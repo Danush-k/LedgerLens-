@@ -1,0 +1,110 @@
+{
+  "_note": "Starter label set for the prototype. Every address below was cross-checked against a public block-explorer tag at write time (see 'source'). Coverage is intentionally partial - expand it the same way: look up an address on Etherscan/BscScan/PolygonScan/a Bitcoin explorer and copy its public label. A production system would replace this with a licensed attribution feed or SAHYOG-mediated VASP data.",
+  "labels": [
+    {
+      "address": "0xeb2d2f1b8c558a40207669291fda468e50c8a0bb",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Binance: Hot Wallet 10",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0x29bdfbf7d27462a2d115748ace2bd71a2646946c",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Binance: Hot Wallet 17",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0x631fc1ea2270e98fbd9d92658ece0f5a269aa161",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Binance: Hot Wallet",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0xf977814e90da44bfa03b6295a0616a897441acec",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Binance: Hot Wallet 20",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Binance",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0x7830c87c02e56aff27fa8ab1241711331fa86f43",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Coinbase: Deposit",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0xb5d85cbf7cb3ee0d56b3bb207d5fc4b82f43f511",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Coinbase 44",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0xddfabcdc4d8ffc6d5beaf154f18b778f892a0740",
+      "chain": "ethereum",
+      "type": "exchange",
+      "name": "Coinbase 23",
+      "source": "etherscan.io public label"
+    },
+    {
+      "address": "0x12d66f87a04a9e220743712ce6d9bb1b5616b8fc",
+      "chain": "ethereum",
+      "type": "mixer",
+      "name": "Tornado.Cash: 0.1 ETH",
+      "source": "etherscan.io public label, OFAC SDN list"
+    },
+    {
+      "address": "0x47ce0c6ed5b0ce3d3a51fdb1c52dc66a7c3c2936",
+      "chain": "ethereum",
+      "type": "mixer",
+      "name": "Tornado.Cash: 1 ETH",
+      "source": "etherscan.io public label, OFAC SDN list"
+    },
+    {
+      "address": "0x910cbd523d972eb0a6f4cae4618ad62622b39dbf",
+      "chain": "ethereum",
+      "type": "mixer",
+      "name": "Tornado.Cash: 10 ETH",
+      "source": "etherscan.io public label, OFAC SDN list"
+    },
+    {
+      "address": "0xa160cdab225685da1d56aa342ad8841c3b53f291",
+      "chain": "ethereum",
+      "type": "mixer",
+      "name": "Tornado.Cash: 100 ETH",
+      "source": "etherscan.io public label, OFAC SDN list"
+    },
+    {
+      "address": "0x722122df12d4e14e13ac3b6895a86e84145b6967",
+      "chain": "ethereum",
+      "type": "mixer",
+      "name": "Tornado.Cash: Proxy",
+      "source": "etherscan.io public label, OFAC SDN list"
+    },
+    {
+      "address": "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b",
+      "chain": "ethereum",
+      "type": "mixer",
+      "name": "Tornado.Cash: Router",
+      "source": "etherscan.io public label, OFAC SDN list"
+    },
+    {
+      "address": "0x0d5550d52428e7e3175bfc9550207e4ad3859b17",
+      "chain": "bsc",
+      "type": "mixer",
+      "name": "Tornado.Cash: Proxy (BSC)",
+      "source": "bscscan.com public label"
+    }
+  ]
+}
