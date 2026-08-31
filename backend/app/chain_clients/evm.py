@@ -1,6 +1,7 @@
 import requests
 
 from app.chain_clients.base import Chain, ChainClient, Transfer
+from app.chain_clients.http import get_with_retry
 from app.config import get_settings
 
 # Etherscan, BscScan and PolygonScan all run the same explorer API shape
@@ -51,8 +52,7 @@ class EVMClient(ChainClient):
             "sort": "desc",
             "apikey": api_key,
         }
-        response = self._session.get(self._config["base_url"], params=params, timeout=15)
-        response.raise_for_status()
+        response = get_with_retry(self._session, self._config["base_url"], params=params)
         payload = response.json()
 
         results = payload.get("result") or []
