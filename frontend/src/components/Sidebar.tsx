@@ -1,13 +1,18 @@
-import { BarChart3, FolderSearch, LayoutGrid, ShieldCheck } from 'lucide-react'
-import { NavLink } from 'react-router-dom'
+import { BarChart3, FolderSearch, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: BarChart3, end: true },
   { to: '/cases', label: 'Cases', icon: LayoutGrid, end: false },
   { to: '/new', label: 'New trace', icon: FolderSearch, end: false },
+  { to: '/bulk', label: 'Bulk upload', icon: Upload, end: false },
 ]
 
 export function Sidebar() {
+  const { user, logout } = useAuth()
+  const navigate = useNavigate()
+
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-ink-800 bg-ink-950 text-ink-100">
       <div className="flex items-center gap-2.5 px-5 py-6">
@@ -39,6 +44,30 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {user && (
+        <div className="border-t border-ink-800 px-4 py-3">
+          <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5">
+            <div className="flex min-w-0 items-center gap-2">
+              <UserCircle2 size={20} className="shrink-0 text-ink-400" />
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-ink-100">{user.username}</p>
+                <p className="text-[10px] uppercase tracking-wide text-ink-500">{user.role}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                logout()
+                navigate('/login')
+              }}
+              title="Sign out"
+              className="shrink-0 text-ink-400 hover:text-white"
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="border-t border-ink-800 px-5 py-4 text-[11px] leading-relaxed text-ink-500">
         Reads public on-chain data only.

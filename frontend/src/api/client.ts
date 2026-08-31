@@ -1,18 +1,47 @@
 import axios from 'axios'
-import type { AnalyticsOverview, AuditEvent, CaseDetail, CaseFilters, CaseSummary, Chain } from '../types'
+import { clearStoredAuth, getStoredToken } from '../auth/AuthContext'
+import type { AnalyticsOverview, AuditEvent, BulkUploadResult, CaseDetail, CaseFilters, CaseSummary, Chain, MlStatus } from '../types'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 export const api = axios.create({ baseURL })
 
+api.interceptors.request.use((config) => {
+  const token = getStoredToken()
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const isLoginCall = error.config?.url?.includes('/auth/login')
+    if (error.response?.status === 401 && !isLoginCall) {
+      clearStoredAuth()
+      if (window.location.pathname !== '/login') window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  },
+)
+
 export interface TraceRequestBody {
   address: string
   chain: Chain
   complaint_ref?: string
+  narrative?: string
 }
 
 export async function submitTrace(body: TraceRequestBody) {
   const { data } = await api.post<{ case_id: string; status: string }>('/trace', body)
+  return data
+}
+
+export async function submitBulkTrace(file: File) {
+  const form = new FormData()
+  form.append('file', file)
+  const { data } = await api.post<BulkUploadResult>('/trace/bulk', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
   return data
 }
 
@@ -31,6 +60,11 @@ export async function getAnalyticsOverview() {
   return data
 }
 
+export async function getMlStatus() {
+  const { data } = await api.get<MlStatus>('/analytics/ml-status')
+  return data
+}
+
 export async function getCase(caseId: string) {
   const { data } = await api.get<CaseDetail>(`/cases/${caseId}`)
   return data
@@ -41,6 +75,16 @@ export async function getIntegrationLog(caseId: string) {
   return data
 }
 
-export function reportUrl(caseId: string) {
-  return `${baseURL}/cases/${caseId}/report`
+/** Plain <a href> can't carry the Authorization header, so the PDF report
+ * is fetched as a blob and handed to the browser as a download instead. */
+export async function downloadReport(caseId: string) {
+  const { data } = await api.get(`/cases/${caseId}/report`, { responseType: 'blob' })
+  const url = window.URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `case-${caseId}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
 }
