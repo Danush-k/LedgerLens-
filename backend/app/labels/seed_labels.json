@@ -105,6 +105,13 @@
       "type": "mixer",
       "name": "Tornado.Cash: Proxy (BSC)",
       "source": "bscscan.com public label"
+    },
+    {
+      "address": "34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
+      "chain": "bitcoin",
+      "type": "exchange",
+      "name": "Binance: Cold Wallet",
+      "source": "publicly documented as Binance's largest cold wallet (bitinfocharts, Dune)"
     }
   ]
 }
