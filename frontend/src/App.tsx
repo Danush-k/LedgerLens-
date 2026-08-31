@@ -3,6 +3,7 @@ import { Sidebar } from './components/Sidebar'
 import { CaseDetail } from './pages/CaseDetail'
 import { CaseList } from './pages/CaseList'
 import { NewCase } from './pages/NewCase'
+import { Overview } from './pages/Overview'
 
 export default function App() {
   return (
@@ -10,7 +11,8 @@ export default function App() {
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <Routes>
-          <Route path="/" element={<CaseList />} />
+          <Route path="/" element={<Overview />} />
+          <Route path="/cases" element={<CaseList />} />
           <Route path="/new" element={<NewCase />} />
           <Route path="/cases/:caseId" element={<CaseDetail />} />
         </Routes>

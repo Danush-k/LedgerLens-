@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { AuditEvent, CaseDetail, CaseSummary, Chain } from '../types'
+import type { AnalyticsOverview, AuditEvent, CaseDetail, CaseFilters, CaseSummary, Chain } from '../types'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -16,8 +16,18 @@ export async function submitTrace(body: TraceRequestBody) {
   return data
 }
 
-export async function listCases() {
-  const { data } = await api.get<CaseSummary[]>('/cases')
+export async function listCases(filters: CaseFilters = {}) {
+  const { data } = await api.get<CaseSummary[]>('/cases', { params: filters })
+  return data
+}
+
+export async function getRelatedCases(caseId: string) {
+  const { data } = await api.get<CaseSummary[]>(`/cases/${caseId}/related`)
+  return data
+}
+
+export async function getAnalyticsOverview() {
+  const { data } = await api.get<AnalyticsOverview>('/analytics/overview')
   return data
 }
 

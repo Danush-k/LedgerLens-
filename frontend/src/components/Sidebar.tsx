@@ -1,8 +1,9 @@
-import { FolderSearch, LayoutGrid, ShieldCheck } from 'lucide-react'
+import { BarChart3, FolderSearch, LayoutGrid, ShieldCheck } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
 const NAV_ITEMS = [
-  { to: '/', label: 'Cases', icon: LayoutGrid, end: true },
+  { to: '/', label: 'Overview', icon: BarChart3, end: true },
+  { to: '/cases', label: 'Cases', icon: LayoutGrid, end: false },
   { to: '/new', label: 'New trace', icon: FolderSearch, end: false },
 ]
 

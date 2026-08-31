@@ -62,3 +62,23 @@ export interface AuditEvent {
   simulated: boolean
   created_at: string
 }
+
+export interface AnalyticsOverview {
+  total_cases: number
+  by_status: Record<string, number>
+  by_chain: Record<string, number>
+  risk_buckets: { low: number; medium: number; high: number }
+  avg_risk_score: number | null
+  exchange_found_count: number
+  exchange_found_rate: number
+  flag_counts: Record<string, number>
+  top_exchanges: { name: string; count: number }[]
+  recent_high_risk: CaseSummary[]
+}
+
+export interface CaseFilters {
+  chain?: string
+  status?: string
+  min_risk?: number
+  search?: string
+}
