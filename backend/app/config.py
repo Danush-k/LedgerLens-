@@ -31,6 +31,18 @@ class Settings(BaseSettings):
     # API
     cors_origins: list[str] = ["http://localhost:5173"]
 
+    # Auth - change these in any real deployment. A random default per
+    # process start means restarting invalidates old tokens rather than
+    # silently accepting a well-known secret.
+    jwt_secret_key: str = "dev-only-insecure-secret-change-me"
+    jwt_algorithm: str = "HS256"
+    jwt_expire_minutes: int = 480
+
+    default_investigator_username: str = "investigator"
+    default_investigator_password: str = "changeme123"
+    default_admin_username: str = "admin"
+    default_admin_password: str = "changeme123"
+
 
 @lru_cache
 def get_settings() -> Settings:
