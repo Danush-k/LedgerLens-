@@ -43,8 +43,11 @@ export function CaseDetail() {
 
   const highlightPath = useMemo(() => {
     if (!caseData?.graph || !caseData.nearest_exchange) return []
-    const rootId = `${caseData.chain}:${caseData.reported_address.toLowerCase()}`
-    const targetId = `${caseData.nearest_exchange.chain}:${caseData.nearest_exchange.address.toLowerCase()}`
+    // The backend already normalizes addresses consistently (lowercase for
+    // EVM, untouched for case-sensitive Bitcoin base58) - use its values
+    // verbatim rather than re-lowercasing, which would break Bitcoin ids.
+    const rootId = `${caseData.chain}:${caseData.reported_address}`
+    const targetId = `${caseData.nearest_exchange.chain}:${caseData.nearest_exchange.address}`
     return findPath(caseData.graph.edges, rootId, targetId)
   }, [caseData])
 
