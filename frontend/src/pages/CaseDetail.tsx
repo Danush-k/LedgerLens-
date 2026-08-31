@@ -1,8 +1,9 @@
-import { Download, ExternalLink } from 'lucide-react'
+import { Download, ExternalLink, Loader2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getCase, getIntegrationLog, getRelatedCases, reportUrl } from '../api/client'
+import { downloadReport, getCase, getIntegrationLog, getMlStatus, getRelatedCases } from '../api/client'
 import { ChainBadge } from '../components/ChainBadge'
+import { ClusterPanel } from '../components/ClusterPanel'
 import { FlagPill } from '../components/FlagPill'
 import { GraphLegend } from '../components/GraphLegend'
 import { GraphView } from '../components/GraphView'
@@ -11,7 +12,8 @@ import { NodeInspector } from '../components/NodeInspector'
 import { RelatedCases } from '../components/RelatedCases'
 import { RiskGauge } from '../components/RiskGauge'
 import { StatusBadge } from '../components/StatusBadge'
-import type { AuditEvent, CaseDetail as CaseDetailType, CaseSummary, GraphNode } from '../types'
+import { TypologyBadge } from '../components/TypologyBadge'
+import type { AuditEvent, CaseDetail as CaseDetailType, CaseSummary, GraphNode, MlStatus } from '../types'
 import { findPath } from '../utils/findPath'
 
 export function CaseDetail() {
@@ -20,6 +22,8 @@ export function CaseDetail() {
   const [events, setEvents] = useState<AuditEvent[]>([])
   const [related, setRelated] = useState<CaseSummary[]>([])
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
+  const [mlStatus, setMlStatus] = useState<MlStatus | null>(null)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     if (!caseId) return
@@ -33,6 +37,9 @@ export function CaseDetail() {
       setEvents(log)
       if (c.status === 'complete') {
         getRelatedCases(caseId).then((r) => active && setRelated(r))
+        if (c.risk_score_ml === null) {
+          getMlStatus().then((s) => active && setMlStatus(s))
+        }
       }
     }
     load()
@@ -78,27 +85,42 @@ export function CaseDetail() {
               {caseData.reported_address}
             </h1>
             <ChainBadge chain={caseData.chain} />
+            {caseData.fraud_typology && caseData.fraud_typology !== 'unclassified' && (
+              <TypologyBadge typology={caseData.fraud_typology} />
+            )}
           </div>
           <div className="mt-2 flex items-center gap-3 text-sm text-ink-500">
             <StatusBadge status={caseData.status} />
             {caseData.complaint_ref && <span>Ref: {caseData.complaint_ref}</span>}
+            {caseData.created_by && <span>Filed by {caseData.created_by}</span>}
             <span>
               Hop {caseData.hop_progress} / {caseData.hop_limit}
             </span>
           </div>
+          {caseData.narrative && (
+            <p className="mt-2 max-w-xl text-sm italic text-ink-500">"{caseData.narrative}"</p>
+          )}
         </div>
 
-        <a
-          href={caseData.status === 'complete' ? reportUrl(caseData.id) : undefined}
+        <button
+          disabled={caseData.status !== 'complete' || downloading}
+          onClick={async () => {
+            setDownloading(true)
+            try {
+              await downloadReport(caseData.id)
+            } finally {
+              setDownloading(false)
+            }
+          }}
           className={`flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition-colors ${
             caseData.status === 'complete'
               ? 'border-ink-200 text-ink-800 hover:border-brand-500 hover:text-brand-600'
               : 'cursor-not-allowed border-ink-100 text-ink-300'
           }`}
         >
-          <Download size={16} />
+          {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
           Download evidence report
-        </a>
+        </button>
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -142,6 +164,7 @@ export function CaseDetail() {
             {caseData.risk_score !== null ? (
               <div className="flex flex-col items-center">
                 <RiskGauge score={caseData.risk_score} />
+                <p className="mt-1 text-[11px] text-ink-400">Explainable v1 (rule-based)</p>
                 {caseData.risk_breakdown && (
                   <div className="mt-4 w-full space-y-1.5 text-xs">
                     {Object.entries(caseData.risk_breakdown).map(([signal, weight]) => (
@@ -152,11 +175,27 @@ export function CaseDetail() {
                     ))}
                   </div>
                 )}
+
+                <div className="mt-4 w-full border-t border-ink-100 pt-3">
+                  {caseData.risk_score_ml !== null ? (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-ink-500">ML-assisted score (v2, illustrative)</span>
+                      <span className="font-semibold text-ink-800">{Math.round(caseData.risk_score_ml)}</span>
+                    </div>
+                  ) : mlStatus && !mlStatus.trained ? (
+                    <p className="text-[11px] text-ink-400">
+                      ML score unavailable: {mlStatus.reason_unavailable} ({mlStatus.trained_on}/
+                      {mlStatus.min_required} cases so far)
+                    </p>
+                  ) : null}
+                </div>
               </div>
             ) : (
               <p className="text-sm text-ink-400">Scoring will appear once tracing completes.</p>
             )}
           </div>
+
+          <ClusterPanel clusters={caseData.clusters ?? []} />
 
           <RelatedCases cases={related} />
 

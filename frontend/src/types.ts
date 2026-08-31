@@ -34,6 +34,12 @@ export interface NearestExchange {
   hops: number
 }
 
+export interface WalletCluster {
+  type: 'common_input' | 'shared_funder'
+  addresses: string[]
+  note: string
+}
+
 export interface CaseSummary {
   id: string
   reported_address: string
@@ -41,16 +47,21 @@ export interface CaseSummary {
   status: CaseStatus
   risk_score: number | null
   nearest_exchange: NearestExchange | null
+  fraud_typology: string | null
   created_at: string
 }
 
 export interface CaseDetail extends CaseSummary {
   complaint_ref: string | null
+  narrative: string | null
+  created_by: string | null
   hop_progress: number
   hop_limit: number
   risk_score_ml: number | null
   risk_breakdown: Record<string, number> | null
   flags: string[] | null
+  clusters: WalletCluster[] | null
+  typology_confidence: number | null
   recommended_action: string | null
   graph: { nodes: GraphNode[]; edges: GraphEdge[] } | null
   completed_at: string | null
@@ -72,8 +83,21 @@ export interface AnalyticsOverview {
   exchange_found_count: number
   exchange_found_rate: number
   flag_counts: Record<string, number>
+  typology_counts: Record<string, number>
   top_exchanges: { name: string; count: number }[]
   recent_high_risk: CaseSummary[]
+}
+
+export interface MlStatus {
+  trained: boolean
+  trained_on: number
+  min_required: number
+  reason_unavailable: string | null
+}
+
+export interface BulkUploadResult {
+  accepted: { row: number; case_id: string; address: string }[]
+  rejected: { row: number; reason: string }[]
 }
 
 export interface CaseFilters {

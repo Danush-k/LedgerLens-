@@ -16,6 +16,7 @@ export function NewCase() {
   const [address, setAddress] = useState('')
   const [chain, setChain] = useState<Chain>('ethereum')
   const [complaintRef, setComplaintRef] = useState('')
+  const [narrative, setNarrative] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,6 +31,7 @@ export function NewCase() {
         address: address.trim(),
         chain,
         complaint_ref: complaintRef.trim() || undefined,
+        narrative: narrative.trim() || undefined,
       })
       navigate(`/cases/${case_id}`)
     } catch {
@@ -92,6 +94,23 @@ export function NewCase() {
             placeholder="e.g. NCRP/2026/000123"
             className="w-full rounded-lg border border-ink-200 px-3.5 py-2.5 text-sm text-ink-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
           />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-ink-800" htmlFor="narrative">
+            Complaint narrative <span className="font-normal text-ink-400">(optional)</span>
+          </label>
+          <textarea
+            id="narrative"
+            value={narrative}
+            onChange={(e) => setNarrative(e.target.value)}
+            rows={3}
+            placeholder="e.g. Victim was promised guaranteed returns on a trading investment…"
+            className="w-full resize-none rounded-lg border border-ink-200 px-3.5 py-2.5 text-sm text-ink-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
+          <p className="mt-1 text-xs text-ink-400">
+            A short description auto-tags the fraud typology (investment scam, phishing, sextortion, etc).
+          </p>
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}

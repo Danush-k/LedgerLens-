@@ -21,6 +21,18 @@ const RISK_COLORS = { low: '#0ca30c', medium: '#fab219', high: '#d03b3b' }
 
 const CHAIN_LABELS: Record<string, string> = { ethereum: 'Ethereum', bitcoin: 'Bitcoin', polygon: 'Polygon', bsc: 'BSC' }
 
+const TYPOLOGY_LABELS: Record<string, string> = {
+  investment_scam: 'Investment scam',
+  task_based_fraud: 'Task-based fraud',
+  sextortion: 'Sextortion',
+  ransomware: 'Ransomware',
+  phishing: 'Phishing',
+  darknet: 'Darknet',
+  unclassified: 'Unclassified',
+}
+// Categorical slots 5-8 (chains already claimed 1-4).
+const TYPOLOGY_COLOR = '#e87ba4' // slot 5 - magenta
+
 export function Overview() {
   const [data, setData] = useState<AnalyticsOverview | null>(null)
 
@@ -49,6 +61,14 @@ export function Overview() {
     value: count,
     color: CHAIN_COLORS[chain] ?? '#64748b',
   }))
+
+  const typologyItems = Object.entries(data.typology_counts)
+    .sort((a, b) => b[1] - a[1])
+    .map(([typology, count]) => ({
+      label: TYPOLOGY_LABELS[typology] ?? typology.replace(/_/g, ' '),
+      value: count,
+      color: TYPOLOGY_COLOR,
+    }))
 
   const riskItems = [
     { label: 'Low (0-34)', value: data.risk_buckets.low, color: RISK_COLORS.low },
@@ -103,6 +123,17 @@ export function Overview() {
             <HorizontalBars items={flagItems} />
           ) : (
             <p className="py-6 text-center text-sm text-ink-400">No flags raised yet.</p>
+          )}
+        </div>
+
+        <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 text-sm font-semibold text-ink-800">Fraud typologies</h2>
+          {typologyItems.length > 0 ? (
+            <HorizontalBars items={typologyItems} />
+          ) : (
+            <p className="py-6 text-center text-sm text-ink-400">
+              No cases tagged yet — add a complaint narrative when submitting a trace.
+            </p>
           )}
         </div>
 
