@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { listCases } from '../api/client'
 import { ChainBadge } from '../components/ChainBadge'
 import { StatusBadge } from '../components/StatusBadge'
-import type { CaseSummary } from '../types'
+import type { CaseFilters, CaseStatus, CaseSummary, Chain } from '../types'
 
 function riskDot(score: number | null) {
   if (score === null) return 'bg-ink-300'
@@ -13,14 +13,30 @@ function riskDot(score: number | null) {
   return 'bg-emerald-500'
 }
 
+const CHAINS: Chain[] = ['ethereum', 'bsc', 'polygon', 'bitcoin']
+const STATUSES: CaseStatus[] = ['queued', 'tracing', 'complete', 'failed']
+
 export function CaseList() {
   const [cases, setCases] = useState<CaseSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [chain, setChain] = useState('')
+  const [status, setStatus] = useState('')
+  const [minRisk, setMinRisk] = useState('')
+
+  const filters: CaseFilters = {
+    ...(search.trim() && { search: search.trim() }),
+    ...(chain && { chain }),
+    ...(status && { status }),
+    ...(minRisk && { min_risk: Number(minRisk) }),
+  }
+  const filterKey = JSON.stringify(filters)
 
   useEffect(() => {
     let active = true
-    const load = () => listCases().then((data) => active && setCases(data))
-    load().finally(() => setLoading(false))
+    setLoading(true)
+    const load = () => listCases(filters).then((data) => active && setCases(data))
+    load().finally(() => active && setLoading(false))
 
     // Simple fixed-interval refresh so in-progress traces update live -
     // cheap enough at dashboard scale, no need for websockets yet.
@@ -29,7 +45,10 @@ export function CaseList() {
       active = false
       clearInterval(interval)
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterKey])
+
+  const hasFilters = Boolean(search || chain || status || minRisk)
 
   return (
     <div className="mx-auto max-w-6xl px-8 py-8">
@@ -49,15 +68,77 @@ export function CaseList() {
         </Link>
       </div>
 
+      <div className="mb-4 flex flex-wrap items-center gap-2.5">
+        <div className="relative flex-1 min-w-[220px]">
+          <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by wallet address…"
+            className="w-full rounded-lg border border-ink-200 py-2 pl-9 pr-3 text-sm outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
+          />
+        </div>
+        <select
+          value={chain}
+          onChange={(e) => setChain(e.target.value)}
+          className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 outline-none focus:border-brand-500"
+        >
+          <option value="">All chains</option>
+          {CHAINS.map((c) => (
+            <option key={c} value={c}>
+              {c[0].toUpperCase() + c.slice(1)}
+            </option>
+          ))}
+        </select>
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 outline-none focus:border-brand-500"
+        >
+          <option value="">All statuses</option>
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s[0].toUpperCase() + s.slice(1)}
+            </option>
+          ))}
+        </select>
+        <select
+          value={minRisk}
+          onChange={(e) => setMinRisk(e.target.value)}
+          className="rounded-lg border border-ink-200 px-3 py-2 text-sm text-ink-700 outline-none focus:border-brand-500"
+        >
+          <option value="">Any risk</option>
+          <option value="35">Medium+ (35+)</option>
+          <option value="70">High only (70+)</option>
+        </select>
+        {hasFilters && (
+          <button
+            onClick={() => {
+              setSearch('')
+              setChain('')
+              setStatus('')
+              setMinRisk('')
+            }}
+            className="text-xs font-semibold text-ink-500 hover:text-brand-600"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
       {loading ? (
         <div className="py-24 text-center text-sm text-ink-500">Loading cases…</div>
       ) : cases.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-ink-300 py-24 text-center">
           <Search size={28} className="text-ink-300" />
-          <p className="text-sm text-ink-500">No cases yet. Submit a wallet address to start tracing.</p>
-          <Link to="/new" className="text-sm font-semibold text-brand-600 hover:underline">
-            Start a new trace →
-          </Link>
+          <p className="text-sm text-ink-500">
+            {hasFilters ? 'No cases match these filters.' : 'No cases yet. Submit a wallet address to start tracing.'}
+          </p>
+          {!hasFilters && (
+            <Link to="/new" className="text-sm font-semibold text-brand-600 hover:underline">
+              Start a new trace →
+            </Link>
+          )}
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-ink-100 bg-white shadow-sm">
