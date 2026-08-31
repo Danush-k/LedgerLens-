@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes_analytics import router as analytics_router
 from app.api.routes_cases import router as cases_router
 from app.api.routes_integrations import router as integrations_router
 from app.api.routes_trace import router as trace_router
@@ -26,6 +27,7 @@ app.add_middleware(
 app.include_router(trace_router)
 app.include_router(cases_router)
 app.include_router(integrations_router)
+app.include_router(analytics_router)
 
 
 @app.on_event("startup")
