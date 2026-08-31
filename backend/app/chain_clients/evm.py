@@ -34,7 +34,7 @@ class EVMClient(ChainClient):
 
     def __init__(self, chain: Chain, session: requests.Session | None = None):
         if chain not in _EXPLORER_CONFIG:
-            raise ValueError(f"{chain} is not an EVM chain handled by this client")
+            raise ValueError(f"{chain.value} is not an EVM chain handled by this client")
         self.chain = chain
         self._config = _EXPLORER_CONFIG[chain]
         self._session = session or requests.Session()

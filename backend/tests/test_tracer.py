@@ -44,6 +44,13 @@ def test_trace_stops_branch_at_known_exchange():
     assert result.nearest_exchange["hops"] == 1
     assert "no_exchange_found" not in result.flags
 
+    # node/edge ids must use the plain chain value ("ethereum"), not the
+    # enum's repr ("Chain.ETHEREUM") - regression check for str(enum) bugs
+    root_uid = f"ethereum:{root}"
+    assert root_uid in result.nodes
+    assert result.nodes[root_uid]["chain"] == "ethereum"
+    assert all(e["source"].startswith("ethereum:") for e in result.edges)
+
 
 def test_trace_flags_mixer_and_keeps_going_via_other_branches():
     root = "0x2220000000000000000000000000000000000f"

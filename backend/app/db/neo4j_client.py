@@ -2,6 +2,7 @@ from functools import lru_cache
 
 from neo4j import GraphDatabase
 
+from app.chain_clients.base import normalize_address
 from app.config import get_settings
 
 
@@ -19,7 +20,7 @@ def ensure_constraints() -> None:
 
 
 def _uid(chain: str, address: str) -> str:
-    return f"{chain}:{address.lower()}"
+    return f"{chain}:{normalize_address(address)}"
 
 
 def upsert_address(chain: str, address: str, label: dict | None = None) -> None:
@@ -33,7 +34,7 @@ def upsert_address(chain: str, address: str, label: dict | None = None) -> None:
             """,
             uid=_uid(chain, address),
             chain=chain,
-            address=address.lower(),
+            address=normalize_address(address),
             label_type=(label or {}).get("type"),
             label_name=(label or {}).get("name"),
         )
@@ -63,12 +64,17 @@ def shortest_path_to_exchange(case_id: str, chain: str, reported_address: str) -
     the shortest hop-path from the reported address to any labeled exchange?
     """
     with get_driver().session() as session:
+        # Deliberately not using the shortestPath() function: Neo4j refuses
+        # it whenever start/end are matched independently (as here) since it
+        # can't statically rule out them being the same node for some row -
+        # even though label_type='exchange' makes that impossible here. A
+        # plain variable-length pattern ordered by length works the same way
+        # and is what Neo4j's own error message recommends for this case.
         result = session.run(
             """
             MATCH (start:Address {uid: $start_uid})
-            MATCH p = shortestPath(
-                (start)-[:TRANSFER* {case_id: $case_id}]->(target:Address {label_type: 'exchange'})
-            )
+            MATCH p = (start)-[:TRANSFER*1..15]->(target:Address {label_type: 'exchange'})
+            WHERE ALL(r IN relationships(p) WHERE r.case_id = $case_id)
             RETURN [n IN nodes(p) | {address: n.address, label_name: n.label_name}] AS addresses,
                    length(p) AS hops
             ORDER BY hops ASC

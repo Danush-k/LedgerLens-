@@ -1,7 +1,7 @@
 from collections import deque
 from dataclasses import dataclass, field
 
-from app.chain_clients.base import Chain, Transfer
+from app.chain_clients.base import Chain, Transfer, normalize_address
 from app.chain_clients.factory import get_chain_client
 from app.labels.loader import lookup_label
 
@@ -16,7 +16,7 @@ class TraceResult:
 
 
 def _uid(chain: str, address: str) -> str:
-    return f"{chain}:{address.lower()}"
+    return f"{chain}:{normalize_address(address)}"
 
 
 def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
@@ -29,13 +29,14 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
     that's a signal too (funds still untraced).
     """
     client = get_chain_client(chain)
+    chain_value = chain.value  # enums str-format as "Chain.X", not "x" - always use .value in ids
     result = TraceResult()
 
-    root_uid = _uid(chain, reported_address)
+    root_uid = _uid(chain_value, reported_address)
     result.nodes[root_uid] = {
         "id": root_uid,
-        "address": reported_address.lower(),
-        "chain": chain.value,
+        "address": normalize_address(reported_address),
+        "chain": chain_value,
         "node_type": "reported",
         "label_name": None,
     }
@@ -61,8 +62,8 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
             result.flags.add("high_fan_out")
 
         for transfer in transfers[:15]:  # cap breadth per node for demo performance
-            to_uid = _uid(chain, transfer.to_address)
-            label = lookup_label(chain.value, transfer.to_address)
+            to_uid = _uid(chain_value, transfer.to_address)
+            label = lookup_label(chain_value, transfer.to_address)
 
             if to_uid not in result.nodes:
                 node_type = "unresolved"
@@ -72,14 +73,14 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
                     label_name = label["name"]
                 result.nodes[to_uid] = {
                     "id": to_uid,
-                    "address": transfer.to_address.lower(),
-                    "chain": chain.value,
+                    "address": normalize_address(transfer.to_address),
+                    "chain": chain_value,
                     "node_type": node_type,
                     "label_name": label_name,
                 }
 
             result.edges.append({
-                "source": _uid(chain, address),
+                "source": _uid(chain_value, address),
                 "target": to_uid,
                 "tx_hash": transfer.tx_hash,
                 "value": transfer.value,

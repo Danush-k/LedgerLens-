@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.chain_clients.base import normalize_address
 from app.config import get_settings
 from app.db.postgres import get_db
 from app.models.orm import AuditEvent, Case
@@ -13,7 +14,7 @@ router = APIRouter(tags=["trace"])
 @router.post("/trace", response_model=TraceAccepted, status_code=202)
 def submit_trace(request: TraceRequest, db: Session = Depends(get_db)):
     case = Case(
-        reported_address=request.address.lower(),
+        reported_address=normalize_address(request.address),
         chain=request.chain.value,
         complaint_ref=request.complaint_ref,
         status="queued",

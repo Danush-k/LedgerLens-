@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.chain_clients.base import normalize_address
 from app.config import get_settings
 from app.db.postgres import get_db
 from app.integrations.mock_lea import receive_ncrp_intake
@@ -18,7 +19,7 @@ def ncrp_intake(payload: dict, db: Session = Depends(get_db)):
     dashboard submission. SIMULATED - not a live NCRP connection."""
     normalised = receive_ncrp_intake(payload)
     case = Case(
-        reported_address=normalised["address"].lower(),
+        reported_address=normalize_address(normalised["address"]),
         chain=normalised["chain"],
         complaint_ref=normalised.get("complaint_ref"),
         status="queued",

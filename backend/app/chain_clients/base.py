@@ -31,3 +31,13 @@ class ChainClient:
 
     def get_outgoing_transfers(self, address: str) -> list[Transfer]:
         raise NotImplementedError
+
+
+def normalize_address(address: str) -> str:
+    """Lowercase EVM (0x...) addresses for consistent matching/dedup - hex
+    is case-insensitive there. Bitcoin base58 addresses are case-sensitive
+    and bech32 ones are already lowercase by convention, so both are left
+    untouched: lowercasing a base58 address silently turns it into a
+    different, invalid-looking address.
+    """
+    return address.lower() if address.startswith("0x") else address

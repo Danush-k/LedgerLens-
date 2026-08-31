@@ -58,12 +58,11 @@ def trace_wallet_task(case_id: str) -> None:
         prior_report_count = (
             db.query(TracedAddress)
             .filter(TracedAddress.chain == case.chain,
-                    TracedAddress.address == case.reported_address.lower(),
+                    TracedAddress.address == case.reported_address,  # already normalized at submission
                     TracedAddress.case_id != case_id)
             .count()
         )
-        db.add(TracedAddress(case_id=case_id, chain=case.chain,
-                              address=case.reported_address.lower()))
+        db.add(TracedAddress(case_id=case_id, chain=case.chain, address=case.reported_address))
 
         rapid_layering = _detect_rapid_layering(result.edges)
         score, breakdown = score_case(result.flags, result.nearest_exchange,
