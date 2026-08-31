@@ -1,31 +1,39 @@
 import { Download, ExternalLink } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getCase, getIntegrationLog, reportUrl } from '../api/client'
+import { getCase, getIntegrationLog, getRelatedCases, reportUrl } from '../api/client'
 import { ChainBadge } from '../components/ChainBadge'
 import { FlagPill } from '../components/FlagPill'
 import { GraphLegend } from '../components/GraphLegend'
 import { GraphView } from '../components/GraphView'
 import { IntegrationLog } from '../components/IntegrationLog'
+import { NodeInspector } from '../components/NodeInspector'
+import { RelatedCases } from '../components/RelatedCases'
 import { RiskGauge } from '../components/RiskGauge'
 import { StatusBadge } from '../components/StatusBadge'
-import type { AuditEvent, CaseDetail as CaseDetailType } from '../types'
+import type { AuditEvent, CaseDetail as CaseDetailType, CaseSummary, GraphNode } from '../types'
 import { findPath } from '../utils/findPath'
 
 export function CaseDetail() {
   const { caseId } = useParams<{ caseId: string }>()
   const [caseData, setCaseData] = useState<CaseDetailType | null>(null)
   const [events, setEvents] = useState<AuditEvent[]>([])
+  const [related, setRelated] = useState<CaseSummary[]>([])
+  const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
 
   useEffect(() => {
     if (!caseId) return
     let active = true
+    setSelectedNode(null)
 
     const load = async () => {
       const [c, log] = await Promise.all([getCase(caseId), getIntegrationLog(caseId)])
       if (!active) return
       setCaseData(c)
       setEvents(log)
+      if (c.status === 'complete') {
+        getRelatedCases(caseId).then((r) => active && setRelated(r))
+      }
     }
     load()
 
@@ -59,7 +67,7 @@ export function CaseDetail() {
 
   return (
     <div className="mx-auto max-w-7xl px-8 py-8">
-      <Link to="/" className="text-xs font-medium text-ink-500 hover:text-brand-600">
+      <Link to="/cases" className="text-xs font-medium text-ink-500 hover:text-brand-600">
         ← All cases
       </Link>
 
@@ -101,9 +109,25 @@ export function CaseDetail() {
             </h2>
             <GraphLegend />
           </div>
-          <div className="h-[420px]">
-            {caseData.graph && caseData.graph.nodes.length > 0 ? (
-              <GraphView nodes={caseData.graph.nodes} edges={caseData.graph.edges} highlightPath={highlightPath} />
+          <div className="relative h-[420px]">
+            {caseData.graph && caseData.graph.edges.length > 0 ? (
+              <>
+                <GraphView
+                  nodes={caseData.graph.nodes}
+                  edges={caseData.graph.edges}
+                  highlightPath={highlightPath}
+                  onNodeClick={setSelectedNode}
+                />
+                {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
+              </>
+            ) : caseData.status === 'complete' ? (
+              <div className="flex h-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-ink-200 px-8 text-center">
+                <p className="text-sm font-medium text-ink-600">No outgoing on-chain activity found</p>
+                <p className="text-xs text-ink-400">
+                  This wallet hasn't sent any traceable transfers within the {caseData.hop_limit}-hop limit — it may
+                  be a pure deposit address, or currently dormant. A genuine, checked result, not an error.
+                </p>
+              </div>
             ) : (
               <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-ink-200 text-sm text-ink-400">
                 Tracing in progress — the graph will appear here once transfers are found.
@@ -134,6 +158,8 @@ export function CaseDetail() {
             )}
           </div>
 
+          <RelatedCases cases={related} />
+
           <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
             <h2 className="mb-3 text-sm font-semibold text-ink-800">Nearest exchange / VASP</h2>
             {caseData.nearest_exchange ? (
@@ -142,7 +168,9 @@ export function CaseDetail() {
                 <p className="mt-1 break-all font-mono text-xs text-ink-500">
                   {caseData.nearest_exchange.address}
                 </p>
-                <p className="mt-1 text-xs text-ink-500">{caseData.nearest_exchange.hops} hops away</p>
+                <p className="mt-1 text-xs text-ink-500">
+                  {caseData.nearest_exchange.hops} hop{caseData.nearest_exchange.hops === 1 ? '' : 's'} away
+                </p>
               </div>
             ) : (
               <p className="text-sm text-ink-400">
