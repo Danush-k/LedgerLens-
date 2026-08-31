@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.auth.dependencies import CurrentUser, get_current_user
 from app.db.postgres import Base, get_db
 from app.main import app
 
@@ -34,6 +35,25 @@ def db_session():
 
 @pytest.fixture()
 def client(db_session):
+    """An authenticated test client - auth itself has its own dedicated
+    tests (test_auth.py), so every other endpoint test can focus on its
+    own business logic instead of re-proving login works each time."""
+    def override_get_db():
+        yield db_session
+
+    def override_get_current_user():
+        return CurrentUser(username="test-investigator", role="investigator")
+
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_current_user] = override_get_current_user
+    yield TestClient(app)
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture()
+def unauthenticated_client(db_session):
+    """A client with the DB overridden but auth left real - for testing
+    that protected endpoints actually reject unauthenticated requests."""
     def override_get_db():
         yield db_session
 
