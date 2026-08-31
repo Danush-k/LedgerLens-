@@ -16,9 +16,10 @@ interface Props {
   nodes: GraphNode[]
   edges: GraphEdge[]
   highlightPath?: string[] // node ids on the path to the nearest exchange
+  onNodeClick?: (node: GraphNode) => void
 }
 
-export function GraphView({ nodes, edges, highlightPath = [] }: Props) {
+export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Props) {
   const elements = useMemo(() => {
     const pathSet = new Set(highlightPath)
     const nodeEls = nodes.map((n) => ({
@@ -104,7 +105,21 @@ export function GraphView({ nodes, edges, highlightPath = [] }: Props) {
         stylesheet={stylesheet as any}
         layout={{ name: 'breadthfirst', directed: true, padding: 24, spacingFactor: 1.4 }}
         cy={(cy: Core) => {
-          cy.on('layoutstop', () => cy.fit(undefined, 30))
+          cy.removeAllListeners()
+          cy.on('layoutstop', () => {
+            cy.fit(undefined, 30)
+            // A sparse graph (1-2 nodes) would otherwise fit-to-fill the
+            // canvas and render one giant circle - cap the zoom instead.
+            if (cy.zoom() > 1.8) cy.zoom(1.8)
+            cy.center()
+          })
+          if (onNodeClick) {
+            cy.on('tap', 'node', (evt) => {
+              const id = evt.target.id() as string
+              const node = nodes.find((n) => n.id === id)
+              if (node) onNodeClick(node)
+            })
+          }
         }}
       />
     </div>
