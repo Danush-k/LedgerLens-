@@ -32,6 +32,13 @@ class ChainClient:
     def get_outgoing_transfers(self, address: str) -> list[Transfer]:
         raise NotImplementedError
 
+    def get_co_spent_addresses(self, address: str) -> set[str]:
+        """Common-input-ownership clustering signal. Only meaningful for
+        UTXO chains (Bitcoin) - EVM's account model has no equivalent, so
+        the default is "nothing to report" rather than every client having
+        to implement a no-op."""
+        return set()
+
 
 def normalize_address(address: str) -> str:
     """Lowercase EVM (0x...) addresses for consistent matching/dedup - hex

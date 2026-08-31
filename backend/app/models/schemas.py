@@ -9,6 +9,7 @@ class TraceRequest(BaseModel):
     address: str = Field(..., description="Victim-reported wallet address")
     chain: Chain
     complaint_ref: str | None = Field(None, description="NCRP/complaint reference number, if any")
+    narrative: str | None = Field(None, description="Free-text complaint description, used for typology tagging")
 
 
 class TraceAccepted(BaseModel):
@@ -53,6 +54,8 @@ class AuditEventOut(BaseModel):
 class CaseOut(BaseModel):
     id: str
     complaint_ref: str | None
+    narrative: str | None
+    created_by: str | None
     reported_address: str
     chain: str
     status: str
@@ -63,6 +66,9 @@ class CaseOut(BaseModel):
     risk_breakdown: dict | None
     flags: list | None
     nearest_exchange: dict | None
+    clusters: list | None
+    fraud_typology: str | None
+    typology_confidence: float | None
     recommended_action: str | None
     graph: dict | None
     created_at: datetime
@@ -79,6 +85,7 @@ class CaseSummary(BaseModel):
     status: str
     risk_score: float | None
     nearest_exchange: dict | None
+    fraud_typology: str | None
     created_at: datetime
 
     class Config:

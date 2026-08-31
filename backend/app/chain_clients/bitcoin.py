@@ -1,6 +1,7 @@
 import requests
 
 from app.chain_clients.base import Chain, ChainClient, Transfer
+from app.chain_clients.http import get_with_retry
 from app.config import get_settings
 
 _SATOSHIS_PER_BTC = 100_000_000
@@ -19,15 +20,18 @@ class BitcoinClient(ChainClient):
 
     def __init__(self, session: requests.Session | None = None):
         self._session = session or requests.Session()
+        self._tx_cache: dict[str, list[dict]] = {}
+
+    def _get_txs(self, address: str) -> list[dict]:
+        if address not in self._tx_cache:
+            base_url = get_settings().bitcoin_api_base_url
+            response = get_with_retry(self._session, f"{base_url}/address/{address}/txs")
+            self._tx_cache[address] = response.json()
+        return self._tx_cache[address]
 
     def get_outgoing_transfers(self, address: str, limit: int = 50) -> list[Transfer]:
-        base_url = get_settings().bitcoin_api_base_url
-        response = self._session.get(f"{base_url}/address/{address}/txs", timeout=15)
-        response.raise_for_status()
-        txs = response.json()
-
         transfers: list[Transfer] = []
-        for tx in txs:
+        for tx in self._get_txs(address):
             spent_as_input = any(
                 (vin.get("prevout") or {}).get("scriptpubkey_address") == address
                 for vin in tx.get("vin", [])
@@ -59,3 +63,22 @@ class BitcoinClient(ChainClient):
             if len(transfers) >= limit:
                 break
         return transfers[:limit]
+
+    def get_co_spent_addresses(self, address: str) -> set[str]:
+        """The common-input-ownership heuristic: if `address` was spent as
+        one of several inputs on the same transaction, every other input
+        address on that transaction was necessarily signed by whoever
+        controls `address` too - a wallet can't spend a UTXO it doesn't
+        hold the key for. That's a strong same-owner signal, not a guess.
+        Reuses the same tx list `get_outgoing_transfers` already fetched.
+        """
+        co_spent: set[str] = set()
+        for tx in self._get_txs(address):
+            input_addrs = {
+                (vin.get("prevout") or {}).get("scriptpubkey_address")
+                for vin in tx.get("vin", [])
+            }
+            input_addrs.discard(None)
+            if address in input_addrs and len(input_addrs) > 1:
+                co_spent |= input_addrs - {address}
+        return co_spent

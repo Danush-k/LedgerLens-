@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.postgres import get_db
 from app.models.orm import Case
+from app.risk import ml as risk_ml
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -41,6 +42,8 @@ def analytics_overview(db: Session = Depends(get_db)):
     for c in with_exchange:
         exchange_counter[c.nearest_exchange["name"]] += 1
 
+    typology_counter: Counter[str] = Counter(c.fraud_typology for c in cases if c.fraud_typology)
+
     recent_high_risk = (
         db.query(Case)
         .filter(Case.risk_score >= 50)
@@ -59,6 +62,7 @@ def analytics_overview(db: Session = Depends(get_db)):
         "exchange_found_count": len(with_exchange),
         "exchange_found_rate": exchange_found_rate,
         "flag_counts": dict(flag_counter),
+        "typology_counts": dict(typology_counter),
         "top_exchanges": [{"name": name, "count": count} for name, count in exchange_counter.most_common(5)],
         "recent_high_risk": [
             {
@@ -72,4 +76,19 @@ def analytics_overview(db: Session = Depends(get_db)):
             }
             for c in recent_high_risk
         ],
+    }
+
+
+@router.get("/ml-status")
+def ml_status(db: Session = Depends(get_db)):
+    """Whether the v2 ML-assisted risk model is currently trainable, and
+    why not if it isn't - surfaced directly rather than a silently-missing
+    score, per the honest-scope framing in PLAN.md."""
+    cases = db.query(Case).filter(Case.status == "complete").all()
+    result = risk_ml.train(cases)
+    return {
+        "trained": result.model is not None,
+        "trained_on": result.trained_on,
+        "min_required": risk_ml.MIN_TRAINING_CASES,
+        "reason_unavailable": result.reason_unavailable,
     }

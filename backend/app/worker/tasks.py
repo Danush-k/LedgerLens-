@@ -5,8 +5,11 @@ from app.config import get_settings
 from app.db.neo4j_client import record_transfer, upsert_address
 from app.db.postgres import SessionLocal
 from app.models.orm import AuditEvent, Case, TracedAddress
+from app.risk import ml as risk_ml
 from app.risk.rules import recommended_action, score_case
+from app.risk.typology import classify_typology
 from app.tracer.bfs import trace_wallet
+from app.tracer.clustering import common_input_clusters, shared_funder_clusters
 from app.worker.celery_app import celery_app
 
 RAPID_LAYERING_WINDOW_SECONDS = 600
@@ -72,6 +75,12 @@ def trace_wallet_task(case_id: str) -> None:
         if prior_report_count > 0:
             result.flags.add("prior_report")
 
+        # Clustering: common-input-ownership (Bitcoin, strong signal) +
+        # shared-funder fan-out (any chain, weaker signal) - both explainable,
+        # both computed from data already fetched during the trace.
+        clusters = common_input_clusters(result.chain_client, {n["address"] for n in result.nodes.values()})
+        clusters += shared_funder_clusters(result.nodes, result.edges)
+
         case.status = "complete"
         case.hop_progress = result.hops_reached
         case.risk_score = score
@@ -79,8 +88,10 @@ def trace_wallet_task(case_id: str) -> None:
         case.flags = sorted(result.flags)
         case.nearest_exchange = result.nearest_exchange
         case.graph = {"nodes": list(result.nodes.values()), "edges": result.edges}
+        case.clusters = clusters
         case.recommended_action = recommended_action(result.nearest_exchange, score)
         case.completed_at = datetime.now(timezone.utc)
+        case.fraud_typology, case.typology_confidence = classify_typology(case.narrative)
 
         event = "exchange_identified" if result.nearest_exchange else "trace_completed"
         db.add(AuditEvent(case_id=case_id, event=event, detail=case.recommended_action))
@@ -90,6 +101,17 @@ def trace_wallet_task(case_id: str) -> None:
             send_alert(db, case)
 
         db.commit()
+
+        # ML-assisted risk score (v2) - retrained on every completion, which
+        # is cheap at this data scale. Best-effort: never blocks the case.
+        try:
+            all_cases = db.query(Case).filter(Case.status == "complete").all()
+            training = risk_ml.train(all_cases)
+            if training.model is not None:
+                case.risk_score_ml = risk_ml.predict(training.model, case)
+                db.commit()
+        except Exception:  # noqa: BLE001 - the rule-based score is always authoritative
+            db.rollback()
     except Exception as exc:  # noqa: BLE001 - a failed trace must not crash the worker
         db.rollback()
         case = db.get(Case, case_id)

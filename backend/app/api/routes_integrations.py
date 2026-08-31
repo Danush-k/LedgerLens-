@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.auth.dependencies import get_current_user
 from app.chain_clients.base import normalize_address
 from app.config import get_settings
 from app.db.postgres import get_db
@@ -36,7 +37,7 @@ def ncrp_intake(payload: dict, db: Session = Depends(get_db)):
     return TraceAccepted(case_id=case.id, status=case.status)
 
 
-@router.get("/log/{case_id}")
+@router.get("/log/{case_id}", dependencies=[Depends(get_current_user)])
 def integration_log(case_id: str, db: Session = Depends(get_db)):
     events = (
         db.query(AuditEvent)

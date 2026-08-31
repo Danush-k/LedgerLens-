@@ -1,5 +1,6 @@
 from collections import deque
 from dataclasses import dataclass, field
+from typing import Any
 
 from app.chain_clients.base import Chain, Transfer, normalize_address
 from app.chain_clients.factory import get_chain_client
@@ -13,6 +14,9 @@ class TraceResult:
     nearest_exchange: dict | None = None
     flags: set[str] = field(default_factory=set)
     hops_reached: int = 0
+    # The chain client used for this trace - kept around so a clustering
+    # pass can reuse its warm per-address tx cache instead of refetching.
+    chain_client: Any = None
 
 
 def _uid(chain: str, address: str) -> str:
@@ -30,7 +34,7 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
     """
     client = get_chain_client(chain)
     chain_value = chain.value  # enums str-format as "Chain.X", not "x" - always use .value in ids
-    result = TraceResult()
+    result = TraceResult(chain_client=client)
 
     root_uid = _uid(chain_value, reported_address)
     result.nodes[root_uid] = {
