@@ -12,8 +12,31 @@ from app.models.orm import AuditEvent, Case
 from app.models.schemas import TraceAccepted, TraceRequest
 from app.worker.tasks import trace_wallet_task
 
+import threading
+
 router = APIRouter(tags=["trace"])
 MAX_BULK_ROWS = 200
+
+
+def dispatch_trace_task(case_id: str) -> None:
+    try:
+        trace_wallet_task.delay(case_id)
+    except Exception:
+        threading.Thread(target=trace_wallet_task, args=(case_id,), daemon=True).start()
+
+
+from pydantic import BaseModel
+from app.risk.complaint_parser import parse_complaint_text
+
+
+class ParseComplaintRequest(BaseModel):
+    text: str
+
+
+@router.post("/trace/parse-complaint")
+def parse_complaint(request: ParseComplaintRequest, user: CurrentUser = Depends(get_current_user)):
+    """Extract candidate wallets, chains, tx hashes, and UPI identifiers from raw complaint text."""
+    return parse_complaint_text(request.text)
 
 
 @router.post("/trace", response_model=TraceAccepted, status_code=202)
@@ -35,7 +58,7 @@ def submit_trace(request: TraceRequest, db: Session = Depends(get_db),
     db.commit()
     db.refresh(case)
 
-    trace_wallet_task.delay(case.id)
+    dispatch_trace_task(case.id)
 
     return TraceAccepted(case_id=case.id, status=case.status)
 
@@ -88,6 +111,6 @@ async def submit_trace_bulk(file: UploadFile, db: Session = Depends(get_db),
 
     db.commit()
     for entry in accepted:
-        trace_wallet_task.delay(entry["case_id"])
+        dispatch_trace_task(entry["case_id"])
 
     return {"accepted": accepted, "rejected": rejected}

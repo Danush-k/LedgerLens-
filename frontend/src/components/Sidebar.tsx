@@ -1,7 +1,6 @@
 import { BarChart3, FolderSearch, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
-import { ThemeToggle } from './ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: BarChart3, end: true },
@@ -45,11 +44,6 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
-
-      <div className="flex items-center justify-between border-t border-chrome-border px-5 py-3">
-        <span className="text-[11px] font-medium text-chrome-text-muted">Theme</span>
-        <ThemeToggle />
-      </div>
 
       {user && (
         <div className="border-t border-chrome-border px-4 py-3">

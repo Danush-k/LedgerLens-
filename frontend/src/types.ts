@@ -106,3 +106,44 @@ export interface CaseFilters {
   min_risk?: number
   search?: string
 }
+
+export interface ParsedWallet {
+  address: string
+  chain: Chain | 'tron'
+  format: string
+  confidence: number
+}
+
+export interface ParsedComplaintResult {
+  wallets: ParsedWallet[]
+  tx_hashes: string[]
+  upi_ids: string[]
+  amounts: string[]
+  complaint_refs: string[]
+  suggested_chain: Chain
+  extracted_count: number
+}
+
+export interface LegalNoticeParams {
+  officer_name: string
+  officer_designation: string
+  police_station: string
+  fir_number?: string
+  fir_date?: string
+  victim_name?: string
+  act_section: 'bnss_94' | 'crpc_91'
+}
+
+export interface HashVerificationResult {
+  verified: boolean
+  case_id?: string
+  reported_address?: string
+  chain?: string
+  risk_score?: number
+  created_at?: string
+  computed_hash?: string
+  submitted_hash: string
+  status: string
+  message?: string
+}
+

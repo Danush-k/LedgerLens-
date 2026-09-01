@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.api.routes_trace import dispatch_trace_task
 from app.auth.dependencies import get_current_user
 from app.chain_clients.base import normalize_address
 from app.config import get_settings
@@ -8,7 +9,6 @@ from app.db.postgres import get_db
 from app.integrations.mock_lea import receive_ncrp_intake
 from app.models.orm import AuditEvent, Case
 from app.models.schemas import TraceAccepted
-from app.worker.tasks import trace_wallet_task
 
 router = APIRouter(prefix="/integrations", tags=["integrations"])
 
@@ -33,7 +33,7 @@ def ncrp_intake(payload: dict, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(case)
 
-    trace_wallet_task.delay(case.id)
+    dispatch_trace_task(case.id)
     return TraceAccepted(case_id=case.id, status=case.status)
 
 

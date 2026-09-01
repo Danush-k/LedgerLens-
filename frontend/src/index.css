@@ -4,7 +4,7 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Brand accent - theme-reactive (values redefined below for dark). */
+  /* Brand accent */
   --color-brand-50: #ddf4ff;
   --color-brand-100: #b6e3ff;
   --color-brand-200: #80ccff;
@@ -16,7 +16,7 @@
   --color-brand-800: #04298f;
   --color-brand-900: #0a1f44;
 
-  /* Neutral scale for all main-content surfaces/text - theme-reactive. */
+  /* Neutral scale for all main-content surfaces/text */
   --color-ink-50: #f6f8fa;
   --color-ink-100: #eaeef2;
   --color-ink-200: #d0d7de;
@@ -29,14 +29,11 @@
   --color-ink-900: #24292f;
   --color-ink-950: #1a1f24;
 
-  /* Card/panel background - theme-reactive replacement for literal `white`. */
+  /* Card/panel background */
   --color-surface: #ffffff;
   --color-overlay: rgb(27 31 36 / 48%);
 
-  /* Fixed-dark chrome (sidebar, login screen) - never theme-reactive, so
-     there's always one calm, persistent rail regardless of the content
-     theme, the way most dev tools (VS Code's activity bar, Linear's nav)
-     keep their primary nav a stable dark surface. */
+  /* Fixed-dark chrome for primary navigation rail */
   --color-chrome-bg: #0d1117;
   --color-chrome-surface: #161b22;
   --color-chrome-border: #30363d;
@@ -48,7 +45,7 @@
   --color-risk-medium: #9a6700;
   --color-risk-high: #cf222e;
 
-  /* Chart categorical slots (validated palette, fixed order) - theme-reactive. */
+  /* Chart categorical slots */
   --chart-blue: #2a78d6;
   --chart-orange: #eb6834;
   --chart-aqua: #1baf7a;
@@ -56,93 +53,9 @@
   --chart-magenta: #e87ba4;
 }
 
-/* ---- Light mode (default) ---- */
+/* Light mode strictly enforced */
 :root {
   color-scheme: light;
-}
-
-/* ---- Dark mode: OS preference, unless the user has explicitly chosen light ---- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-
-    --color-brand-50: #0c2d6b;
-    --color-brand-100: #0f3a75;
-    --color-brand-200: #1958a8;
-    --color-brand-300: #388bfd;
-    --color-brand-400: #4493f8;
-    --color-brand-500: #4493f8;
-    --color-brand-600: #79c0ff;
-    --color-brand-700: #a5d6ff;
-    --color-brand-800: #cae8ff;
-    --color-brand-900: #ddf4ff;
-
-    --color-ink-50: #0d1117;
-    --color-ink-100: #161b22;
-    --color-ink-200: #30363d;
-    --color-ink-300: #3d444d;
-    --color-ink-400: #656c76;
-    --color-ink-500: #8b949e;
-    --color-ink-600: #9198a1;
-    --color-ink-700: #adbac7;
-    --color-ink-800: #c9d1d9;
-    --color-ink-900: #e6edf3;
-    --color-ink-950: #f0f3f6;
-
-    --color-surface: #161b22;
-    --color-overlay: rgb(1 4 9 / 65%);
-
-    --color-risk-low: #3fb950;
-    --color-risk-medium: #d29922;
-    --color-risk-high: #f85149;
-
-    --chart-blue: #3987e5;
-    --chart-orange: #d95926;
-    --chart-aqua: #199e70;
-    --chart-yellow: #c98500;
-    --chart-magenta: #d55181;
-  }
-}
-
-/* ---- Dark mode: explicit user choice, wins over the OS setting either way ---- */
-:root[data-theme="dark"] {
-  color-scheme: dark;
-
-  --color-brand-50: #0c2d6b;
-  --color-brand-100: #0f3a75;
-  --color-brand-200: #1958a8;
-  --color-brand-300: #388bfd;
-  --color-brand-400: #4493f8;
-  --color-brand-500: #4493f8;
-  --color-brand-600: #79c0ff;
-  --color-brand-700: #a5d6ff;
-  --color-brand-800: #cae8ff;
-  --color-brand-900: #ddf4ff;
-
-  --color-ink-50: #0d1117;
-  --color-ink-100: #161b22;
-  --color-ink-200: #30363d;
-  --color-ink-300: #3d444d;
-  --color-ink-400: #656c76;
-  --color-ink-500: #8b949e;
-  --color-ink-600: #9198a1;
-  --color-ink-700: #adbac7;
-  --color-ink-800: #c9d1d9;
-  --color-ink-900: #e6edf3;
-  --color-ink-950: #f0f3f6;
-
-  --color-surface: #161b22;
-  --color-overlay: rgb(1 4 9 / 65%);
-
-  --color-risk-low: #3fb950;
-  --color-risk-medium: #d29922;
-  --color-risk-high: #f85149;
-
-  --chart-blue: #3987e5;
-  --chart-orange: #d95926;
-  --chart-aqua: #199e70;
-  --chart-yellow: #c98500;
-  --chart-magenta: #d55181;
 }
 
 body {

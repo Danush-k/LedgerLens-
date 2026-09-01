@@ -1,6 +1,18 @@
 import axios from 'axios'
 import { clearStoredAuth, getStoredToken } from '../auth/AuthContext'
-import type { AnalyticsOverview, AuditEvent, BulkUploadResult, CaseDetail, CaseFilters, CaseSummary, Chain, MlStatus } from '../types'
+import type {
+  AnalyticsOverview,
+  AuditEvent,
+  BulkUploadResult,
+  CaseDetail,
+  CaseFilters,
+  CaseSummary,
+  Chain,
+  HashVerificationResult,
+  LegalNoticeParams,
+  MlStatus,
+  ParsedComplaintResult,
+} from '../types'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -42,6 +54,11 @@ export async function submitBulkTrace(file: File) {
   const { data } = await api.post<BulkUploadResult>('/trace/bulk', form, {
     headers: { 'Content-Type': 'multipart/form-data' },
   })
+  return data
+}
+
+export async function parseComplaintText(text: string) {
+  const { data } = await api.post<ParsedComplaintResult>('/trace/parse-complaint', { text })
   return data
 }
 
@@ -88,3 +105,27 @@ export async function downloadReport(caseId: string) {
   link.remove()
   window.URL.revokeObjectURL(url)
 }
+
+export async function downloadLegalNotice(caseId: string, params: LegalNoticeParams) {
+  const { data } = await api.get(`/cases/${caseId}/legal-notice`, {
+    params,
+    responseType: 'blob',
+  })
+  const url = window.URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `legal-notice-case-${caseId}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+export async function verifyEvidenceHash(hash: string, caseId?: string) {
+  const { data } = await api.post<HashVerificationResult>('/cases/verify-hash', {
+    hash,
+    case_id: caseId || undefined,
+  })
+  return data
+}
+

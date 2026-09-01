@@ -43,49 +43,104 @@ class EVMClient(ChainClient):
     def get_outgoing_transfers(self, address: str, limit: int = 50) -> list[Transfer]:
         settings = get_settings()
         api_key = getattr(settings, self._config["api_key_attr"])
-        params = {
-            "module": "account",
-            "action": "txlist",
-            "address": address,
-            "startblock": 0,
-            "endblock": 99_999_999,
-            "sort": "desc",
-            "apikey": api_key,
-        }
-        response = get_with_retry(self._session, self._config["base_url"], params=params)
-        payload = response.json()
-
-        results = payload.get("result") or []
-        if not isinstance(results, list):
-            return []
-
         decimals = self._config["native_unit_decimals"]
         transfers: list[Transfer] = []
-        for tx in results:
-            if tx.get("isError") not in ("0", None):
-                continue
-            from_addr = (tx.get("from") or "").lower()
-            if from_addr != address.lower():
-                continue  # only outgoing
-            to_addr = (tx.get("to") or "").lower()
-            if not to_addr:
-                continue  # contract creation, no destination address
+        seen_tx_hashes = set()
+
+        # 1. Native currency transfers (ETH / BNB / MATIC)
+        try:
+            params_native = {
+                "module": "account",
+                "action": "txlist",
+                "address": address,
+                "startblock": 0,
+                "endblock": 99_999_999,
+                "sort": "desc",
+                "apikey": api_key,
+            }
+            response = get_with_retry(self._session, self._config["base_url"], params=params_native)
+            results = response.json().get("result") or []
+            if isinstance(results, list):
+                for tx in results:
+                    if tx.get("isError") not in ("0", None):
+                        continue
+                    from_addr = (tx.get("from") or "").lower()
+                    if from_addr != address.lower():
+                        continue
+                    to_addr = (tx.get("to") or "").lower()
+                    if not to_addr:
+                        continue
+                    try:
+                        value = int(tx["value"]) / (10**decimals)
+                    except (KeyError, ValueError):
+                        continue
+                    if value <= 0:
+                        continue
+                    tx_hash = tx.get("hash", "")
+                    seen_tx_hashes.add(tx_hash)
+                    transfers.append(
+                        Transfer(
+                            tx_hash=tx_hash,
+                            chain=self.chain,
+                            from_address=from_addr,
+                            to_address=to_addr,
+                            value=value,
+                            timestamp=int(tx.get("timeStamp", 0)),
+                        )
+                    )
+                    if len(transfers) >= limit:
+                        break
+        except Exception:
+            pass
+
+        # 2. ERC-20 Token transfers (USDT, USDC, DAI, etc.)
+        if len(transfers) < limit:
             try:
-                value = int(tx["value"]) / (10**decimals)
-            except (KeyError, ValueError):
-                continue
-            if value <= 0:
-                continue
-            transfers.append(
-                Transfer(
-                    tx_hash=tx.get("hash", ""),
-                    chain=self.chain,
-                    from_address=from_addr,
-                    to_address=to_addr,
-                    value=value,
-                    timestamp=int(tx.get("timeStamp", 0)),
-                )
-            )
-            if len(transfers) >= limit:
-                break
-        return transfers
+                params_token = {
+                    "module": "account",
+                    "action": "tokentx",
+                    "address": address,
+                    "startblock": 0,
+                    "endblock": 99_999_999,
+                    "sort": "desc",
+                    "apikey": api_key,
+                }
+                response = get_with_retry(self._session, self._config["base_url"], params=params_token)
+                token_results = response.json().get("result") or []
+                if isinstance(token_results, list):
+                    for tx in token_results:
+                        from_addr = (tx.get("from") or "").lower()
+                        if from_addr != address.lower():
+                            continue
+                        to_addr = (tx.get("to") or "").lower()
+                        if not to_addr:
+                            continue
+                        try:
+                            token_dec = int(tx.get("tokenDecimal", 18))
+                            value = int(tx["value"]) / (10**token_dec)
+                        except (KeyError, ValueError):
+                            continue
+                        if value <= 0:
+                            continue
+                        tx_hash = tx.get("hash", "")
+                        if tx_hash in seen_tx_hashes:
+                            continue
+                        seen_tx_hashes.add(tx_hash)
+                        transfers.append(
+                            Transfer(
+                                tx_hash=tx_hash,
+                                chain=self.chain,
+                                from_address=from_addr,
+                                to_address=to_addr,
+                                value=value,
+                                timestamp=int(tx.get("timeStamp", 0)),
+                            )
+                        )
+                        if len(transfers) >= limit:
+                            break
+            except Exception:
+                pass
+
+        # Sort combined transfers by timestamp descending
+        transfers.sort(key=lambda t: t.timestamp, reverse=True)
+        return transfers[:limit]

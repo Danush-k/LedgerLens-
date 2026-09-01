@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { submitTrace } from '../api/client'
+import { SmartComplaintParser } from '../components/SmartComplaintParser'
 import type { Chain } from '../types'
 
 const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
@@ -44,90 +45,102 @@ export function NewCase() {
     }
   }
 
+  const handleWalletExtracted = (extracted: {
+    address: string
+    chain: Chain
+    complaintRef?: string
+    narrative: string
+  }) => {
+    setAddress(extracted.address)
+    setChain(extracted.chain)
+    if (extracted.complaintRef) setComplaintRef(extracted.complaintRef)
+    if (extracted.narrative) setNarrative(extracted.narrative)
+  }
+
   return (
-    <div className="mx-auto max-w-xl px-8 py-8">
-      <h1 className="text-xl font-bold text-ink-900">New wallet trace</h1>
-      <p className="mt-1 text-sm text-ink-500">
-        Submit a victim-reported wallet address. Tracing runs in the background — you'll be
-        taken to the case page and it will update live.
-      </p>
+    <div className="mx-auto max-w-2xl px-6 py-8">
+      <div className="space-y-6">
+        {/* Smart Complaint Extractor */}
+        <SmartComplaintParser onSelectWallet={handleWalletExtracted} />
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-ink-800">Chain</label>
-          <div className="grid grid-cols-4 gap-2">
-            {CHAINS.map((c) => (
-              <button
-                type="button"
-                key={c.value}
-                onClick={() => setChain(c.value)}
-                className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
-                  chain === c.value
-                    ? 'border-brand-500 bg-brand-500/10 text-brand-600'
-                    : 'border-ink-200 text-ink-600 hover:border-ink-300'
-                }`}
-              >
-                {c.label}
-              </button>
-            ))}
+        {/* Manual Intake Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-ink-100 bg-surface p-6 shadow-xs">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-ink-800">Target Blockchain</label>
+            <div className="grid grid-cols-4 gap-2">
+              {CHAINS.map((c) => (
+                <button
+                  type="button"
+                  key={c.value}
+                  onClick={() => setChain(c.value)}
+                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                    chain === c.value
+                      ? 'border-brand-500 bg-brand-500/10 text-brand-600'
+                      : 'border-ink-200 text-ink-600 hover:border-ink-300'
+                  }`}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-ink-800" htmlFor="address">
-            Suspect wallet address
-          </label>
-          <input
-            id="address"
-            required
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder={activeChain.placeholder}
-            className="w-full rounded-lg border border-ink-200 px-3.5 py-2.5 font-mono text-sm text-ink-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-        </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-ink-800" htmlFor="address">
+              Suspect Wallet Address
+            </label>
+            <input
+              id="address"
+              required
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder={activeChain.placeholder}
+              className="w-full rounded-lg border border-ink-200 bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-ink-800" htmlFor="complaint-ref">
-            Complaint reference <span className="font-normal text-ink-400">(optional)</span>
-          </label>
-          <input
-            id="complaint-ref"
-            value={complaintRef}
-            onChange={(e) => setComplaintRef(e.target.value)}
-            placeholder="e.g. NCRP/2026/000123"
-            className="w-full rounded-lg border border-ink-200 px-3.5 py-2.5 text-sm text-ink-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-        </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-ink-800" htmlFor="complaint-ref">
+              Complaint / NCRP Reference <span className="font-normal text-ink-400">(optional)</span>
+            </label>
+            <input
+              id="complaint-ref"
+              value={complaintRef}
+              onChange={(e) => setComplaintRef(e.target.value)}
+              placeholder="e.g. NCRP/2026/000123 or FIR No. 45/2026"
+              className="w-full rounded-lg border border-ink-200 bg-surface px-3.5 py-2 text-xs text-ink-900 outline-hidden focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            />
+          </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-semibold text-ink-800" htmlFor="narrative">
-            Complaint narrative <span className="font-normal text-ink-400">(optional)</span>
-          </label>
-          <textarea
-            id="narrative"
-            value={narrative}
-            onChange={(e) => setNarrative(e.target.value)}
-            rows={3}
-            placeholder="e.g. Victim was promised guaranteed returns on a trading investment…"
-            className="w-full resize-none rounded-lg border border-ink-200 px-3.5 py-2.5 text-sm text-ink-900 outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100"
-          />
-          <p className="mt-1 text-xs text-ink-400">
-            A short description auto-tags the fraud typology (investment scam, phishing, sextortion, etc).
-          </p>
-        </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-ink-800" htmlFor="narrative">
+              Complaint Narrative / Description <span className="font-normal text-ink-400">(optional)</span>
+            </label>
+            <textarea
+              id="narrative"
+              value={narrative}
+              onChange={(e) => setNarrative(e.target.value)}
+              rows={3}
+              placeholder="e.g. Victim reported being promised 50% returns on a crypto trading app. Sent funds from private wallet..."
+              className="w-full resize-none rounded-lg border border-ink-200 bg-surface px-3.5 py-2 text-xs text-ink-900 outline-hidden focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+            />
+            <p className="mt-1 text-[11px] text-ink-400">
+              The narrative is automatically analyzed by the rule-based NLP classifier to determine the fraud typology.
+            </p>
+          </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-xs text-red-600">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-brand-500/20 transition-colors hover:bg-brand-600 disabled:opacity-60"
-        >
-          {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-          {submitting ? 'Submitting…' : 'Start trace'}
-        </button>
-      </form>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-700 disabled:opacity-60"
+          >
+            {submitting ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
+            {submitting ? 'Initiating Trace…' : 'Start Multi-Hop Trace'}
+          </button>
+        </form>
+      </div>
     </div>
   )
 }
