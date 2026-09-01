@@ -1,10 +1,11 @@
 from unittest.mock import MagicMock
-
+from app.chain_clients.base import Chain
 from app.tracer.clustering import common_input_clusters, shared_funder_clusters
 
 
 def test_common_input_clusters_uses_co_spent_addresses():
     client = MagicMock()
+    client.chain = Chain.BITCOIN
     client.get_co_spent_addresses.side_effect = lambda addr: {"addrB", "addrC"} if addr == "addrA" else set()
 
     clusters = common_input_clusters(client, {"addrA", "addrB"})
@@ -16,6 +17,7 @@ def test_common_input_clusters_uses_co_spent_addresses():
 
 def test_common_input_clusters_empty_when_no_co_spends():
     client = MagicMock()
+    client.chain = Chain.BITCOIN
     client.get_co_spent_addresses.return_value = set()
 
     assert common_input_clusters(client, {"addrA"}) == []

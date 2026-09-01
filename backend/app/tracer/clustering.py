@@ -12,10 +12,14 @@
 """
 from collections import defaultdict
 
-from app.chain_clients.base import ChainClient
+from app.chain_clients.base import Chain, ChainClient
 
 
 def common_input_clusters(chain_client: ChainClient, visited_addresses: set[str]) -> list[dict]:
+    # Common-input-ownership only applies to UTXO-based chains like Bitcoin.
+    if chain_client.chain != Chain.BITCOIN:
+        return []
+
     clusters = []
     for address in visited_addresses:
         co_spent = chain_client.get_co_spent_addresses(address)
