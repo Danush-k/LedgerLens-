@@ -1,6 +1,7 @@
 import { Loader2, Send } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 import { submitTrace } from '../api/client'
 import type { Chain } from '../types'
 
@@ -33,9 +34,12 @@ export function NewCase() {
         complaint_ref: complaintRef.trim() || undefined,
         narrative: narrative.trim() || undefined,
       })
+      toast.success('Trace started', { description: 'Tracing runs in the background — this page updates live.' })
       navigate(`/cases/${case_id}`)
     } catch {
-      setError('Could not submit this trace. Check the backend is running and try again.')
+      const message = 'Could not submit this trace. Check the backend is running and try again.'
+      setError(message)
+      toast.error('Submission failed', { description: message })
       setSubmitting(false)
     }
   }
@@ -48,7 +52,7 @@ export function NewCase() {
         taken to the case page and it will update live.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5 rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
         <div>
           <label className="mb-1.5 block text-sm font-semibold text-ink-800">Chain</label>
           <div className="grid grid-cols-4 gap-2">
@@ -59,7 +63,7 @@ export function NewCase() {
                 onClick={() => setChain(c.value)}
                 className={`rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                   chain === c.value
-                    ? 'border-brand-500 bg-brand-50 text-brand-700'
+                    ? 'border-brand-500 bg-brand-500/10 text-brand-600'
                     : 'border-ink-200 text-ink-600 hover:border-ink-300'
                 }`}
               >

@@ -1,6 +1,7 @@
 import { CheckCircle2, Loader2, Upload, XCircle } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { toast } from 'sonner'
 import { submitBulkTrace } from '../api/client'
 import type { BulkUploadResult } from '../types'
 
@@ -23,8 +24,17 @@ export function BulkUpload() {
     try {
       const data = await submitBulkTrace(file)
       setResult(data)
+      if (data.accepted.length > 0) {
+        toast.success(`${data.accepted.length} trace${data.accepted.length === 1 ? '' : 's'} queued`, {
+          description: data.rejected.length > 0 ? `${data.rejected.length} row(s) rejected — see details below.` : undefined,
+        })
+      } else {
+        toast.error('No rows accepted', { description: 'Check the CSV format and try again.' })
+      }
     } catch {
-      setError('Upload failed. Check the CSV has "address" and "chain" columns and try again.')
+      const message = 'Upload failed. Check the CSV has "address" and "chain" columns and try again.'
+      setError(message)
+      toast.error('Upload failed', { description: message })
     } finally {
       setSubmitting(false)
     }
@@ -53,7 +63,7 @@ export function BulkUpload() {
         <code className="rounded bg-ink-100 px-1 py-0.5 text-xs">narrative</code> are optional). Up to 200 rows.
       </p>
 
-      <div className="mt-6 rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
         <div
           onClick={() => fileInput.current?.click()}
           onDragOver={(e) => e.preventDefault()}
@@ -91,17 +101,17 @@ export function BulkUpload() {
 
       {result && (
         <div className="mt-6 space-y-4">
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-800">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-5">
+            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
               <CheckCircle2 size={16} />
               {result.accepted.length} trace{result.accepted.length === 1 ? '' : 's'} queued
             </p>
             {result.accepted.length > 0 && (
-              <ul className="mt-2 space-y-1 text-xs text-emerald-900">
+              <ul className="mt-2 space-y-1 text-xs text-ink-600">
                 {result.accepted.map((r) => (
                   <li key={r.case_id}>
                     Row {r.row}: {r.address.slice(0, 14)}… →{' '}
-                    <Link to={`/cases/${r.case_id}`} className="font-semibold hover:underline">
+                    <Link to={`/cases/${r.case_id}`} className="font-semibold text-emerald-600 hover:underline">
                       view case
                     </Link>
                   </li>
@@ -111,12 +121,12 @@ export function BulkUpload() {
           </div>
 
           {result.rejected.length > 0 && (
-            <div className="rounded-xl border border-red-200 bg-red-50 p-5">
-              <p className="flex items-center gap-2 text-sm font-semibold text-red-800">
+            <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-5">
+              <p className="flex items-center gap-2 text-sm font-semibold text-red-600">
                 <XCircle size={16} />
                 {result.rejected.length} row{result.rejected.length === 1 ? '' : 's'} rejected
               </p>
-              <ul className="mt-2 space-y-1 text-xs text-red-900">
+              <ul className="mt-2 space-y-1 text-xs text-ink-600">
                 {result.rejected.map((r, i) => (
                   <li key={i}>
                     Row {r.row}: {r.reason}

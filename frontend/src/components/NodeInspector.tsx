@@ -1,4 +1,5 @@
-import { ExternalLink, X } from 'lucide-react'
+import { Copy, ExternalLink, X } from 'lucide-react'
+import { toast } from 'sonner'
 import type { GraphNode } from '../types'
 import { explorerUrl } from '../utils/explorer'
 
@@ -14,8 +15,17 @@ const TYPE_LABELS: Record<string, string> = {
 export function NodeInspector({ node, onClose }: { node: GraphNode; onClose: () => void }) {
   const url = explorerUrl(node.chain, node.address)
 
+  async function copyAddress() {
+    try {
+      await navigator.clipboard.writeText(node.address)
+      toast.success('Address copied')
+    } catch {
+      toast.error('Could not copy — clipboard access blocked')
+    }
+  }
+
   return (
-    <div className="absolute inset-x-3 bottom-3 rounded-lg border border-ink-200 bg-white/95 p-3.5 shadow-lg backdrop-blur">
+    <div className="absolute inset-x-3 bottom-3 rounded-lg border border-ink-200 bg-surface/95 p-3.5 shadow-lg backdrop-blur">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-400">
@@ -28,16 +38,24 @@ export function NodeInspector({ node, onClose }: { node: GraphNode; onClose: () 
           <X size={16} />
         </button>
       </div>
-      {url && (
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:underline"
+      <div className="mt-2 flex items-center gap-3">
+        <button
+          onClick={copyAddress}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-600 hover:text-ink-900"
         >
-          View on block explorer <ExternalLink size={12} />
-        </a>
-      )}
+          Copy address <Copy size={12} />
+        </button>
+        {url && (
+          <a
+            href={url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:underline"
+          >
+            View on block explorer <ExternalLink size={12} />
+          </a>
+        )}
+      </div>
     </div>
   )
 }

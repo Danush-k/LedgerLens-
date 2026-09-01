@@ -2,22 +2,29 @@ import { AlertTriangle, FolderSearch, Landmark, Percent } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAnalyticsOverview } from '../api/client'
+import { CardSkeleton, StatTileSkeleton } from '../components/Skeleton'
 import { ChainBadge } from '../components/ChainBadge'
 import { HorizontalBars } from '../components/HorizontalBars'
 import { StatTile } from '../components/StatTile'
 import type { AnalyticsOverview } from '../types'
 
-// Categorical slots from the validated reference palette - fixed order, not
-// cycled, so a chain's color stays stable regardless of what else is shown.
+// Categorical slots from the validated reference palette, referenced via CSS
+// custom properties (see index.css) so they flip correctly in dark mode -
+// fixed order, not cycled, so a chain's color stays stable regardless of
+// what else is shown.
 const CHAIN_COLORS: Record<string, string> = {
-  ethereum: '#2a78d6', // slot 1 - blue
-  bitcoin: '#eb6834', // slot 2 - orange
-  polygon: '#1baf7a', // slot 3 - aqua
-  bsc: '#eda100', // slot 4 - yellow
+  ethereum: 'var(--chart-blue)',
+  bitcoin: 'var(--chart-orange)',
+  polygon: 'var(--chart-aqua)',
+  bsc: 'var(--chart-yellow)',
 }
 
-// Status palette (fixed, never themed) - risk bands are a state, not an identity.
-const RISK_COLORS = { low: '#0ca30c', medium: '#fab219', high: '#d03b3b' }
+// Status colors (fixed roles, theme-reactive values) - risk bands are a state, not an identity.
+const RISK_COLORS = {
+  low: 'var(--color-risk-low)',
+  medium: 'var(--color-risk-medium)',
+  high: 'var(--color-risk-high)',
+}
 
 const CHAIN_LABELS: Record<string, string> = { ethereum: 'Ethereum', bitcoin: 'Bitcoin', polygon: 'Polygon', bsc: 'BSC' }
 
@@ -30,8 +37,8 @@ const TYPOLOGY_LABELS: Record<string, string> = {
   darknet: 'Darknet',
   unclassified: 'Unclassified',
 }
-// Categorical slots 5-8 (chains already claimed 1-4).
-const TYPOLOGY_COLOR = '#e87ba4' // slot 5 - magenta
+// Categorical slot 5 (chains already claimed slots 1-4).
+const TYPOLOGY_COLOR = 'var(--chart-magenta)'
 
 export function Overview() {
   const [data, setData] = useState<AnalyticsOverview | null>(null)
@@ -48,18 +55,29 @@ export function Overview() {
   }, [])
 
   if (!data) {
-    return <div className="px-8 py-8 text-sm text-ink-500">Loading analytics…</div>
+    return (
+      <div className="mx-auto max-w-6xl px-8 py-8">
+        <div className="mb-2 h-7 w-32 animate-skeleton rounded-md bg-ink-200" />
+        <div className="mb-6 h-4 w-72 animate-skeleton rounded-md bg-ink-200" />
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => <StatTileSkeleton key={i} />)}
+        </div>
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} lines={3} />)}
+        </div>
+      </div>
+    )
   }
 
   const flagItems = Object.entries(data.flag_counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 6)
-    .map(([flag, count]) => ({ label: flag.replace(/_/g, ' '), value: count, color: '#3b6bf0' }))
+    .map(([flag, count]) => ({ label: flag.replace(/_/g, ' '), value: count, color: 'var(--color-brand-500)' }))
 
   const chainItems = Object.entries(data.by_chain).map(([chain, count]) => ({
     label: CHAIN_LABELS[chain] ?? chain,
     value: count,
-    color: CHAIN_COLORS[chain] ?? '#64748b',
+    color: CHAIN_COLORS[chain] ?? 'var(--color-ink-500)',
   }))
 
   const typologyItems = Object.entries(data.typology_counts)
@@ -103,12 +121,12 @@ export function Overview() {
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-ink-800">Risk distribution</h2>
           <HorizontalBars items={riskItems} />
         </div>
 
-        <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-ink-800">Cases by chain</h2>
           {chainItems.length > 0 ? (
             <HorizontalBars items={chainItems} />
@@ -117,7 +135,7 @@ export function Overview() {
           )}
         </div>
 
-        <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-ink-800">Most common flags</h2>
           {flagItems.length > 0 ? (
             <HorizontalBars items={flagItems} />
@@ -126,7 +144,7 @@ export function Overview() {
           )}
         </div>
 
-        <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-ink-800">Fraud typologies</h2>
           {typologyItems.length > 0 ? (
             <HorizontalBars items={typologyItems} />
@@ -137,7 +155,7 @@ export function Overview() {
           )}
         </div>
 
-        <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+        <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
           <h2 className="mb-4 text-sm font-semibold text-ink-800">Top identified exchanges</h2>
           {data.top_exchanges.length > 0 ? (
             <ul className="space-y-2.5">
@@ -156,7 +174,7 @@ export function Overview() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+      <div className="mt-6 rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
         <h2 className="mb-4 text-sm font-semibold text-ink-800">Recent high-risk cases</h2>
         {data.recent_high_risk.length > 0 ? (
           <div className="divide-y divide-ink-100">
