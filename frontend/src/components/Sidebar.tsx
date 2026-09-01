@@ -21,7 +21,7 @@ export function Sidebar() {
           <ShieldCheck size={18} className="text-white" />
         </div>
         <div>
-          <p className="text-sm font-bold leading-tight">FraudMap</p>
+          <p className="text-sm font-bold leading-tight">LedgerLens</p>
           <p className="text-[11px] leading-tight text-chrome-text-muted">Crypto attribution</p>
         </div>
       </div>

@@ -13,7 +13,7 @@ from app.db.neo4j_client import load_seed_labels_into_neo4j
 from app.db.postgres import Base, SessionLocal, engine
 
 app = FastAPI(
-    title="Real-Time Crypto Fraud Attribution System",
+    title="LedgerLens — Real-Time Crypto Fraud Attribution System",
     description="Traces victim-reported wallet addresses to the nearest known exchange/VASP.",
     version="0.1.0",
 )

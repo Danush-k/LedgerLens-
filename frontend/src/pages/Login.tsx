@@ -45,7 +45,7 @@ export function Login() {
             <ShieldCheck size={19} className="text-white" />
           </div>
           <div>
-            <p className="text-base font-bold text-white">FraudMap</p>
+            <p className="text-base font-bold text-white">LedgerLens</p>
             <p className="text-xs text-chrome-text-muted">Investigator sign-in</p>
           </div>
         </div>

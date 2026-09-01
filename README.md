@@ -1,4 +1,4 @@
-# FraudMap — Real-Time Crypto Fraud Attribution System
+# LedgerLens — Real-Time Crypto Fraud Attribution System
 
 Traces a victim-reported cryptocurrency wallet address across its on-chain transaction
 history and identifies the nearest known exchange/VASP that received the funds — turning

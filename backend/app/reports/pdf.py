@@ -33,7 +33,7 @@ def build_case_report(case: Case) -> bytes:
     styles = getSampleStyleSheet()
     story = []
 
-    story.append(Paragraph("Crypto Fraud Attribution — Investigation Report", styles["Title"]))
+    story.append(Paragraph("LedgerLens — Investigation Report", styles["Title"]))
     story.append(Spacer(1, 0.5 * cm))
     story.append(Paragraph(f"Case ID: {case.id}", styles["Normal"]))
     story.append(Paragraph(f"Complaint reference: {case.complaint_ref or '—'}", styles["Normal"]))

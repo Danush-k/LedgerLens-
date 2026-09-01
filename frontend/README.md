@@ -1,4 +1,4 @@
-# FraudMap frontend
+# LedgerLens frontend
 
 React + TypeScript + Tailwind dashboard for the crypto fraud attribution system.
 See the [root README](../README.md) for the full setup (backend, Docker Compose, etc).
