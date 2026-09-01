@@ -3,6 +3,7 @@ const CHAIN_META: Record<string, { label: string; className: string }> = {
   bsc: { label: 'BSC', className: 'bg-amber-500/10 text-amber-600' },
   polygon: { label: 'Polygon', className: 'bg-purple-500/10 text-purple-600' },
   bitcoin: { label: 'Bitcoin', className: 'bg-orange-500/10 text-orange-600' },
+  tron: { label: 'Tron (TRC-20)', className: 'bg-red-500/10 text-red-600' },
 }
 
 export function ChainBadge({ chain }: { chain: string }) {

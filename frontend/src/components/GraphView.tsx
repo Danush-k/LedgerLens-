@@ -21,6 +21,8 @@ const NODE_COLORS: Record<string, string> = {
   exchange: '#22c55e',
   mixer: '#ef4444',
   bridge: '#a855f7',
+  dex: '#ec4899',
+  funder: '#9333ea',
   unresolved: '#94a3b8',
   intermediate: '#64748b',
 }

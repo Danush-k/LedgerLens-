@@ -7,6 +7,8 @@ class Chain(str, Enum):
     BSC = "bsc"
     POLYGON = "polygon"
     BITCOIN = "bitcoin"
+    TRON = "tron"
+    SOLANA = "solana"
 
 
 EVM_CHAINS = {Chain.ETHEREUM, Chain.BSC, Chain.POLYGON}
@@ -46,7 +48,7 @@ EVM_ADDRESS_REGEX = re.compile(r"^0x[a-fA-F0-9]{40}$")
 BITCOIN_ADDRESS_REGEX = re.compile(
     r"^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$"
 )
-TRON_ADDRESS_REGEX = re.compile(r"^T[1-9A-HJ-NP-Za-k-z]{33}$")
+TRON_ADDRESS_REGEX = re.compile(r"^T[1-9A-HJ-NP-Za-km-z]{33}$")
 SOLANA_ADDRESS_REGEX = re.compile(r"^[1-9A-HJ-NP-Za-k-z]{32,44}$")
 
 

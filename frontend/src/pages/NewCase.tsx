@@ -11,6 +11,7 @@ const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
   { value: 'bsc', label: 'BSC', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'polygon', label: 'Polygon', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
+  { value: 'tron', label: 'Tron (TRC-20 USDT)', placeholder: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t' },
 ]
 
 function validateAddressFormat(addr: string, ch: Chain): string | null {
@@ -35,6 +36,16 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
     }
     if (!/^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) {
       return `Invalid Bitcoin address format.`
+    }
+  } else if (ch === 'tron') {
+    if (!trimmed.startsWith('T')) {
+      return `Invalid Tron address: Must start with prefix 'T'.`
+    }
+    if (trimmed.length !== 34) {
+      return `Invalid Tron address length (${trimmed.length} chars). Must be exactly 34 characters.`
+    }
+    if (!/^T[1-9A-HJ-NP-Za-k-z]{33}$/.test(trimmed)) {
+      return `Invalid Tron address format.`
     }
   }
   return null

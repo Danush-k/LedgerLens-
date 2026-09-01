@@ -28,3 +28,9 @@ def get_with_retry(session: requests.Session, url: str, params: dict | None = No
             if attempt < attempts - 1:
                 time.sleep(0.5 * (attempt + 1))
     raise last_exc
+
+
+def get(url: str, params: dict | None = None, timeout: int = 5) -> dict:
+    session = requests.Session()
+    resp = get_with_retry(session, url, params=params, timeout=timeout)
+    return resp.json()

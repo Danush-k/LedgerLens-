@@ -1,8 +1,10 @@
 const ITEMS = [
   { type: 'reported', label: 'Reported wallet', color: '#3b6bf0' },
   { type: 'exchange', label: 'Exchange / VASP', color: '#16a34a' },
+  { type: 'funder', label: 'Seed Funder (Gas)', color: '#9333ea' },
+  { type: 'dex', label: 'DEX Swap', color: '#ec4899' },
   { type: 'mixer', label: 'Mixer', color: '#dc2626' },
-  { type: 'bridge', label: 'Bridge', color: '#9333ea' },
+  { type: 'bridge', label: 'Bridge', color: '#a855f7' },
   { type: 'unresolved', label: 'Unresolved', color: '#94a3b8' },
 ]
 

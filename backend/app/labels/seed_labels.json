@@ -332,6 +332,41 @@
       "name": "Coinbase: Hot Wallet (BTC)",
       "vasp_key": "Coinbase",
       "source": "mempool.space public label"
+    },
+    {
+      "address": "0x7a250d5630b4cf539739df2c5dacb4c659f2488d",
+      "chain": "ethereum",
+      "type": "dex",
+      "name": "Uniswap V2: Router",
+      "source": "etherscan.com public label"
+    },
+    {
+      "address": "0x68b3465833fb72a70ecdf485e0e4c7bd8665fc45",
+      "chain": "ethereum",
+      "type": "dex",
+      "name": "Uniswap V3: Router 2",
+      "source": "etherscan.com public label"
+    },
+    {
+      "address": "0x10ed4336791035263955567693674d461d4c1371",
+      "chain": "bsc",
+      "type": "dex",
+      "name": "PancakeSwap: Router V2",
+      "source": "bscscan.com public label"
+    },
+    {
+      "address": "0xa5e0829cace38ffdd4de3c43696c57f7d7a678ff",
+      "chain": "polygon",
+      "type": "dex",
+      "name": "QuickSwap: Router",
+      "source": "polygonscan.com public label"
+    },
+    {
+      "address": "TKzxdWhmptNSLxuhx12C5B655555555555",
+      "chain": "tron",
+      "type": "dex",
+      "name": "SunSwap: Router V2",
+      "source": "tronscan.org public label"
     }
   ]
 }

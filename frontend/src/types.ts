@@ -1,4 +1,4 @@
-export type Chain = 'ethereum' | 'bsc' | 'polygon' | 'bitcoin'
+export type Chain = 'ethereum' | 'bsc' | 'polygon' | 'bitcoin' | 'tron'
 
 export type CaseStatus = 'queued' | 'tracing' | 'complete' | 'failed'
 
@@ -8,6 +8,8 @@ export type NodeType =
   | 'exchange'
   | 'mixer'
   | 'bridge'
+  | 'dex'
+  | 'funder'
   | 'unresolved'
 
 export interface GraphNode {

@@ -45,6 +45,36 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
         "label_name": None,
     }
 
+    # Backward Inflow Tracing ("Follow the Gas / Seed Funding") for Hop 0 wallet
+    if hasattr(client, "get_inflow_transfers"):
+        try:
+            inflows = client.get_inflow_transfers(reported_address)
+            if inflows:
+                earliest_inflow = min(inflows, key=lambda t: t.timestamp or 0)
+                funder_addr = earliest_inflow.from_address
+                if funder_addr and normalize_address(funder_addr) != normalize_address(reported_address):
+                    funder_uid = _uid(chain_value, funder_addr)
+                    funder_label = lookup_label(chain_value, funder_addr)
+                    result.nodes[funder_uid] = {
+                        "id": funder_uid,
+                        "address": normalize_address(funder_addr),
+                        "chain": chain_value,
+                        "node_type": "funder",
+                        "label_name": funder_label["name"] if funder_label else "Seed Funder (Gas Source)",
+                    }
+                    result.edges.append({
+                        "source": funder_uid,
+                        "target": root_uid,
+                        "tx_hash": earliest_inflow.tx_hash,
+                        "value": earliest_inflow.value,
+                        "timestamp": earliest_inflow.timestamp,
+                        "hop": -1,
+                        "note": "Initial Gas / Seed Funding Transaction",
+                    })
+                    result.flags.add("seed_funder_identified")
+        except Exception:
+            pass
+
     visited: set[str] = {root_uid}
     queue: deque[tuple[str, int]] = deque([(reported_address, 0)])
     seen_exchange = False
@@ -107,14 +137,16 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
                 seen_exchange = True
                 continue  # stop this branch - nearest VASP found
 
+            if label and label["type"] == "dex":
+                result.flags.add("dex_swap_detected")
+                continue  # DEX swap identified
+
             if label and label["type"] == "mixer":
                 result.flags.add("mixer_detected")
                 continue  # flagged, but a mixer breaks the traceable link - stop here
 
             if label and label["type"] == "bridge":
                 result.flags.add("cross_chain_bridge")
-                # flagged; continuing to trace past a bridge on the same
-                # chain adds little value, so this branch stops too
 
             if to_uid not in visited:
                 visited.add(to_uid)
