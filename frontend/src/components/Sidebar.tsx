@@ -69,11 +69,6 @@ export function Sidebar() {
         </div>
       )}
 
-      <div className="border-t border-chrome-border px-5 py-4 text-[11px] leading-relaxed text-chrome-text-muted">
-        Reads public on-chain data only.
-        <br />
-        No wallet, funds, or custody involved.
-      </div>
     </aside>
   )
 }
