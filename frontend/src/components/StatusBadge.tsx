@@ -4,22 +4,22 @@ import type { CaseStatus } from '../types'
 const CONFIG: Record<CaseStatus, { label: string; className: string; icon: React.ReactNode }> = {
   queued: {
     label: 'Queued',
-    className: 'bg-ink-100 text-ink-700',
+    className: 'bg-ink-500/10 text-ink-600',
     icon: <Clock size={13} />,
   },
   tracing: {
     label: 'Tracing',
-    className: 'bg-brand-50 text-brand-700',
+    className: 'bg-brand-500/10 text-brand-600',
     icon: <Loader2 size={13} className="animate-spin" />,
   },
   complete: {
     label: 'Complete',
-    className: 'bg-emerald-50 text-emerald-700',
+    className: 'bg-emerald-500/10 text-emerald-600',
     icon: <CheckCircle2 size={13} />,
   },
   failed: {
     label: 'Failed',
-    className: 'bg-red-50 text-red-700',
+    className: 'bg-red-500/10 text-red-600',
     icon: <XCircle size={13} />,
   },
 }

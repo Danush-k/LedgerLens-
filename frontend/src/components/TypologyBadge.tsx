@@ -11,7 +11,7 @@ const TYPOLOGY_LABELS: Record<string, string> = {
 export function TypologyBadge({ typology }: { typology: string }) {
   const label = TYPOLOGY_LABELS[typology] ?? typology.replace(/_/g, ' ')
   return (
-    <span className="inline-flex items-center rounded-md bg-violet-50 px-2 py-0.5 text-xs font-semibold text-violet-700">
+    <span className="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-xs font-semibold text-violet-600">
       {label}
     </span>
   )
