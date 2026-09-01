@@ -153,7 +153,7 @@ def build_legal_notice(
     # Evidence Trail Table
     story.append(Paragraph("1. Identified Target Deposit Wallet & Forensic Fund Trail", section_heading))
     graph = case.graph or {"nodes": [], "edges": []}
-    address_by_id = {n["id"]: n["address"] for n in graph.get("nodes", [])}
+    address_by_id = {n["id"]: n.get("address", n["id"].split(":")[-1]) for n in graph.get("nodes", [])}
 
     trail_rows = [[Paragraph("<b>Hop</b>", bold_cell), Paragraph("<b>From Address</b>", bold_cell),
                    Paragraph("<b>To Address (Deposit)</b>", bold_cell), Paragraph("<b>Value</b>", bold_cell),

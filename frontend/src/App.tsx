@@ -11,6 +11,7 @@ import { CaseList } from './pages/CaseList'
 import { Login } from './pages/Login'
 import { NewCase } from './pages/NewCase'
 import { Overview } from './pages/Overview'
+import { Syndicates } from './pages/Syndicates'
 function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false)
 
@@ -35,6 +36,7 @@ function AppShell() {
             <Routes>
               <Route path="/" element={<Overview />} />
               <Route path="/cases" element={<CaseList />} />
+              <Route path="/syndicates" element={<Syndicates />} />
               <Route path="/new" element={<NewCase />} />
               <Route path="/bulk" element={<BulkUpload />} />
               <Route path="/cases/:caseId" element={<CaseDetail />} />

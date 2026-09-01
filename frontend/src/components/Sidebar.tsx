@@ -1,10 +1,11 @@
-import { BarChart3, FolderSearch, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
+import { BarChart3, FolderSearch, Layers, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: BarChart3, end: true },
   { to: '/cases', label: 'Cases', icon: LayoutGrid, end: false },
+  { to: '/syndicates', label: 'Syndicates', icon: Layers, end: false },
   { to: '/new', label: 'New trace', icon: FolderSearch, end: false },
   { to: '/bulk', label: 'Bulk upload', icon: Upload, end: false },
 ]

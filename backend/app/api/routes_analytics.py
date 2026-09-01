@@ -92,3 +92,18 @@ def ml_status(db: Session = Depends(get_db)):
         "min_required": risk_ml.MIN_TRAINING_CASES,
         "reason_unavailable": result.reason_unavailable,
     }
+
+
+from app.tracer.syndicate import find_syndicate_clusters
+
+
+@router.get("/syndicates")
+def get_syndicates(db: Session = Depends(get_db)):
+    """Detects cross-FIR offender syndicates, shared deposit accounts, and repeat suspect wallets."""
+    syndicates = find_syndicate_clusters(db)
+    return {
+        "syndicate_count": len(syndicates),
+        "total_linked_cases": sum(s["linked_case_count"] for s in syndicates),
+        "syndicates": syndicates,
+    }
+

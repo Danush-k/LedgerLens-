@@ -129,3 +129,34 @@ export async function verifyEvidenceHash(hash: string, caseId?: string) {
   return data
 }
 
+export async function downloadEvidencePackage(caseId: string, params: LegalNoticeParams) {
+  const { data } = await api.get(`/cases/${caseId}/evidence-package`, {
+    params,
+    responseType: 'blob',
+  })
+  const url = window.URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `evidence-package-${caseId.slice(0, 8)}.zip`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+export async function getSyndicates() {
+  const { data } = await api.get<{ syndicate_count: number; total_linked_cases: number; syndicates: any[] }>('/analytics/syndicates')
+  return data
+}
+
+export async function getCaseSwaps(caseId: string) {
+  const { data } = await api.get<{ case_id: string; swaps_count: number; swaps: any[] }>(`/cases/${caseId}/swaps`)
+  return data
+}
+
+export async function aggregateCases(caseIds: string[]) {
+  const { data } = await api.post<{ nodes: any[]; edges: any[]; case_count: number; shared_nodes_count: number }>('/cases/aggregate-graph', { case_ids: caseIds })
+  return data
+}
+
+

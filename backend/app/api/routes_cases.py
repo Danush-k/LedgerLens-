@@ -185,3 +185,72 @@ def get_case_report(case_id: str, db: Session = Depends(get_db)):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="case-{case_id}.pdf"'},
     )
+
+
+from pydantic import BaseModel
+from app.reports.evidence_package import generate_evidence_zip
+from app.tracer.aggregation import aggregate_case_graphs
+from app.tracer.bridge_detector import detect_cross_chain_swaps
+
+
+class AggregateGraphRequest(BaseModel):
+    case_ids: list[str]
+
+
+@router.post("/cases/aggregate-graph")
+def post_aggregate_graph(request: AggregateGraphRequest, db: Session = Depends(get_db)):
+    """Merges multiple case graphs into a single multi-target aggregated visualization."""
+    if not request.case_ids:
+        raise HTTPException(400, "Must provide at least one case ID")
+    return aggregate_case_graphs(request.case_ids, db)
+
+
+@router.get("/{case_id}/swaps")
+def get_case_swaps(case_id: str, db: Session = Depends(get_db)):
+    """Detects cross-chain bridge and DEX swap interactions within a case graph."""
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    edges = (case.graph or {}).get("edges", [])
+    swaps = detect_cross_chain_swaps(case.chain, edges)
+    return {"case_id": case_id, "swaps_count": len(swaps), "swaps": swaps}
+
+
+@router.get("/{case_id}/evidence-package")
+def get_evidence_package(
+    case_id: str,
+    officer_name: str = Query("Investigating Officer"),
+    officer_designation: str = Query("Inspector of Police"),
+    police_station: str = Query("Cyber Crime Police Station"),
+    fir_number: str | None = Query(None),
+    fir_date: str | None = Query(None),
+    act_section: str = Query("bnss_94"),
+    db: Session = Depends(get_db),
+):
+    """Generates a complete tamper-evident Evidence ZIP Package containing:
+    1. Statutory Sec 91/94 Legal Notice PDF
+    2. Cryptographic SHA-256 JSON Manifest
+    3. Forensic Summary Dossier Text File
+    """
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    if case.status != "complete":
+        raise HTTPException(409, "Case tracing is not complete yet")
+
+    zip_bytes = generate_evidence_zip(
+        case=case,
+        officer_name=officer_name,
+        officer_designation=officer_designation,
+        police_station=police_station,
+        fir_number=fir_number,
+        fir_date=fir_date,
+        act_section=act_section,
+    )
+    filename = f"evidence-package-{case_id[:8]}.zip"
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+

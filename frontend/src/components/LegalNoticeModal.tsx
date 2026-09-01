@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { CheckCircle2, Download, FileText, Loader2, ShieldCheck, X } from 'lucide-react'
+import { Archive, CheckCircle2, Download, FileText, Loader2, ShieldCheck, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { downloadLegalNotice } from '../api/client'
+import { downloadEvidencePackage, downloadLegalNotice } from '../api/client'
 import type { CaseDetail, LegalNoticeParams } from '../types'
 
 interface Props {
@@ -226,21 +226,46 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-3 border-t border-ink-100">
+          <div className="flex flex-wrap items-center justify-end gap-2 pt-3 border-t border-ink-100">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2.5 text-xs font-bold text-ink-600 hover:bg-ink-100"
+              className="rounded-lg px-3.5 py-2 text-xs font-bold text-ink-600 hover:bg-ink-100 cursor-pointer"
             >
               Cancel
             </button>
             <button
+              type="button"
+              disabled={loading}
+              onClick={async () => {
+                if (!params.officer_name.trim() || !params.police_station.trim()) {
+                  toast.error('Please fill in Officer Name and Police Station')
+                  return
+                }
+                setLoading(true)
+                try {
+                  await downloadEvidencePackage(caseDetail.id, params)
+                  toast.success('Complete Evidence Package (.ZIP) downloaded!')
+                  onClose()
+                } catch {
+                  toast.error('Failed to generate ZIP package')
+                } finally {
+                  setLoading(false)
+                }
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-brand-200 bg-brand-50 px-4 py-2 text-xs font-bold text-brand-700 shadow-2xs hover:bg-brand-100 disabled:opacity-50 transition-all cursor-pointer"
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Archive className="h-4 w-4 text-brand-600" />}
+              Evidence Package (.ZIP)
+            </button>
+
+            <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-brand-700 disabled:opacity-50 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-brand-700 disabled:opacity-50 transition-all cursor-pointer"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-              Generate &amp; Download Legal Notice
+              Legal Notice (PDF)
             </button>
           </div>
         </form>

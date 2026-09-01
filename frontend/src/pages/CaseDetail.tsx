@@ -1,7 +1,8 @@
-import { FileText, Fingerprint, SearchX } from 'lucide-react'
+import { Building2, Clock, FileText, Fingerprint, LayoutGrid, SearchX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCase, getRelatedCases } from '../api/client'
+import { CaseTimeline } from '../components/CaseTimeline'
 import { ChainBadge } from '../components/ChainBadge'
 import { ClusterPanel } from '../components/ClusterPanel'
 import { FlagPill } from '../components/FlagPill'
@@ -15,6 +16,7 @@ import { RiskGauge } from '../components/RiskGauge'
 import { CardSkeleton } from '../components/Skeleton'
 import { StatusBadge } from '../components/StatusBadge'
 import { TypologyBadge } from '../components/TypologyBadge'
+import { VaspDirectoryModal } from '../components/VaspDirectoryModal'
 import type { CaseDetail as CaseDetailType, CaseSummary, GraphNode } from '../types'
 import { findPath } from '../utils/findPath'
 
@@ -25,6 +27,8 @@ export function CaseDetail() {
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
   const [noticeModalOpen, setNoticeModalOpen] = useState(false)
   const [hashModalOpen, setHashModalOpen] = useState(false)
+  const [vaspModalOpen, setVaspModalOpen] = useState(false)
+  const [activeView, setActiveView] = useState<'graph' | 'timeline'>('graph')
 
   useEffect(() => {
     if (!caseId) return
@@ -111,10 +115,20 @@ export function CaseDetail() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          {/* VASP Contacts Directory Button */}
+          <button
+            onClick={() => setVaspModalOpen(true)}
+            className="flex items-center gap-1.5 rounded-lg border border-ink-200 bg-surface px-3 py-2 text-xs font-medium text-ink-700 shadow-2xs hover:border-brand-500 hover:text-brand-600 transition-colors cursor-pointer"
+            title="Open VASP Nodal Officer Directory"
+          >
+            <Building2 size={14} className="text-brand-600" />
+            VASP Directory
+          </button>
+
           {/* Verify Evidence Hash Button */}
           <button
             onClick={() => setHashModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-lg border border-ink-200 bg-surface px-3 py-2 text-xs font-medium text-ink-700 shadow-2xs hover:border-brand-500 hover:text-brand-600 transition-colors"
+            className="flex items-center gap-1.5 rounded-lg border border-ink-200 bg-surface px-3 py-2 text-xs font-medium text-ink-700 shadow-2xs hover:border-brand-500 hover:text-brand-600 transition-colors cursor-pointer"
             title="Verify evidence hash integrity"
           >
             <Fingerprint size={14} className="text-brand-600" />
@@ -125,7 +139,7 @@ export function CaseDetail() {
           <button
             disabled={caseData.status !== 'complete'}
             onClick={() => setNoticeModalOpen(true)}
-            className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold shadow-2xs transition-colors ${
+            className={`flex items-center gap-2 rounded-lg border px-3.5 py-2 text-xs font-semibold shadow-2xs transition-colors cursor-pointer ${
               caseData.status === 'complete'
                 ? 'border-ink-200 bg-surface text-ink-800 hover:border-brand-500 hover:text-brand-600'
                 : 'cursor-not-allowed border-ink-100 text-ink-300'
@@ -137,38 +151,68 @@ export function CaseDetail() {
         </div>
       </div>
 
-      {/* 1. FULL WIDTH TRANSACTION GRAPH CANVAS */}
-      <div className="mt-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-ink-800">
-            Transaction Graph{' '}
-            <span className="font-normal text-ink-400">
-              ({nodeCount} address{nodeCount === 1 ? '' : 'es'})
-            </span>
-          </h2>
-          <GraphLegend />
+      {/* View Selector Tabs: Graph vs Timeline */}
+      <div className="mt-6 border-b border-ink-200 flex items-center justify-between">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveView('graph')}
+            className={`flex items-center gap-2 pb-3 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
+              activeView === 'graph'
+                ? 'border-brand-600 text-brand-600'
+                : 'border-transparent text-ink-500 hover:text-ink-800'
+            }`}
+          >
+            <LayoutGrid size={15} />
+            Transaction Graph ({nodeCount} Wallets)
+          </button>
+
+          <button
+            onClick={() => setActiveView('timeline')}
+            className={`flex items-center gap-2 pb-3 text-xs font-bold border-b-2 transition-colors cursor-pointer ${
+              activeView === 'timeline'
+                ? 'border-brand-600 text-brand-600'
+                : 'border-transparent text-ink-500 hover:text-ink-800'
+            }`}
+          >
+            <Clock size={15} />
+            Chronological Timeline
+          </button>
         </div>
-        <div className="relative h-[520px] w-full">
-          {caseData.graph && caseData.graph.nodes && caseData.graph.nodes.length > 0 ? (
-            <>
-              <GraphView
-                nodes={caseData.graph.nodes}
-                edges={caseData.graph.edges || []}
-                highlightPath={highlightPath}
-                onNodeClick={setSelectedNode}
-              />
-              {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
-            </>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 px-8 text-center bg-surface">
-              <SearchX size={22} className="text-ink-400" />
-              <p className="text-sm font-medium text-ink-700">No outgoing on-chain activity found</p>
-            </div>
-          )}
-        </div>
+
+        {activeView === 'graph' && <GraphLegend />}
       </div>
 
-      {/* 2. INFORMATION CARDS (PLACED DIRECTLY DOWN BELOW THE GRAPH) */}
+      {/* Main View Area */}
+      <div className="mt-4">
+        {activeView === 'graph' ? (
+          <div className="relative h-[520px] w-full">
+            {caseData.graph && caseData.graph.nodes && caseData.graph.nodes.length > 0 ? (
+              <>
+                <GraphView
+                  nodes={caseData.graph.nodes}
+                  edges={caseData.graph.edges || []}
+                  highlightPath={highlightPath}
+                  onNodeClick={setSelectedNode}
+                />
+                {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
+              </>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 px-8 text-center bg-surface">
+                <SearchX size={22} className="text-ink-400" />
+                <p className="text-sm font-medium text-ink-700">No outgoing on-chain activity found</p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <CaseTimeline
+            nodes={caseData.graph?.nodes || []}
+            edges={caseData.graph?.edges || []}
+            chain={caseData.chain}
+          />
+        )}
+      </div>
+
+      {/* Information Cards Section */}
       <div className="mt-8 space-y-6">
         {/* Row 1: Target VASP & Risk Assessment Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -243,6 +287,11 @@ export function CaseDetail() {
         open={hashModalOpen}
         onClose={() => setHashModalOpen(false)}
         initialCaseId={caseData.id}
+      />
+
+      <VaspDirectoryModal
+        open={vaspModalOpen}
+        onClose={() => setVaspModalOpen(false)}
       />
     </div>
   )
