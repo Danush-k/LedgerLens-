@@ -43,7 +43,7 @@ and learning path behind this implementation.
 | Clustering | Common-input-ownership (Bitcoin) + shared-funder fan-out (any chain) |
 | Risk scoring | Rule-based explainable rubric (v1) + scikit-learn-assisted score (v2, illustrative) |
 | Typology tagging | Rule-based keyword classifier over the complaint narrative |
-| Frontend | React + TypeScript + Vite + Tailwind + Cytoscape.js |
+| Frontend | React + TypeScript + Vite + Tailwind + Cytoscape.js, with a GitHub-inspired light/dark theme, a Cmd+K command palette (`cmdk`), and toast notifications (`sonner`) |
 | Reports | PDF via ReportLab, SHA-256 chain-of-custody hash |
 
 Nothing in this system ever holds a private key, custodies funds, or requires a paid
