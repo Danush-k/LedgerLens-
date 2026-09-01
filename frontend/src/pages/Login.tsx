@@ -29,37 +29,46 @@ export function Login() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-ink-950 px-4">
-      <div className="w-full max-w-sm rounded-xl border border-ink-800 bg-ink-900 p-8 shadow-xl">
+    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-chrome-bg px-4">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 50% 0%, rgba(9,105,218,0.18), transparent 55%), linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
+          backgroundSize: '100% 100%, 32px 32px, 32px 32px',
+        }}
+      />
+
+      <div className="animate-slide-up relative w-full max-w-sm rounded-xl border border-chrome-border bg-chrome-surface p-8 shadow-2xl">
         <div className="mb-6 flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500">
             <ShieldCheck size={19} className="text-white" />
           </div>
           <div>
             <p className="text-base font-bold text-white">FraudMap</p>
-            <p className="text-xs text-ink-400">Investigator sign-in</p>
+            <p className="text-xs text-chrome-text-muted">Investigator sign-in</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-ink-300">Username</label>
+            <label className="mb-1.5 block text-xs font-semibold text-chrome-text-secondary">Username</label>
             <input
               required
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-chrome-border bg-chrome-bg px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-ink-300">Password</label>
+            <label className="mb-1.5 block text-xs font-semibold text-chrome-text-secondary">Password</label>
             <input
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-ink-700 bg-ink-950 px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-chrome-border bg-chrome-bg px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
 
@@ -75,9 +84,10 @@ export function Login() {
           </button>
         </form>
 
-        <p className="mt-6 border-t border-ink-800 pt-4 text-[11px] leading-relaxed text-ink-500">
-          Demo credentials: <code className="text-ink-300">investigator</code> /{' '}
-          <code className="text-ink-300">changeme123</code> — change these in production via env vars.
+        <p className="mt-6 border-t border-chrome-border pt-4 text-[11px] leading-relaxed text-chrome-text-muted">
+          Demo credentials: <code className="text-chrome-text-secondary">investigator</code> /{' '}
+          <code className="text-chrome-text-secondary">changeme123</code> — change these in production via env
+          vars.
         </p>
       </div>
     </div>

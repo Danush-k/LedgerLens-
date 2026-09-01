@@ -1,6 +1,7 @@
 import { BarChart3, FolderSearch, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { ThemeToggle } from './ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: BarChart3, end: true },
@@ -14,14 +15,14 @@ export function Sidebar() {
   const navigate = useNavigate()
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-ink-800 bg-ink-950 text-ink-100">
+    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-chrome-border bg-chrome-bg text-white">
       <div className="flex items-center gap-2.5 px-5 py-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500">
           <ShieldCheck size={18} className="text-white" />
         </div>
         <div>
           <p className="text-sm font-bold leading-tight">FraudMap</p>
-          <p className="text-[11px] leading-tight text-ink-500">Crypto attribution</p>
+          <p className="text-[11px] leading-tight text-chrome-text-muted">Crypto attribution</p>
         </div>
       </div>
 
@@ -35,7 +36,7 @@ export function Sidebar() {
               `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-brand-500/15 text-brand-300'
-                  : 'text-ink-300 hover:bg-white/5 hover:text-white'
+                  : 'text-chrome-text-secondary hover:bg-white/5 hover:text-white'
               }`
             }
           >
@@ -45,14 +46,19 @@ export function Sidebar() {
         ))}
       </nav>
 
+      <div className="flex items-center justify-between border-t border-chrome-border px-5 py-3">
+        <span className="text-[11px] font-medium text-chrome-text-muted">Theme</span>
+        <ThemeToggle />
+      </div>
+
       {user && (
-        <div className="border-t border-ink-800 px-4 py-3">
+        <div className="border-t border-chrome-border px-4 py-3">
           <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5">
             <div className="flex min-w-0 items-center gap-2">
-              <UserCircle2 size={20} className="shrink-0 text-ink-400" />
+              <UserCircle2 size={20} className="shrink-0 text-chrome-text-secondary" />
               <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-ink-100">{user.username}</p>
-                <p className="text-[10px] uppercase tracking-wide text-ink-500">{user.role}</p>
+                <p className="truncate text-xs font-semibold text-white">{user.username}</p>
+                <p className="text-[10px] uppercase tracking-wide text-chrome-text-muted">{user.role}</p>
               </div>
             </div>
             <button
@@ -61,7 +67,7 @@ export function Sidebar() {
                 navigate('/login')
               }}
               title="Sign out"
-              className="shrink-0 text-ink-400 hover:text-white"
+              className="shrink-0 text-chrome-text-secondary hover:text-white"
             >
               <LogOut size={15} />
             </button>
@@ -69,7 +75,7 @@ export function Sidebar() {
         </div>
       )}
 
-      <div className="border-t border-ink-800 px-5 py-4 text-[11px] leading-relaxed text-ink-500">
+      <div className="border-t border-chrome-border px-5 py-4 text-[11px] leading-relaxed text-chrome-text-muted">
         Reads public on-chain data only.
         <br />
         No wallet, funds, or custody involved.

@@ -4,26 +4,145 @@
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  --color-brand-50: #eef4ff;
-  --color-brand-100: #d9e6ff;
-  --color-brand-300: #94b4fb;
-  --color-brand-500: #3b6bf0;
-  --color-brand-600: #2952d6;
-  --color-brand-700: #1f3fa8;
-  --color-brand-900: #16265c;
+  /* Brand accent - theme-reactive (values redefined below for dark). */
+  --color-brand-50: #ddf4ff;
+  --color-brand-100: #b6e3ff;
+  --color-brand-200: #80ccff;
+  --color-brand-300: #54aeff;
+  --color-brand-400: #2b8aef;
+  --color-brand-500: #0969da;
+  --color-brand-600: #0757ba;
+  --color-brand-700: #033d8b;
+  --color-brand-800: #04298f;
+  --color-brand-900: #0a1f44;
 
-  --color-ink-950: #0b1120;
-  --color-ink-900: #0f172a;
-  --color-ink-800: #1e293b;
-  --color-ink-700: #334155;
-  --color-ink-500: #64748b;
-  --color-ink-300: #cbd5e1;
-  --color-ink-100: #f1f5f9;
-  --color-ink-50: #f8fafc;
+  /* Neutral scale for all main-content surfaces/text - theme-reactive. */
+  --color-ink-50: #f6f8fa;
+  --color-ink-100: #eaeef2;
+  --color-ink-200: #d0d7de;
+  --color-ink-300: #afb8c1;
+  --color-ink-400: #8c959f;
+  --color-ink-500: #6e7781;
+  --color-ink-600: #57606a;
+  --color-ink-700: #424a53;
+  --color-ink-800: #32383f;
+  --color-ink-900: #24292f;
+  --color-ink-950: #1a1f24;
 
-  --color-risk-low: #16a34a;
-  --color-risk-medium: #d97706;
-  --color-risk-high: #dc2626;
+  /* Card/panel background - theme-reactive replacement for literal `white`. */
+  --color-surface: #ffffff;
+  --color-overlay: rgb(27 31 36 / 48%);
+
+  /* Fixed-dark chrome (sidebar, login screen) - never theme-reactive, so
+     there's always one calm, persistent rail regardless of the content
+     theme, the way most dev tools (VS Code's activity bar, Linear's nav)
+     keep their primary nav a stable dark surface. */
+  --color-chrome-bg: #0d1117;
+  --color-chrome-surface: #161b22;
+  --color-chrome-border: #30363d;
+  --color-chrome-border-subtle: #21262d;
+  --color-chrome-text-secondary: #8b949e;
+  --color-chrome-text-muted: #6e7681;
+
+  --color-risk-low: #1a7f37;
+  --color-risk-medium: #9a6700;
+  --color-risk-high: #cf222e;
+
+  /* Chart categorical slots (validated palette, fixed order) - theme-reactive. */
+  --chart-blue: #2a78d6;
+  --chart-orange: #eb6834;
+  --chart-aqua: #1baf7a;
+  --chart-yellow: #eda100;
+  --chart-magenta: #e87ba4;
+}
+
+/* ---- Light mode (default) ---- */
+:root {
+  color-scheme: light;
+}
+
+/* ---- Dark mode: OS preference, unless the user has explicitly chosen light ---- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --color-brand-50: #0c2d6b;
+    --color-brand-100: #0f3a75;
+    --color-brand-200: #1958a8;
+    --color-brand-300: #388bfd;
+    --color-brand-400: #4493f8;
+    --color-brand-500: #4493f8;
+    --color-brand-600: #79c0ff;
+    --color-brand-700: #a5d6ff;
+    --color-brand-800: #cae8ff;
+    --color-brand-900: #ddf4ff;
+
+    --color-ink-50: #0d1117;
+    --color-ink-100: #161b22;
+    --color-ink-200: #30363d;
+    --color-ink-300: #3d444d;
+    --color-ink-400: #656c76;
+    --color-ink-500: #8b949e;
+    --color-ink-600: #9198a1;
+    --color-ink-700: #adbac7;
+    --color-ink-800: #c9d1d9;
+    --color-ink-900: #e6edf3;
+    --color-ink-950: #f0f3f6;
+
+    --color-surface: #161b22;
+    --color-overlay: rgb(1 4 9 / 65%);
+
+    --color-risk-low: #3fb950;
+    --color-risk-medium: #d29922;
+    --color-risk-high: #f85149;
+
+    --chart-blue: #3987e5;
+    --chart-orange: #d95926;
+    --chart-aqua: #199e70;
+    --chart-yellow: #c98500;
+    --chart-magenta: #d55181;
+  }
+}
+
+/* ---- Dark mode: explicit user choice, wins over the OS setting either way ---- */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-brand-50: #0c2d6b;
+  --color-brand-100: #0f3a75;
+  --color-brand-200: #1958a8;
+  --color-brand-300: #388bfd;
+  --color-brand-400: #4493f8;
+  --color-brand-500: #4493f8;
+  --color-brand-600: #79c0ff;
+  --color-brand-700: #a5d6ff;
+  --color-brand-800: #cae8ff;
+  --color-brand-900: #ddf4ff;
+
+  --color-ink-50: #0d1117;
+  --color-ink-100: #161b22;
+  --color-ink-200: #30363d;
+  --color-ink-300: #3d444d;
+  --color-ink-400: #656c76;
+  --color-ink-500: #8b949e;
+  --color-ink-600: #9198a1;
+  --color-ink-700: #adbac7;
+  --color-ink-800: #c9d1d9;
+  --color-ink-900: #e6edf3;
+  --color-ink-950: #f0f3f6;
+
+  --color-surface: #161b22;
+  --color-overlay: rgb(1 4 9 / 65%);
+
+  --color-risk-low: #3fb950;
+  --color-risk-medium: #d29922;
+  --color-risk-high: #f85149;
+
+  --chart-blue: #3987e5;
+  --chart-orange: #d95926;
+  --chart-aqua: #199e70;
+  --chart-yellow: #c98500;
+  --chart-magenta: #d55181;
 }
 
 body {
@@ -44,3 +163,20 @@ body {
   background: var(--color-ink-300);
   border-radius: 999px;
 }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-fade-in { animation: fade-in 120ms ease-out; }
+.animate-slide-up { animation: slide-up 140ms ease-out; }
+
+@keyframes skeleton-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.animate-skeleton { animation: skeleton-pulse 1.5s ease-in-out infinite; }
