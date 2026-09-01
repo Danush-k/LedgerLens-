@@ -1,5 +1,5 @@
 import { Loader2, Send } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { submitTrace } from '../api/client'
@@ -7,11 +7,26 @@ import { SmartComplaintParser } from '../components/SmartComplaintParser'
 import type { Chain } from '../types'
 
 const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
-  { value: 'ethereum', label: 'Ethereum', placeholder: '0x…' },
-  { value: 'bsc', label: 'BSC', placeholder: '0x…' },
-  { value: 'polygon', label: 'Polygon', placeholder: '0x…' },
+  { value: 'ethereum', label: 'Ethereum', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
+  { value: 'bsc', label: 'BSC', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
+  { value: 'polygon', label: 'Polygon', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
 ]
+
+function validateAddressFormat(addr: string, ch: Chain): string | null {
+  const trimmed = addr.trim()
+  if (!trimmed) return null
+  if (['ethereum', 'bsc', 'polygon'].includes(ch)) {
+    if (!/^0x[a-fA-F0-9]{40}$/.test(trimmed)) {
+      return `Invalid ${ch.toUpperCase()} address. Must start with 0x followed by 40 hex characters.`
+    }
+  } else if (ch === 'bitcoin') {
+    if (!/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(trimmed)) {
+      return 'Invalid Bitcoin address. Must start with 1, 3, or bc1.'
+    }
+  }
+  return null
+}
 
 export function NewCase() {
   const navigate = useNavigate()
@@ -24,9 +39,21 @@ export function NewCase() {
 
   const activeChain = CHAINS.find((c) => c.value === chain)!
 
+  const validationError = useMemo(() => {
+    return validateAddressFormat(address, chain)
+  }, [address, chain])
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+
+    const valErr = validateAddressFormat(address, chain)
+    if (valErr) {
+      setError(valErr)
+      toast.error('Invalid Wallet Address', { description: valErr })
+      return
+    }
+
     setSubmitting(true)
     try {
       const { case_id } = await submitTrace({
@@ -37,8 +64,8 @@ export function NewCase() {
       })
       toast.success('Trace started', { description: 'Tracing runs in the background — this page updates live.' })
       navigate(`/cases/${case_id}`)
-    } catch {
-      const message = 'Could not submit this trace. Check the backend is running and try again.'
+    } catch (err: any) {
+      const message = err?.response?.data?.detail || 'Could not submit this trace. Verify the wallet address and backend status.'
       setError(message)
       toast.error('Submission failed', { description: message })
       setSubmitting(false)
@@ -93,10 +120,20 @@ export function NewCase() {
               id="address"
               required
               value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              onChange={(e) => {
+                setAddress(e.target.value)
+                setError(null)
+              }}
               placeholder={activeChain.placeholder}
-              className="w-full rounded-lg border border-ink-200 bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+              className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${
+                validationError
+                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  : 'border-ink-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
+              }`}
             />
+            {validationError && (
+              <p className="mt-1.5 text-xs text-red-600 font-medium">{validationError}</p>
+            )}
           </div>
 
           <div>
@@ -129,12 +166,12 @@ export function NewCase() {
             </p>
           </div>
 
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
 
           <button
             type="submit"
-            disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-700 disabled:opacity-60"
+            disabled={submitting || !!validationError}
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
             {submitting ? 'Initiating Trace…' : 'Start Multi-Hop Trace'}

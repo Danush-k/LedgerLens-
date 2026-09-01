@@ -6,7 +6,7 @@ RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 
 
 def get_with_retry(session: requests.Session, url: str, params: dict | None = None,
-                    timeout: int = 15, attempts: int = 3) -> requests.Response:
+                    timeout: int = 5, attempts: int = 2) -> requests.Response:
     """Free public block-explorer APIs occasionally blip (rate limits,
     momentary connection resets) - a single failed request shouldn't sink
     an otherwise-good trace. Retries with a short linear backoff, then lets

@@ -9,13 +9,35 @@ from app.config import get_settings
 logger = logging.getLogger(__name__)
 
 
+_NEO4J_AVAILABLE: bool | None = None
+
+
 @lru_cache
 def get_driver():
     settings = get_settings()
-    return GraphDatabase.driver(settings.neo4j_uri, auth=(settings.neo4j_user, settings.neo4j_password))
+    return GraphDatabase.driver(
+        settings.neo4j_uri,
+        auth=(settings.neo4j_user, settings.neo4j_password),
+        connection_timeout=1.0,
+        max_connection_lifetime=5.0,
+    )
+
+
+def is_neo4j_available() -> bool:
+    global _NEO4J_AVAILABLE
+    if _NEO4J_AVAILABLE is not None:
+        return _NEO4J_AVAILABLE
+    try:
+        get_driver().verify_connectivity()
+        _NEO4J_AVAILABLE = True
+    except Exception:
+        _NEO4J_AVAILABLE = False
+    return _NEO4J_AVAILABLE
 
 
 def ensure_constraints() -> None:
+    if not is_neo4j_available():
+        return
     try:
         with get_driver().session() as session:
             session.run(
@@ -30,6 +52,8 @@ def _uid(chain: str, address: str) -> str:
 
 
 def upsert_address(chain: str, address: str, label: dict | None = None) -> None:
+    if not is_neo4j_available():
+        return
     try:
         with get_driver().session() as session:
             session.run(
@@ -51,6 +75,8 @@ def upsert_address(chain: str, address: str, label: dict | None = None) -> None:
 
 def record_transfer(case_id: str, chain: str, from_address: str, to_address: str,
                      tx_hash: str, value: float, timestamp: int, hop: int) -> None:
+    if not is_neo4j_available():
+        return
     try:
         with get_driver().session() as session:
             session.run(
@@ -72,9 +98,8 @@ def record_transfer(case_id: str, chain: str, from_address: str, to_address: str
 
 
 def shortest_path_to_exchange(case_id: str, chain: str, reported_address: str) -> list[dict] | None:
-    """Live Cypher demo query: within this case's traced subgraph, what is
-    the shortest hop-path from the reported address to any labeled exchange?
-    """
+    if not is_neo4j_available():
+        return None
     try:
         with get_driver().session() as session:
             result = session.run(

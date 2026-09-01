@@ -38,9 +38,20 @@ def parse_complaint(request: ParseComplaintRequest, user: CurrentUser = Depends(
     return parse_complaint_text(request.text)
 
 
+from app.chain_clients.base import Chain, is_valid_address, normalize_address
+
+
 @router.post("/trace", response_model=TraceAccepted, status_code=202)
 def submit_trace(request: TraceRequest, db: Session = Depends(get_db),
                   user: CurrentUser = Depends(get_current_user)):
+    if not is_valid_address(request.address, request.chain):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid wallet address format for {request.chain.value.upper()}. "
+                   f"EVM addresses must be 42 characters starting with '0x'. "
+                   f"Bitcoin addresses must start with '1', '3', or 'bc1'."
+        )
+
     case = Case(
         reported_address=normalize_address(request.address),
         chain=request.chain.value,
@@ -91,6 +102,10 @@ async def submit_trace_bulk(file: UploadFile, db: Session = Depends(get_db),
             chain = Chain(chain_raw)
         except ValueError:
             rejected.append({"row": i, "reason": f"Unknown chain '{chain_raw}'"})
+            continue
+
+        if not is_valid_address(address, chain):
+            rejected.append({"row": i, "reason": f"Invalid wallet address '{address}' format for {chain.value.upper()}"})
             continue
 
         case = Case(
