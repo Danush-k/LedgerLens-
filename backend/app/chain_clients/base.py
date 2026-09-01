@@ -43,17 +43,27 @@ class ChainClient:
 import re
 
 EVM_ADDRESS_REGEX = re.compile(r"^0x[a-fA-F0-9]{40}$")
-BITCOIN_ADDRESS_REGEX = re.compile(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$")
+BITCOIN_ADDRESS_REGEX = re.compile(
+    r"^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$"
+)
+TRON_ADDRESS_REGEX = re.compile(r"^T[1-9A-HJ-NP-Za-k-z]{33}$")
+SOLANA_ADDRESS_REGEX = re.compile(r"^[1-9A-HJ-NP-Za-k-z]{32,44}$")
 
 
 def is_valid_address(address: str, chain: Chain | str) -> bool:
-    """Validates that a wallet address adheres to the expected format for its chain."""
+    """Validates that a wallet address adheres to strict chain-specific rules
+    (start prefix, character set, and exact length boundaries).
+    """
     addr = address.strip()
     chain_str = chain.value if isinstance(chain, Chain) else str(chain).lower()
     if chain_str in ("ethereum", "bsc", "polygon"):
         return bool(EVM_ADDRESS_REGEX.match(addr))
     if chain_str == "bitcoin":
         return bool(BITCOIN_ADDRESS_REGEX.match(addr))
+    if chain_str == "tron":
+        return bool(TRON_ADDRESS_REGEX.match(addr))
+    if chain_str == "solana":
+        return bool(SOLANA_ADDRESS_REGEX.match(addr))
     return len(addr) >= 10
 
 

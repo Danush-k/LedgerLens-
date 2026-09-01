@@ -17,12 +17,24 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
   const trimmed = addr.trim()
   if (!trimmed) return null
   if (['ethereum', 'bsc', 'polygon'].includes(ch)) {
+    if (!trimmed.startsWith('0x') && !trimmed.startsWith('0X')) {
+      return `Invalid ${ch.toUpperCase()} address: Must start with prefix '0x'.`
+    }
+    if (trimmed.length !== 42) {
+      return `Invalid ${ch.toUpperCase()} address length (${trimmed.length} chars). Must be exactly 42 characters (0x + 40 hex characters).`
+    }
     if (!/^0x[a-fA-F0-9]{40}$/.test(trimmed)) {
-      return `Invalid ${ch.toUpperCase()} address. Must start with 0x followed by 40 hex characters.`
+      return `Invalid ${ch.toUpperCase()} address: Contains non-hexadecimal characters.`
     }
   } else if (ch === 'bitcoin') {
-    if (!/^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,62}$/.test(trimmed)) {
-      return 'Invalid Bitcoin address. Must start with 1, 3, or bc1.'
+    if (!/^(1|3|bc1)/i.test(trimmed)) {
+      return `Invalid Bitcoin address prefix. Must start with '1' (Legacy), '3' (Script), or 'bc1' (SegWit).`
+    }
+    if (trimmed.length < 26 || trimmed.length > 62) {
+      return `Invalid Bitcoin address length (${trimmed.length} chars). Must be between 26 and 62 characters.`
+    }
+    if (!/^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) {
+      return `Invalid Bitcoin address format.`
     }
   }
   return null
