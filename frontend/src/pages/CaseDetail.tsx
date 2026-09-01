@@ -1,6 +1,7 @@
 import { Download, ExternalLink, Loader2 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
 import { downloadReport, getCase, getIntegrationLog, getMlStatus, getRelatedCases } from '../api/client'
 import { ChainBadge } from '../components/ChainBadge'
 import { ClusterPanel } from '../components/ClusterPanel'
@@ -10,6 +11,7 @@ import { GraphView } from '../components/GraphView'
 import { IntegrationLog } from '../components/IntegrationLog'
 import { NodeInspector } from '../components/NodeInspector'
 import { RelatedCases } from '../components/RelatedCases'
+import { CardSkeleton } from '../components/Skeleton'
 import { RiskGauge } from '../components/RiskGauge'
 import { StatusBadge } from '../components/StatusBadge'
 import { TypologyBadge } from '../components/TypologyBadge'
@@ -67,7 +69,20 @@ export function CaseDetail() {
   }, [caseData])
 
   if (!caseData) {
-    return <div className="px-8 py-8 text-sm text-ink-500">Loading case…</div>
+    return (
+      <div className="mx-auto max-w-7xl px-8 py-8">
+        <div className="mb-2 h-3 w-16 animate-skeleton rounded bg-ink-200" />
+        <div className="mt-2 h-7 w-96 animate-skeleton rounded-md bg-ink-200" />
+        <div className="mt-3 h-4 w-56 animate-skeleton rounded-md bg-ink-200" />
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="h-[420px] animate-skeleton rounded-lg bg-ink-200 lg:col-span-2" />
+          <div className="space-y-6">
+            <CardSkeleton lines={4} />
+            <CardSkeleton lines={2} />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const nodeCount = caseData.graph?.nodes.length ?? 0
@@ -108,6 +123,9 @@ export function CaseDetail() {
             setDownloading(true)
             try {
               await downloadReport(caseData.id)
+              toast.success('Report downloaded')
+            } catch {
+              toast.error('Could not generate the report', { description: 'Try again in a moment.' })
             } finally {
               setDownloading(false)
             }
@@ -156,10 +174,18 @@ export function CaseDetail() {
               </div>
             )}
           </div>
+
+          <div className="mt-6 rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
+            <div className="mb-3 flex items-center gap-1.5">
+              <ExternalLink size={14} className="text-ink-400" />
+              <h2 className="text-sm font-semibold text-ink-800">Integration log</h2>
+            </div>
+            <IntegrationLog events={events} />
+          </div>
         </div>
 
         <div className="space-y-6">
-          <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-ink-800">Risk assessment</h2>
             {caseData.risk_score !== null ? (
               <div className="flex flex-col items-center">
@@ -195,11 +221,7 @@ export function CaseDetail() {
             )}
           </div>
 
-          <ClusterPanel clusters={caseData.clusters ?? []} />
-
-          <RelatedCases cases={related} />
-
-          <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+          <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
             <h2 className="mb-3 text-sm font-semibold text-ink-800">Nearest exchange / VASP</h2>
             {caseData.nearest_exchange ? (
               <div>
@@ -220,8 +242,15 @@ export function CaseDetail() {
             )}
           </div>
 
+          {caseData.recommended_action && (
+            <div className="rounded-xl border border-brand-500/20 bg-brand-500/[0.06] p-6">
+              <h2 className="mb-2 text-sm font-semibold text-brand-600">Recommended action</h2>
+              <p className="text-sm leading-relaxed text-ink-700">{caseData.recommended_action}</p>
+            </div>
+          )}
+
           {caseData.flags && caseData.flags.length > 0 && (
-            <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold text-ink-800">Flags</h2>
               <div className="flex flex-wrap gap-2">
                 {caseData.flags.map((f) => (
@@ -231,20 +260,9 @@ export function CaseDetail() {
             </div>
           )}
 
-          {caseData.recommended_action && (
-            <div className="rounded-xl border border-brand-100 bg-brand-50 p-6">
-              <h2 className="mb-2 text-sm font-semibold text-brand-800">Recommended action</h2>
-              <p className="text-sm leading-relaxed text-brand-900">{caseData.recommended_action}</p>
-            </div>
-          )}
+          <ClusterPanel clusters={caseData.clusters ?? []} />
 
-          <div className="rounded-xl border border-ink-100 bg-white p-6 shadow-sm">
-            <div className="mb-3 flex items-center gap-1.5">
-              <ExternalLink size={14} className="text-ink-400" />
-              <h2 className="text-sm font-semibold text-ink-800">Integration log</h2>
-            </div>
-            <IntegrationLog events={events} />
-          </div>
+          <RelatedCases cases={related} />
         </div>
       </div>
     </div>

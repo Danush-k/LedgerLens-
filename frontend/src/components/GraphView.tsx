@@ -1,13 +1,15 @@
 import type { Core } from 'cytoscape'
 import { useMemo } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
+import { useTheme } from '../theme/ThemeContext'
 import type { GraphEdge, GraphNode } from '../types'
+import { formatAmount } from '../utils/format'
 
 const NODE_COLORS: Record<string, string> = {
-  reported: '#3b6bf0',
-  exchange: '#16a34a',
-  mixer: '#dc2626',
-  bridge: '#9333ea',
+  reported: '#3b82f6',
+  exchange: '#22c55e',
+  mixer: '#ef4444',
+  bridge: '#a855f7',
   unresolved: '#94a3b8',
   intermediate: '#64748b',
 }
@@ -20,6 +22,9 @@ interface Props {
 }
 
 export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Props) {
+  const { resolved } = useTheme()
+  const dark = resolved === 'dark'
+
   const elements = useMemo(() => {
     const pathSet = new Set(highlightPath)
     const nodeEls = nodes.map((n) => ({
@@ -35,12 +40,23 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
         id: `${e.tx_hash}-${i}`,
         source: e.source,
         target: e.target,
-        value: e.value.toFixed(4),
+        value: formatAmount(e.value),
       },
       classes: pathSet.has(e.source) && pathSet.has(e.target) ? 'on-path' : '',
     }))
     return [...nodeEls, ...edgeEls]
   }, [nodes, edges, highlightPath])
+
+  // Cytoscape renders to a <canvas>, so it can't read our CSS custom
+  // properties - these mirror the light/dark token values from index.css
+  // by hand and are recomputed whenever the resolved theme changes.
+  const surface = dark ? '#161b22' : '#ffffff'
+  const labelColor = dark ? '#e6edf3' : '#1f2328'
+  const nodeRing = dark ? '#161b22' : '#ffffff'
+  const onPathRing = dark ? '#f0f3f6' : '#0b1120'
+  const edgeLine = dark ? '#3d444d' : '#cbd5e1'
+  const edgeLabelColor = dark ? '#9198a1' : '#64748b'
+  const brandLine = dark ? '#4493f8' : '#0969da'
 
   // cytoscape's own Stylesheet union type isn't reliably importable across
   // versions of @types/cytoscape, so this is typed loosely and validated
@@ -51,7 +67,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       style: {
         'background-color': (ele: any) => NODE_COLORS[ele.data('type')] ?? '#64748b',
         label: 'data(label)',
-        color: '#1e293b',
+        color: labelColor,
         'font-size': 10,
         'font-family': 'Inter, sans-serif',
         'text-valign': 'bottom',
@@ -59,14 +75,14 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
         width: 26,
         height: 26,
         'border-width': 2,
-        'border-color': '#ffffff',
+        'border-color': nodeRing,
       },
     },
     {
       selector: 'node.on-path',
       style: {
         'border-width': 3,
-        'border-color': '#0b1120',
+        'border-color': onPathRing,
         width: 32,
         height: 32,
       },
@@ -75,14 +91,14 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       selector: 'edge',
       style: {
         width: 1.5,
-        'line-color': '#cbd5e1',
-        'target-arrow-color': '#cbd5e1',
+        'line-color': edgeLine,
+        'target-arrow-color': edgeLine,
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier',
         label: 'data(value)',
         'font-size': 8,
-        color: '#64748b',
-        'text-background-color': '#f8fafc',
+        color: edgeLabelColor,
+        'text-background-color': surface,
         'text-background-opacity': 1,
       },
     },
@@ -90,14 +106,14 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       selector: 'edge.on-path',
       style: {
         width: 3,
-        'line-color': '#3b6bf0',
-        'target-arrow-color': '#3b6bf0',
+        'line-color': brandLine,
+        'target-arrow-color': brandLine,
       },
     },
   ]
 
   return (
-    <div className="h-full w-full rounded-lg border border-ink-100 bg-white">
+    <div className="h-full w-full rounded-lg border border-ink-100 bg-surface">
       <CytoscapeComponent
         elements={CytoscapeComponent.normalizeElements(elements)}
         style={{ width: '100%', height: '100%' }}

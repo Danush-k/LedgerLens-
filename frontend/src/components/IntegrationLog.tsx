@@ -17,17 +17,17 @@ export function IntegrationLog({ events }: { events: AuditEvent[] }) {
           <span className="mt-0.5 text-ink-300">
             <Radio size={14} />
           </span>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="font-medium text-ink-800">{e.event.replace(/_/g, ' ')}</span>
               {e.simulated && (
-                <span className="rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
                   Simulated
                 </span>
               )}
               <span className="text-xs text-ink-400">{formatTime(e.created_at)}</span>
             </div>
-            {e.detail && <p className="mt-0.5 text-ink-500">{e.detail}</p>}
+            {e.detail && <p className="mt-0.5 break-words text-ink-500">{e.detail}</p>}
           </div>
         </li>
       ))}
