@@ -1,4 +1,4 @@
-import { Download, ExternalLink, Loader2 } from 'lucide-react'
+import { Download, ExternalLink, Loader2, SearchX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -145,7 +145,10 @@ export function CaseDetail() {
         <div className="lg:col-span-2">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-ink-800">
-              Transaction graph <span className="font-normal text-ink-400">({nodeCount} addresses)</span>
+              Transaction graph{' '}
+              <span className="font-normal text-ink-400">
+                ({nodeCount} address{nodeCount === 1 ? '' : 'es'})
+              </span>
             </h2>
             <GraphLegend />
           </div>
@@ -161,16 +164,22 @@ export function CaseDetail() {
                 {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
               </>
             ) : caseData.status === 'complete' ? (
-              <div className="flex h-full flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-ink-200 px-8 text-center">
-                <p className="text-sm font-medium text-ink-600">No outgoing on-chain activity found</p>
-                <p className="text-xs text-ink-400">
-                  This wallet hasn't sent any traceable transfers within the {caseData.hop_limit}-hop limit — it may
-                  be a pure deposit address, or currently dormant. A genuine, checked result, not an error.
-                </p>
+              <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 px-8 text-center">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-ink-100">
+                  <SearchX size={20} className="text-ink-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-ink-700">No outgoing on-chain activity found</p>
+                  <p className="mt-1 max-w-sm text-xs text-ink-400">
+                    This wallet hasn't sent any traceable transfers within the {caseData.hop_limit}-hop limit — it
+                    may be a pure deposit address, or currently dormant. A genuine, checked result, not an error.
+                  </p>
+                </div>
               </div>
             ) : (
-              <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-ink-200 text-sm text-ink-400">
-                Tracing in progress — the graph will appear here once transfers are found.
+              <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 px-8 text-center">
+                <Loader2 size={22} className="animate-spin text-brand-400" />
+                <p className="text-sm text-ink-400">Tracing in progress — the graph will appear here once transfers are found.</p>
               </div>
             )}
           </div>
