@@ -32,7 +32,7 @@ export function Sidebar() {
             to={to}
             end={end}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 isActive
                   ? 'bg-brand-500/15 text-brand-300'
                   : 'text-chrome-text-secondary hover:bg-white/5 hover:text-white'
@@ -47,7 +47,7 @@ export function Sidebar() {
 
       {user && (
         <div className="border-t border-chrome-border px-4 py-3">
-          <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5">
+          <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5">
             <div className="flex min-w-0 items-center gap-2">
               <UserCircle2 size={20} className="shrink-0 text-chrome-text-secondary" />
               <div className="min-w-0">
@@ -61,14 +61,13 @@ export function Sidebar() {
                 navigate('/login')
               }}
               title="Sign out"
-              className="shrink-0 text-chrome-text-secondary hover:text-white"
+              className="cursor-pointer shrink-0 rounded-md p-1.5 text-chrome-text-secondary transition-colors hover:bg-white/10 hover:text-white"
             >
-              <LogOut size={15} />
+              <LogOut size={16} />
             </button>
           </div>
         </div>
       )}
-
     </aside>
   )
 }

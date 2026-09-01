@@ -32,15 +32,15 @@ export function TopBar({ onOpenPalette }: { onOpenPalette: () => void }) {
 
   return (
     <>
-      <header className="flex h-12 shrink-0 items-center justify-between border-b border-ink-100 bg-surface px-6">
-        <nav className="flex items-center gap-1.5 text-xs">
+      <header className="flex h-14 shrink-0 items-center justify-between border-b border-ink-100 bg-surface px-8 shadow-2xs">
+        <nav className="flex items-center gap-2 text-xs">
           {crumbs.map((crumb, i) => (
-            <span key={crumb.to} className="flex items-center gap-1.5">
+            <span key={crumb.to} className="flex items-center gap-2">
               {i > 0 && <ChevronRight size={13} className="text-ink-300" />}
               {i === crumbs.length - 1 ? (
-                <span className="font-medium text-ink-800">{crumb.label}</span>
+                <span className="font-semibold text-ink-900">{crumb.label}</span>
               ) : (
-                <Link to={crumb.to} className="text-ink-500 hover:text-brand-600">
+                <Link to={crumb.to} className="font-medium text-ink-500 hover:text-brand-600 transition-colors">
                   {crumb.label}
                 </Link>
               )}
@@ -48,22 +48,22 @@ export function TopBar({ onOpenPalette }: { onOpenPalette: () => void }) {
           ))}
         </nav>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <button
             onClick={() => setHashModalOpen(true)}
-            className="flex items-center gap-1.5 rounded-md border border-ink-200 bg-ink-50 px-2.5 py-1 text-xs text-ink-500 transition-colors hover:border-brand-500 hover:bg-surface hover:text-brand-600"
+            className="cursor-pointer flex items-center gap-1.5 rounded-lg border border-ink-200 bg-surface px-3 py-1.5 text-xs font-medium text-ink-700 shadow-2xs transition-colors hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600"
           >
-            <Fingerprint size={13} />
+            <Fingerprint size={14} className="text-brand-600" />
             Verify Hash
           </button>
 
           <button
             onClick={onOpenPalette}
-            className="flex items-center gap-2 rounded-md border border-ink-200 bg-ink-50 px-2.5 py-1 text-xs text-ink-400 transition-colors hover:border-ink-300 hover:text-ink-600"
+            className="cursor-pointer flex items-center gap-2 rounded-lg border border-ink-200 bg-surface px-3 py-1.5 text-xs font-medium text-ink-600 shadow-2xs transition-colors hover:border-brand-500 hover:bg-brand-50 hover:text-brand-600"
           >
-            <Search size={13} />
-            Search
-            <kbd className="rounded border border-ink-200 bg-surface px-1 py-px font-sans text-[10px] text-ink-400">
+            <Search size={14} className="text-ink-500" />
+            <span>Search</span>
+            <kbd className="rounded border border-ink-200 bg-ink-50 px-1.5 py-0.5 font-sans text-[10px] font-semibold text-ink-500">
               ⌘K
             </kbd>
           </button>
