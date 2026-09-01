@@ -109,6 +109,8 @@ class EVMClient(ChainClient):
                 token_results = response.json().get("result") or []
                 if isinstance(token_results, list):
                     for tx in token_results:
+                        if tx.get("isError") not in ("0", None):
+                            continue
                         from_addr = (tx.get("from") or "").lower()
                         if from_addr != address.lower():
                             continue

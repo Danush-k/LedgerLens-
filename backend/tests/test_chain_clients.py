@@ -42,6 +42,12 @@ def test_evm_client_parses_outgoing_transfers_only():
         },
         status=200,
     )
+    responses.add(
+        responses.GET,
+        "https://api.etherscan.io/api",
+        json={"status": "1", "result": []},
+        status=200,
+    )
 
     client = EVMClient(Chain.ETHEREUM)
     transfers = client.get_outgoing_transfers(address)
