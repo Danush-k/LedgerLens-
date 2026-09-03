@@ -32,6 +32,9 @@ class Case(Base):
     nearest_exchange: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     graph: Mapped[dict | None] = mapped_column(JSON, nullable=True)  # {nodes: [...], edges: [...]}
     clusters: Mapped[list | None] = mapped_column(JSON, nullable=True)  # [{type, addresses, note}]
+    # Evidence-backed findings from tracer/patterns.py:
+    # [{pattern, severity, title, evidence, transactions, addresses, flag}]
+    patterns: Mapped[list | None] = mapped_column(JSON, nullable=True)
     fraud_typology: Mapped[str | None] = mapped_column(String, nullable=True)
     typology_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     recommended_action: Mapped[str | None] = mapped_column(String, nullable=True)

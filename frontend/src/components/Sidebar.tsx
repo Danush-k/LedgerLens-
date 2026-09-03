@@ -1,6 +1,7 @@
 import { BarChart3, FolderSearch, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { ThemeToggle } from './ThemeToggle'
 
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: BarChart3, end: true },
@@ -14,7 +15,7 @@ export function Sidebar() {
   const navigate = useNavigate()
 
   return (
-    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-chrome-border bg-chrome-bg text-white">
+    <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-chrome-border bg-chrome-bg text-chrome-text-primary">
       <div className="flex items-center gap-2.5 px-5 py-6">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500">
           <ShieldCheck size={18} className="text-white" />
@@ -35,7 +36,7 @@ export function Sidebar() {
               `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
                 isActive
                   ? 'bg-brand-500/15 text-brand-300'
-                  : 'text-chrome-text-secondary hover:bg-white/5 hover:text-white'
+                  : 'text-chrome-text-secondary hover:bg-chrome-border-subtle hover:text-chrome-text-primary'
               }`
             }
           >
@@ -45,13 +46,18 @@ export function Sidebar() {
         ))}
       </nav>
 
+      <div className="flex items-center justify-between border-t border-chrome-border px-5 py-3">
+        <span className="text-[11px] font-medium text-chrome-text-muted">Theme</span>
+        <ThemeToggle />
+      </div>
+
       {user && (
         <div className="border-t border-chrome-border px-4 py-3">
-          <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-white/5">
+          <div className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 transition-colors hover:bg-chrome-border-subtle">
             <div className="flex min-w-0 items-center gap-2">
               <UserCircle2 size={20} className="shrink-0 text-chrome-text-secondary" />
               <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-white">{user.username}</p>
+                <p className="truncate text-xs font-semibold text-chrome-text-primary">{user.username}</p>
                 <p className="text-[10px] uppercase tracking-wide text-chrome-text-muted">{user.role}</p>
               </div>
             </div>
@@ -61,7 +67,7 @@ export function Sidebar() {
                 navigate('/login')
               }}
               title="Sign out"
-              className="cursor-pointer shrink-0 rounded-md p-1.5 text-chrome-text-secondary transition-colors hover:bg-white/10 hover:text-white"
+              className="cursor-pointer shrink-0 rounded-md p-1.5 text-chrome-text-secondary transition-colors hover:bg-chrome-border-subtle hover:text-chrome-text-primary"
             >
               <LogOut size={16} />
             </button>

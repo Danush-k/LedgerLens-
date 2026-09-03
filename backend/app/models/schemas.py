@@ -67,6 +67,7 @@ class CaseOut(BaseModel):
     flags: list | None
     nearest_exchange: dict | None
     clusters: list | None
+    patterns: list | None
     fraud_typology: str | None
     typology_confidence: float | None
     recommended_action: str | None
