@@ -33,11 +33,13 @@
   --color-surface: #ffffff;
   --color-overlay: rgb(27 31 36 / 48%);
 
-  /* Fixed-dark chrome for primary navigation rail */
+  /* Primary navigation rail. Dark by default; swaps to light alongside
+     the content palette below once the resolved theme is light. */
   --color-chrome-bg: #0d1117;
   --color-chrome-surface: #161b22;
   --color-chrome-border: #30363d;
   --color-chrome-border-subtle: #21262d;
+  --color-chrome-text-primary: #e6edf3;
   --color-chrome-text-secondary: #8b949e;
   --color-chrome-text-muted: #6e7681;
 
@@ -53,9 +55,71 @@
   --chart-magenta: #e87ba4;
 }
 
-/* Light mode strictly enforced */
+/* Theme resolution below: :root holds the light content palette and the
+   dark chrome palette as the fallback state. Each block that follows
+   flips one half in response to either an OS preference (when the user
+   hasn't chosen explicitly) or the explicit data-theme attribute that
+   ThemeContext sets, so content and chrome always switch together. */
 :root {
   color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --color-ink-50: #0d1117;
+    --color-ink-100: #161b22;
+    --color-ink-200: #30363d;
+    --color-ink-300: #3d444d;
+    --color-ink-400: #545d68;
+    --color-ink-500: #8b949e;
+    --color-ink-600: #9ea7b3;
+    --color-ink-700: #b6bec7;
+    --color-ink-800: #d0d7de;
+    --color-ink-900: #e6edf3;
+    --color-ink-950: #f0f3f6;
+    --color-surface: #161b22;
+    --color-overlay: rgb(1 4 9 / 72%);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --color-chrome-bg: var(--color-ink-50);
+    --color-chrome-surface: #ffffff;
+    --color-chrome-border: var(--color-ink-200);
+    --color-chrome-border-subtle: var(--color-ink-100);
+    --color-chrome-text-primary: var(--color-ink-900);
+    --color-chrome-text-secondary: var(--color-ink-600);
+    --color-chrome-text-muted: var(--color-ink-500);
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-ink-50: #0d1117;
+  --color-ink-100: #161b22;
+  --color-ink-200: #30363d;
+  --color-ink-300: #3d444d;
+  --color-ink-400: #545d68;
+  --color-ink-500: #8b949e;
+  --color-ink-600: #9ea7b3;
+  --color-ink-700: #b6bec7;
+  --color-ink-800: #d0d7de;
+  --color-ink-900: #e6edf3;
+  --color-ink-950: #f0f3f6;
+  --color-surface: #161b22;
+  --color-overlay: rgb(1 4 9 / 72%);
+}
+
+:root[data-theme='light'] {
+  --color-chrome-bg: var(--color-ink-50);
+  --color-chrome-surface: #ffffff;
+  --color-chrome-border: var(--color-ink-200);
+  --color-chrome-border-subtle: var(--color-ink-100);
+  --color-chrome-text-primary: var(--color-ink-900);
+  --color-chrome-text-secondary: var(--color-ink-600);
+  --color-chrome-text-muted: var(--color-ink-500);
 }
 
 body {

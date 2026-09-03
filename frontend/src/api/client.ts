@@ -16,7 +16,9 @@ import type {
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
-export const api = axios.create({ baseURL })
+// Bound every request so an unreachable/hung API fails predictably instead of
+// spinning for however long the OS takes to give up on the TCP connection.
+export const api = axios.create({ baseURL, timeout: 15_000 })
 
 api.interceptors.request.use((config) => {
   const token = getStoredToken()

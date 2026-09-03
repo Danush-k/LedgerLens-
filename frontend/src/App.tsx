@@ -11,8 +11,11 @@ import { CaseList } from './pages/CaseList'
 import { Login } from './pages/Login'
 import { NewCase } from './pages/NewCase'
 import { Overview } from './pages/Overview'
+import { useTheme } from './theme/ThemeContext'
+
 function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const { resolved } = useTheme()
 
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
@@ -43,7 +46,7 @@ function AppShell() {
         </div>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-      <Toaster theme="light" position="bottom-right" richColors closeButton />
+      <Toaster theme={resolved} position="bottom-right" richColors closeButton />
     </ProtectedRoute>
   )
 }

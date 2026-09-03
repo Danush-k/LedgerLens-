@@ -1,3 +1,4 @@
+import axios from 'axios'
 import { Loader2, LogIn, ShieldCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -21,15 +22,23 @@ export function Login() {
     try {
       await login(username, password)
       navigate(from, { replace: true })
-    } catch {
-      setError('Incorrect username or password.')
+    } catch (err) {
+      if (axios.isAxiosError(err) && !err.response) {
+        setError(
+          err.code === 'ECONNABORTED'
+            ? 'The server took too long to respond. Is the API running?'
+            : 'Could not reach the server. Is the API running?',
+        )
+      } else {
+        setError('Incorrect username or password.')
+      }
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-chrome-bg px-4">
+    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-[#0d1117] px-4">
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
         style={{
@@ -39,36 +48,36 @@ export function Login() {
         }}
       />
 
-      <div className="animate-slide-up relative w-full max-w-sm rounded-xl border border-chrome-border bg-chrome-surface p-8 shadow-2xl">
+      <div className="animate-slide-up relative w-full max-w-sm rounded-xl border border-[#30363d] bg-[#161b22] p-8 shadow-2xl">
         <div className="mb-6 flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500">
             <ShieldCheck size={19} className="text-white" />
           </div>
           <div>
             <p className="text-base font-bold text-white">LedgerLens</p>
-            <p className="text-xs text-chrome-text-muted">Investigator sign-in</p>
+            <p className="text-xs text-[#6e7681]">Investigator sign-in</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-chrome-text-secondary">Username</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#8b949e]">Username</label>
             <input
               required
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-chrome-border bg-chrome-bg px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-[#30363d] bg-[#0d1117] px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-chrome-text-secondary">Password</label>
+            <label className="mb-1.5 block text-xs font-semibold text-[#8b949e]">Password</label>
             <input
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-chrome-border bg-chrome-bg px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded-lg border border-[#30363d] bg-[#0d1117] px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
             />
           </div>
 
@@ -84,9 +93,9 @@ export function Login() {
           </button>
         </form>
 
-        <p className="mt-6 border-t border-chrome-border pt-4 text-[11px] leading-relaxed text-chrome-text-muted">
-          Demo credentials: <code className="text-chrome-text-secondary">investigator</code> /{' '}
-          <code className="text-chrome-text-secondary">changeme123</code> — change these in production via env
+        <p className="mt-6 border-t border-[#30363d] pt-4 text-[11px] leading-relaxed text-[#6e7681]">
+          Demo credentials: <code className="text-[#8b949e]">investigator</code> /{' '}
+          <code className="text-[#8b949e]">changeme123</code> — change these in production via env
           vars.
         </p>
       </div>
