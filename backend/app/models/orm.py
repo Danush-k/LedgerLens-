@@ -24,6 +24,13 @@ class Case(Base):
 
     hop_progress: Mapped[int] = mapped_column(Integer, default=0)
     hop_limit: Mapped[int] = mapped_column(Integer, default=5)
+    status_message: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Heartbeat. A worker can die mid-trace - Celery acknowledges a task on
+    # receipt, so nothing requeues it and the row is left claiming to be
+    # tracing forever. This timestamp is what lets a stalled trace be told
+    # apart from a slow one.
+    last_progress_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
 
     risk_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     risk_score_ml: Mapped[float | None] = mapped_column(Float, nullable=True)

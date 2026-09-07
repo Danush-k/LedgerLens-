@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
@@ -15,6 +17,7 @@ from app.auth.ratelimit import limiter
 from app.config import get_settings
 from app.db.neo4j_client import load_seed_labels_into_neo4j
 from app.db.postgres import Base, SessionLocal, engine, ensure_additive_schema
+from app.worker.reaper import reap_stale_traces
 
 def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
     """Say plainly what happened and when to retry.
@@ -71,6 +74,13 @@ def on_startup() -> None:
     db = SessionLocal()
     try:
         seed_default_users(db)
+        # A restart is the clearest evidence that whatever was mid-trace is
+        # not running any more. Clearing those rows here stops the interface
+        # showing a spinner for work that stopped before the process began.
+        reaped = reap_stale_traces(db)
+        if reaped:
+            logging.getLogger(__name__).info(
+                f"Marked {reaped} trace(s) as failed - their worker did not survive")
     finally:
         db.close()
 
