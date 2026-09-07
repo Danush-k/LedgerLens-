@@ -13,6 +13,7 @@ const CHAINS: Record<string, { label: string; color: string; symbol: string }> =
   ethereum: { label: 'Ethereum', color: '#627eea', symbol: 'Ξ' },
   bsc: { label: 'BNB Chain', color: '#f0b90b', symbol: 'B' },
   polygon: { label: 'Polygon', color: '#8247e5', symbol: 'P' },
+  tron: { label: 'Tron', color: '#eb0029', symbol: 'T' },
 }
 
 export function chainMeta(chain: string) {
