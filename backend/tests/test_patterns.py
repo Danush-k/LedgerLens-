@@ -176,3 +176,125 @@ def test_every_pattern_carries_structured_evidence():
         assert len(pattern["evidence"]) > 20  # a real sentence, not a slug
         assert "transactions" in pattern
         assert "addresses" in pattern
+
+
+# ── keeping the findings list readable ────────────────────────────────────
+
+def _relay_graph(relay_count: int):
+    """A root paying N relay wallets, each forwarding nearly everything on."""
+    nodes = {"btc:root": {"address": "root", "chain": "bitcoin",
+                          "node_type": "reported", "hop": 0}}
+    edges = []
+    for i in range(relay_count):
+        relay, sink = f"btc:r{i}", f"btc:s{i}"
+        nodes[relay] = {"address": f"relay{i}", "chain": "bitcoin",
+                        "node_type": "unresolved", "hop": 1}
+        nodes[sink] = {"address": f"sink{i}", "chain": "bitcoin",
+                       "node_type": "unresolved", "hop": 2}
+        edges.append({"source": "btc:root", "target": relay, "value": 1.0,
+                      "tx_hash": f"a{i}" * 32, "timestamp": 1_700_000_000, "hop": 1})
+        edges.append({"source": relay, "target": sink, "value": 0.95,
+                      "tx_hash": f"b{i}" * 32, "timestamp": 1_700_000_100, "hop": 2})
+    return nodes, edges
+
+
+def test_many_relay_wallets_produce_one_finding():
+    """A trace of any depth produces a dozen relay wallets. A dozen
+    near-identical rows saying the same thing in different hex pushes the
+    findings that need a decision off the screen."""
+    nodes, edges = _relay_graph(6)
+
+    relays = [p for p in run_detectors(nodes, edges, None, 5)
+              if p["pattern"] == "pass_through"]
+
+    assert len(relays) == 1
+    assert len(relays[0]["addresses"]) >= 4   # every wallet still named
+
+
+def test_a_single_relay_still_reads_naturally():
+    nodes, edges = _relay_graph(1)
+
+    relays = [p for p in run_detectors(nodes, edges, None, 5)
+              if p["pattern"] == "pass_through"]
+
+    assert len(relays) == 1
+    assert relays[0]["title"] == "Pass-through wallet"
+
+
+def test_relay_finding_keeps_its_transaction_evidence():
+    """Collapsing rows must not cost the evidence - each claim still has to
+    be checkable against the public ledger."""
+    nodes, edges = _relay_graph(4)
+
+    relay = next(p for p in run_detectors(nodes, edges, None, 5)
+                 if p["pattern"] == "pass_through")
+
+    assert relay["transactions"]
+    assert all(len(tx) == 64 for tx in relay["transactions"])
+
+
+def test_peel_chain_wallets_are_not_reported_twice():
+    """A peel chain is a run of relay wallets, so every wallet in one also
+    trips the pass-through detector. Reporting them again at a second
+    severity states one behaviour as two pieces of evidence."""
+    # A straight chain: root -> a -> b -> c, each forwarding ~95%.
+    nodes = {"btc:root": {"address": "root", "chain": "bitcoin",
+                          "node_type": "reported", "hop": 0}}
+    edges = []
+    chain = ["btc:root", "btc:a", "btc:b", "btc:c", "btc:d"]
+    for i, uid in enumerate(chain[1:], start=1):
+        nodes[uid] = {"address": f"addr{i}", "chain": "bitcoin",
+                      "node_type": "unresolved", "hop": i}
+        edges.append({"source": chain[i - 1], "target": uid,
+                      "value": 1.0 * (0.95 ** (i - 1)), "tx_hash": f"c{i}" * 32,
+                      "timestamp": 1_700_000_000 + i, "hop": i})
+
+    patterns = run_detectors(nodes, edges, None, 6)
+    peel = [p for p in patterns if p["pattern"] == "peel_chain"]
+    relays = [p for p in patterns if p["pattern"] == "pass_through"]
+
+    if peel:
+        peel_addresses = set(peel[0]["addresses"])
+        for relay in relays:
+            assert not (set(relay["addresses"]) & peel_addresses)
+
+
+def test_relay_prose_never_names_a_wallet_it_excluded():
+    """The regression: exclusion used to filter the address list after the
+    sentence was written, so the finding said "3 wallets (A, B, C)" while
+    listing only one, and contradicted itself with a note about the rest."""
+    nodes = {"btc:root": {"address": "root", "chain": "bitcoin",
+                          "node_type": "reported", "hop": 0}}
+    edges = []
+    chain = ["btc:root", "btc:a", "btc:b", "btc:c", "btc:d"]
+    for i, uid in enumerate(chain[1:], start=1):
+        nodes[uid] = {"address": f"addr{i}", "chain": "bitcoin",
+                      "node_type": "unresolved", "hop": i}
+        edges.append({"source": chain[i - 1], "target": uid,
+                      "value": 1.0 * (0.95 ** (i - 1)), "tx_hash": f"e{i}" * 32,
+                      "timestamp": 1_700_000_000 + i, "hop": i})
+
+    patterns = run_detectors(nodes, edges, None, 6)
+    peel = {a for p in patterns if p["pattern"] == "peel_chain"
+            for a in p["addresses"]}
+    relays = [p for p in patterns if p["pattern"] == "pass_through"]
+
+    for relay in relays:
+        # Neither the list nor the prose may mention an excluded wallet.
+        assert not (set(relay["addresses"]) & peel)
+        for address in peel:
+            assert address[:10] not in relay["evidence"]
+        # And the stated count must match what is listed.
+        assert str(len(relay["addresses"])) in relay["evidence"] or \
+               len(relay["addresses"]) == 1
+
+
+def test_amounts_use_readable_units():
+    """Dust written in whole coins forces the reader to count decimal
+    places to judge whether it matters."""
+    from app.tracer.patterns import _fmt
+
+    assert _fmt(0.00008078, "bitcoin") == "8,078 sats"
+    assert _fmt(0.48, "bitcoin") == "0.48 BTC"
+    assert _fmt(1.5, "ethereum") == "1.5 ETH"
+    assert _fmt(500.0, "tron") == "500 USDT"

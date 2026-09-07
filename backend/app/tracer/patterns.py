@@ -58,9 +58,25 @@ MAX_MEANINGFUL_FORWARD_RATIO = 1.10
 COMMINGLING_MIN_RATIO = 2.0     # outflow >=2x traced inflow: other funding sources
 
 
-def _fmt(value: float) -> str:
-    """Trim trailing zeros so 0.4800 reads as 0.48."""
-    return f"{value:.8f}".rstrip("0").rstrip(".") or "0"
+UNITS = {"bitcoin": "BTC", "ethereum": "ETH", "bsc": "BNB",
+         "polygon": "MATIC", "tron": "USDT"}
+
+
+def _fmt(value: float, chain: str = "bitcoin") -> str:
+    """An amount a reader can hold in their head.
+
+    Dust written in whole coins - "0.00008078 BTC" - forces the reader to
+    count decimal places to judge whether it matters, and several such
+    figures in one sentence become impossible to compare at a glance.
+    Small Bitcoin amounts are therefore given in satoshis, which is how
+    they are actually discussed, with the unit named either way so the
+    two can never be confused.
+    """
+    if chain == "bitcoin" and 0 < value < 0.001:
+        return f"{round(value * 100_000_000):,} sats"
+    trimmed = f"{value:.8f}".rstrip("0").rstrip(".") or "0"
+    unit = UNITS.get(chain)
+    return f"{trimmed} {unit}" if unit else trimmed
 
 
 def _short(address: str) -> str:
@@ -77,6 +93,9 @@ class _Flow:
     def __init__(self, nodes: dict[str, dict], edges: list[dict]):
         self.nodes = nodes
         self.edges = edges
+        # Every node in a trace is on one chain, so the first is enough.
+        self.chain = next((n.get("chain") for n in nodes.values() if n.get("chain")),
+                           "bitcoin")
         self.out_edges: dict[str, list[dict]] = defaultdict(list)
         self.in_edges: dict[str, list[dict]] = defaultdict(list)
         for edge in edges:
@@ -131,7 +150,7 @@ def detect_fan_out(flow: _Flow) -> list[dict]:
             "title": "Fan-out / dispersal",
             "evidence": (
                 f"{_short(flow.address(uid))} sent funds to {len(recipients)} "
-                f"different wallets ({_fmt(total)} total) - a splitting pattern "
+                f"different wallets ({_fmt(total, flow.chain)} total) - a splitting pattern "
                 f"that fragments the trail across many branches."
             ),
             "transactions": [e["tx_hash"] for e in out[:10]],
@@ -159,7 +178,7 @@ def detect_fan_in(flow: _Flow) -> list[dict]:
             "severity": "medium",
             "title": "Fan-in / consolidation",
             "evidence": (
-                f"{len(senders)} wallets sent a combined {_fmt(total)} into "
+                f"{len(senders)} wallets sent a combined {_fmt(total, flow.chain)} into "
                 f"{_short(flow.address(uid))}"
                 + (f" ({node['label_name']})" if node.get("label_name") else "")
                 + " - a consolidation point where separate branches rejoin."
@@ -204,9 +223,23 @@ def detect_rapid_movement(flow: _Flow) -> list[dict]:
     return found
 
 
-def detect_pass_through(flow: _Flow) -> list[dict]:
-    """A wallet that keeps almost nothing - a pure relay hop."""
-    found = []
+def detect_pass_through(flow: _Flow, exclude: set[str] | None = None) -> list[dict]:
+    """Wallets that keep almost nothing - pure relay hops.
+
+    Reported as one finding listing every relay, not one finding each. A
+    trace of any depth produces a dozen of these, and a dozen near-identical
+    rows saying the same thing in different hex pushes the findings that
+    actually need a decision off the screen. The individual wallets are
+    still named, so nothing is lost - only the repetition.
+
+    `exclude` holds wallets a stronger finding already accounts for. A peel
+    chain is a run of relay wallets, so every wallet in one also trips this
+    detector; reporting them again states one behaviour as two pieces of
+    evidence. They are dropped here, before the sentence is written, so the
+    prose and the address list can never disagree.
+    """
+    exclude = exclude or set()
+    relays: list[tuple[str, float, float, list[str]]] = []
     for uid in flow.out_edges:
         ratio = flow.forward_ratio(uid)
         if ratio is None or not (PASS_THROUGH_RATIO <= ratio <= MAX_MEANINGFUL_FORWARD_RATIO):
@@ -214,20 +247,47 @@ def detect_pass_through(flow: _Flow) -> list[dict]:
         node = flow.nodes.get(uid, {})
         if node.get("node_type") in ("exchange", "mixer", "bridge"):
             continue  # services forward by design - not a signal
-        found.append({
-            "pattern": "pass_through",
-            "severity": "low",
-            "title": "Pass-through wallet",
-            "evidence": (
-                f"{_short(flow.address(uid))} forwarded {ratio * 100:.0f}% of the "
-                f"{_fmt(flow.value_in(uid))} it received, retaining almost nothing - "
-                f"it holds no balance of its own, only relays."
-            ),
-            "transactions": [e["tx_hash"] for e in flow.out_edges[uid][:5]],
-            "addresses": [flow.address(uid)],
-            "flag": "pass_through",
-        })
-    return found
+        if flow.address(uid) in exclude:
+            continue  # a stronger, more specific finding already explains it
+        relays.append((
+            flow.address(uid), ratio, flow.value_in(uid),
+            [e["tx_hash"] for e in flow.out_edges[uid][:2]],
+        ))
+
+    if not relays:
+        return []
+
+    relays.sort(key=lambda r: r[2], reverse=True)  # largest amount first
+    addresses = [r[0] for r in relays]
+    average = sum(r[1] for r in relays) / len(relays)
+
+    if len(relays) == 1:
+        address, ratio, value, _ = relays[0]
+        evidence = (
+            f"{_short(address)} forwarded {ratio * 100:.0f}% of the {_fmt(value, flow.chain)} it "
+            f"received, retaining almost nothing - it holds no balance of its own, "
+            f"only relays."
+        )
+    else:
+        named = ", ".join(_short(a) for a in addresses[:3])
+        rest = f" and {len(addresses) - 3} more" if len(addresses) > 3 else ""
+        evidence = (
+            f"{len(relays)} wallets in this trace forwarded on {average * 100:.0f}% of "
+            f"what they received on average, keeping almost nothing ({named}{rest}). "
+            f"Wallets that only relay are staging points rather than destinations - "
+            f"they are worth listing in a request, but holding no balance, they are "
+            f"not where the money ended up."
+        )
+
+    return [{
+        "pattern": "pass_through",
+        "severity": "low",
+        "title": "Relay wallets" if len(relays) > 1 else "Pass-through wallet",
+        "evidence": evidence,
+        "transactions": [tx for r in relays[:5] for tx in r[3]],
+        "addresses": addresses,
+        "flag": "pass_through",
+    }]
 
 
 def detect_commingling(flow: _Flow) -> list[dict]:
@@ -254,8 +314,8 @@ def detect_commingling(flow: _Flow) -> list[dict]:
             "severity": "low",
             "title": "Commingled with untraced funds",
             "evidence": (
-                f"{_short(flow.address(uid))} received {_fmt(received)} from the "
-                f"traced path but moved {_fmt(sent)} in total - the difference came "
+                f"{_short(flow.address(uid))} received {_fmt(received, flow.chain)} from the "
+                f"traced path but moved {_fmt(sent, flow.chain)} in total - the difference came "
                 f"from wallets outside this trace, so traced funds are mixed with "
                 f"unrelated money here. Downstream amounts cannot be attributed to "
                 f"the reported wallet alone."
@@ -423,7 +483,7 @@ def detect_untraced_termination(flow: _Flow, hop_limit: int,
         "title": "Funds untraced at hop limit",
         "evidence": (
             f"{len(dead_ends)} wallet{'s' if len(dead_ends) > 1 else ''} that received "
-            f"{_fmt(stranded)} in total were still unresolved when the {hop_limit}-hop "
+            f"{_fmt(stranded, flow.chain)} in total were still unresolved when the {hop_limit}-hop "
             f"limit was reached - their onward transactions were never fetched, so the "
             f"trail continues beyond what was traced. Re-running with a higher hop limit "
             f"may resolve these branches."
@@ -442,13 +502,16 @@ def run_detectors(nodes: dict[str, dict], edges: list[dict],
     flow = _Flow(nodes, edges)
 
     patterns: list[dict] = []
-    patterns += detect_peel_chain(flow)
+    peel = detect_peel_chain(flow)
+    patterns += peel
     patterns += detect_service_hits(flow)
     patterns += detect_exchange_deposit(flow, nearest_exchange)
     patterns += detect_fan_out(flow)
     patterns += detect_fan_in(flow)
     patterns += detect_rapid_movement(flow)
-    patterns += detect_pass_through(flow)
+    # Wallets the layering finding already names are not reported again.
+    patterns += detect_pass_through(
+        flow, exclude={a for p in peel for a in p.get("addresses", [])})
     patterns += detect_commingling(flow)
     patterns += detect_untraced_termination(flow, hop_limit, nearest_exchange)
 
