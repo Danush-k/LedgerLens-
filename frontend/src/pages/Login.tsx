@@ -39,47 +39,47 @@ export function Login() {
   }
 
   return (
-    <div className="flex h-screen items-center justify-center bg-[#131b24] px-4">
+    <div className="flex h-screen items-center justify-center bg-surface-sunk px-4">
       <div className="w-full max-w-[360px]">
         <div className="mb-5 flex items-center gap-3">
-          <LogoMark size={34} className="text-brand-400" title="LedgerLens" />
+          <LogoMark size={34} className="text-brand-600" title="LedgerLens" />
           <div>
-            <p className="text-[17px] font-semibold tracking-[-0.01em] text-[#e6ecf3]">
+            <p className="text-[17px] font-semibold tracking-[-0.01em] text-ink-900">
               Ledger<span className="font-normal">Lens</span>
             </p>
-            <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-[#6c7a8a]">
+            <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-ink-500">
               Fraud attribution
             </p>
           </div>
         </div>
 
-        <div className="rounded border border-[#2c3742] bg-[#1c262f] p-6">
-          <p className="mb-4 text-[13px] font-medium text-[#93a2b3]">Investigator sign-in</p>
+        <div className="rounded border border-ink-200 bg-surface p-6">
+          <p className="mb-4 text-[13px] font-medium text-ink-600">Investigator sign-in</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-[#93a2b3]">Username</label>
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-ink-600">Username</label>
             <input
               required
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded border border-[#2c3742] bg-[#131b24] px-3 py-2 text-[13px] text-[#e6ecf3] outline-none focus:border-brand-400"
+              className="w-full rounded border border-ink-200 bg-surface-sunk px-3 py-2 text-[13px] text-ink-900 outline-none focus:border-brand-400"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-[#93a2b3]">Password</label>
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-ink-600">Password</label>
             <input
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded border border-[#2c3742] bg-[#131b24] px-3 py-2 text-[13px] text-[#e6ecf3] outline-none focus:border-brand-400"
+              className="w-full rounded border border-ink-200 bg-surface-sunk px-3 py-2 text-[13px] text-ink-900 outline-none focus:border-brand-400"
             />
           </div>
 
           {error && (
-            <p className="rounded border border-[#5a2a26] bg-[#2e1614] px-3 py-2 text-xs text-[#f2867c]">
+            <p className="rounded border border-critical/40 bg-critical-soft px-3 py-2 text-xs text-critical">
               {error}
             </p>
           )}
@@ -96,9 +96,9 @@ export function Login() {
 
         </div>
 
-        <p className="mt-4 text-[11px] leading-relaxed text-[#6c7a8a]">
-          Demo credentials <code className="text-[#93a2b3]">investigator</code> /{' '}
-          <code className="text-[#93a2b3]">changeme123</code>. Change these before any
+        <p className="mt-4 text-[11px] leading-relaxed text-ink-500">
+          Demo credentials <code className="text-ink-600">investigator</code> /{' '}
+          <code className="text-ink-600">changeme123</code>. Change these before any
           deployment beyond this machine.
         </p>
       </div>
