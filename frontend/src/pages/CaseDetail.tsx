@@ -2,7 +2,8 @@ import { FileText, Fingerprint, SearchX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCase, getRelatedCases } from '../api/client'
-import { ChainBadge } from '../components/ChainBadge'
+import { AuditChainPanel } from '../components/AuditChainPanel'
+import { ChainBadge } from '../components/ChainMark'
 import { ClusterPanel } from '../components/ClusterPanel'
 import { FindingsPanel } from '../components/FindingsPanel'
 import { FlagPill } from '../components/FlagPill'
@@ -230,10 +231,11 @@ export function CaseDetail() {
             sit with the graph rather than below the secondary panels. */}
         <FindingsPanel patterns={caseData.patterns} chain={caseData.chain} />
 
-        {/* Row 2: Clusters & Related Cases */}
+        {/* Row 2: Clusters, related cases, chain of custody */}
         <div className="space-y-6">
           <ClusterPanel clusters={caseData.clusters ?? []} />
           <RelatedCases cases={related} />
+          <AuditChainPanel caseId={caseData.id} />
         </div>
       </div>
 

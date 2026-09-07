@@ -8,7 +8,8 @@ from app.auth.dependencies import CurrentUser, get_current_user
 from app.chain_clients.base import Chain, normalize_address
 from app.config import get_settings
 from app.db.postgres import get_db
-from app.models.orm import AuditEvent, Case
+from app.models.orm import Case
+from app.reports.audit_chain import append_audit_event
 from app.models.schemas import TraceAccepted, TraceRequest
 from app.worker.tasks import trace_wallet_task
 
@@ -63,8 +64,8 @@ def submit_trace(request: TraceRequest, db: Session = Depends(get_db),
     )
     db.add(case)
     db.flush()
-    db.add(AuditEvent(case_id=case.id, event="case_created",
-                       detail=f"Submitted by {user.username} for {case.reported_address}"))
+    append_audit_event(db, case.id, "case_created",
+                       f"Submitted by {user.username} for {case.reported_address}")
     db.commit()
     db.refresh(case)
 
@@ -119,8 +120,8 @@ async def submit_trace_bulk(file: UploadFile, db: Session = Depends(get_db),
         )
         db.add(case)
         db.flush()
-        db.add(AuditEvent(case_id=case.id, event="case_created",
-                           detail=f"Submitted via bulk upload (row {i}) by {user.username}"))
+        append_audit_event(db, case.id, "case_created",
+                            f"Submitted via bulk upload (row {i}) by {user.username}")
         accepted.append({"row": i, "case_id": case.id, "address": address})
 
     db.commit()

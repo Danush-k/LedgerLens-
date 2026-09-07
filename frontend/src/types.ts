@@ -243,3 +243,30 @@ export interface AddressFootprint {
   reported_directly: boolean
   cases: ConvergenceCase[]
 }
+
+
+// ── Tamper-evident audit chain ────────────────────────────────────────────
+
+export interface AuditChainEntry {
+  sequence: number
+  event: string
+  detail: string | null
+  simulated: boolean
+  created_at: string
+  entry_hash: string | null
+  prev_hash: string | null
+}
+
+export interface AuditChainVerification {
+  case_id: string
+  intact: boolean
+  entry_count: number
+  chain_head: string | null
+  first_broken_sequence: number | null
+  reason: string | null
+}
+
+export interface AuditChain {
+  verification: AuditChainVerification
+  entries: AuditChainEntry[]
+}

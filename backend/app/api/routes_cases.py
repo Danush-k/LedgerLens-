@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.db.neo4j_client import shortest_path_to_exchange
 from app.db.postgres import get_db
-from app.models.orm import Case, TracedAddress
+from app.models.orm import AuditEvent, Case, TracedAddress
 from app.models.schemas import CaseOut, CaseSummary
+from app.reports.audit_chain import verify_audit_chain
 from app.reports.legal_notice import build_legal_notice
 from app.reports.pdf import _snapshot_hash, build_case_report
 
@@ -185,3 +186,39 @@ def get_case_report(case_id: str, db: Session = Depends(get_db)):
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="case-{case_id}.pdf"'},
     )
+
+
+@router.get("/{case_id}/audit")
+def get_audit_chain(case_id: str, db: Session = Depends(get_db)):
+    """This case's audit log together with a verification of its integrity.
+
+    The entries alone say what happened; the verification says whether the
+    record can be trusted to still be what was written. Both are returned
+    together so a reader never sees the history without its provenance.
+    """
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+
+    verification = verify_audit_chain(db, case_id)
+    entries = (
+        db.query(AuditEvent)
+        .filter(AuditEvent.case_id == case_id)
+        .order_by(AuditEvent.sequence.asc())
+        .all()
+    )
+    return {
+        "verification": verification.as_dict(),
+        "entries": [
+            {
+                "sequence": e.sequence,
+                "event": e.event,
+                "detail": e.detail,
+                "simulated": e.simulated,
+                "created_at": e.created_at,
+                "entry_hash": e.entry_hash,
+                "prev_hash": e.prev_hash,
+            }
+            for e in entries
+        ],
+    }

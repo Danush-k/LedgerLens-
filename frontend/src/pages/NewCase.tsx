@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { submitTrace } from '../api/client'
 import { SmartComplaintParser } from '../components/SmartComplaintParser'
+import { ChainMark, chainMeta } from '../components/ChainMark'
 import type { Chain } from '../types'
 
 const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
@@ -106,21 +107,31 @@ export function NewCase() {
         <form onSubmit={handleSubmit} className="space-y-4 rounded-md border border-ink-100 bg-surface p-6 shadow-xs">
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-ink-800">Target Blockchain</label>
-            <div className="grid grid-cols-4 gap-2">
-              {CHAINS.map((c) => (
-                <button
-                  type="button"
-                  key={c.value}
-                  onClick={() => setChain(c.value)}
-                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-                    chain === c.value
-                      ? 'border-brand-500 bg-brand-500/10 text-brand-600'
-                      : 'border-ink-200 text-ink-600 hover:border-ink-300'
-                  }`}
-                >
-                  {c.label}
-                </button>
-              ))}
+            {/* The selected chain's own brand colour carries the border, so
+                the control identifies the network at a glance rather than
+                relying on the label alone. */}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {CHAINS.map((c) => {
+                const active = chain === c.value
+                const { color } = chainMeta(c.value)
+                return (
+                  <button
+                    type="button"
+                    key={c.value}
+                    onClick={() => setChain(c.value)}
+                    aria-pressed={active}
+                    className={`flex cursor-pointer items-center gap-2 rounded border px-2.5 py-2 text-[13px] font-medium transition-colors ${
+                      active
+                        ? 'bg-surface text-ink-900'
+                        : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:text-ink-900'
+                    }`}
+                    style={active ? { borderColor: color } : undefined}
+                  >
+                    <ChainMark chain={c.value} size={17} />
+                    {c.label}
+                  </button>
+                )
+              })}
             </div>
           </div>
 

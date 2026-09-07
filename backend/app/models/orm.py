@@ -72,8 +72,26 @@ class User(Base):
 
 
 class AuditEvent(Base):
-    """Every notable action on a case - trace started, exchange found,
-    report generated, mock alert sent - for investigator-facing traceability."""
+    """Every notable action on a case, in a tamper-evident chain.
+
+    A plain audit table records what happened but proves nothing: anyone
+    with database access can rewrite a row, reorder history or delete an
+    inconvenient entry, and the log will look untouched. For a system whose
+    output is meant to support a legal process that is a real weakness.
+
+    Each entry therefore hashes its own contents together with the hash of
+    the entry before it, so the log forms a chain per case. Altering any
+    entry changes its hash, which breaks every link after it, and the break
+    points at the exact entry that was touched.
+
+    What this does and does not establish is worth being precise about.
+    It detects modification, reordering and deletion of entries within a
+    case. It does not stop someone who can write to the database from
+    deleting a case wholesale and recomputing a fresh chain - defending
+    against that needs the chain head published somewhere outside this
+    system, which a production deployment should do and this prototype
+    does not.
+    """
 
     __tablename__ = "audit_events"
 
@@ -83,6 +101,14 @@ class AuditEvent(Base):
     detail: Mapped[str | None] = mapped_column(String, nullable=True)
     simulated: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    # Position in this case's chain, starting at 0. Explicit rather than
+    # inferred from id, because ids are global and gaps would be ambiguous.
+    sequence: Mapped[int] = mapped_column(Integer, default=0)
+    # The previous entry's hash. Null only for the first entry in a case.
+    prev_hash: Mapped[str | None] = mapped_column(String, nullable=True)
+    # SHA-256 over this entry's content plus prev_hash.
+    entry_hash: Mapped[str | None] = mapped_column(String, nullable=True)
 
     case: Mapped[Case] = relationship(back_populates="audit_events")
 

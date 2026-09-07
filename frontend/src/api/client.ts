@@ -2,6 +2,7 @@ import axios from 'axios'
 import { clearStoredAuth, getStoredToken } from '../auth/AuthContext'
 import type {
   AddressFootprint,
+  AuditChain,
   AnalyticsOverview,
   AuditEvent,
   BulkUploadResult,
@@ -151,5 +152,10 @@ export async function getEntities(chain?: string) {
 
 export async function getAddressFootprint(chain: string, address: string) {
   const { data } = await api.get<AddressFootprint>(`/intel/address/${chain}/${address}`)
+  return data
+}
+
+export async function getAuditChain(caseId: string) {
+  const { data } = await api.get<AuditChain>(`/cases/${caseId}/audit`)
   return data
 }

@@ -5,17 +5,16 @@
  * is a vanity metric; a wallet collecting from four separate victims is a
  * lead, and it goes at the top.
  */
-import {
-  AlertTriangle, ArrowRight, Building2, Network, ShieldAlert,
-} from 'lucide-react'
+import { ArrowRight, Building2, Network, ShieldAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getAnalyticsOverview, getConvergence } from '../api/client'
+import { ChainBadge, ChainMark } from '../components/ChainMark'
 import { HorizontalBars } from '../components/HorizontalBars'
 import { LoadingRing } from '../components/Logo'
 import {
-  Address, EmptyState, Panel, Pill, RiskBadge, StatTile, StatusPill, Table, Td, Th,
+  Address, EmptyState, Panel, RiskBadge, StatTile, StatusPill, Table, Td, Th,
 } from '../components/ui/Primitives'
 import type { AnalyticsOverview, ConvergenceResult } from '../types'
 import { formatAmount } from '../utils/format'
@@ -78,32 +77,61 @@ export function Overview() {
           dense
         >
           <ul className="divide-y divide-ink-100">
-            {topConvergence.map(point => (
-              <li key={point.address} className="border-l-[3px] border-l-critical px-3.5 py-2.5">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <AlertTriangle size={14} className="text-critical" />
-                    <Address address={point.address} chain={point.chain} />
-                    <Pill tone="critical">{point.case_count} cases</Pill>
-                    {point.min_hop === 0 && <Pill tone="warning">reported directly</Pill>}
+            {topConvergence.map(point => {
+              // Stripe weight tracks how many complaints implicate the wallet.
+              // A stripe on every row at the same intensity says nothing; this
+              // way the four-victim wallet is distinguishable from the two.
+              const weight =
+                point.case_count >= 4 ? 'bg-critical'
+                : point.case_count === 3 ? 'bg-critical/70'
+                : 'bg-critical/40'
+              return (
+                <li key={point.address} className="relative grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 py-2.5 pl-4 pr-3.5 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
+                  <span className={`absolute left-0 top-0 h-full w-[3px] ${weight}`} aria-hidden="true" />
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <ChainMark chain={point.chain} size={15} />
+                      <Address address={point.address} chain={point.chain} />
+                      {point.min_hop === 0 && (
+                        <span className="text-[11px] text-ink-500">· reported directly</span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 truncate text-[11px] text-ink-500">
+                      {point.cases.map((c, i) => (
+                        <span key={c.case_id}>
+                          {i > 0 && <span className="text-ink-300"> · </span>}
+                          <Link
+                            to={`/cases/${c.case_id}`}
+                            className="text-ink-500 underline decoration-ink-300 underline-offset-2 hover:text-brand-600 hover:decoration-brand-600"
+                          >
+                            {c.complaint_ref ?? `#${c.case_id.slice(0, 8)}`}
+                          </Link>
+                        </span>
+                      ))}
+                    </p>
                   </div>
-                  <span className="tabular text-xs text-ink-600">
-                    {formatAmount(point.total_value)} {point.chain} traced in
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-ink-500">
-                  Complaints:{' '}
-                  {point.cases.map((c, i) => (
-                    <span key={c.case_id}>
-                      {i > 0 && ', '}
-                      <Link to={`/cases/${c.case_id}`} className="text-brand-600 hover:underline">
-                        {c.complaint_ref ?? `#${c.case_id.slice(0, 8)}`}
-                      </Link>
-                    </span>
-                  ))}
-                </p>
-              </li>
-            ))}
+
+                  <div className="text-right">
+                    <p className="tabular text-[15px] font-semibold leading-none text-ink-900">
+                      {point.case_count}
+                    </p>
+                    <p className="mt-0.5 text-[10px] uppercase tracking-wide text-ink-500">
+                      complaints
+                    </p>
+                  </div>
+
+                  <div className="hidden text-right sm:block">
+                    <p className="tabular text-[15px] font-semibold leading-none text-ink-900">
+                      {formatAmount(point.total_value)}
+                    </p>
+                    <p className="mt-0.5 text-[10px] uppercase tracking-wide text-ink-500">
+                      traced in
+                    </p>
+                  </div>
+                </li>
+              )
+            })}
           </ul>
         </Panel>
       )}
@@ -218,7 +246,7 @@ export function Overview() {
                       <Address address={c.reported_address} link={false} />
                     </Link>
                   </Td>
-                  <Td><Pill>{c.chain}</Pill></Td>
+                  <Td><ChainBadge chain={c.chain} /></Td>
                   <Td><StatusPill status={c.status} /></Td>
                   <Td><RiskBadge score={c.risk_score} showBar /></Td>
                   <Td className="text-ink-600">

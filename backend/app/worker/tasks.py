@@ -5,6 +5,7 @@ from app.config import get_settings
 from app.db.neo4j_client import link_case_to_addresses, record_transfer, upsert_address
 from app.db.postgres import SessionLocal
 from app.models.orm import AuditEvent, Case, CaseAddress, TracedAddress
+from app.reports.audit_chain import append_audit_event
 from app.risk import ml as risk_ml
 from app.risk.rules import recommended_action, score_case
 from app.risk.typology import classify_typology
@@ -23,8 +24,8 @@ def trace_wallet_task(case_id: str) -> None:
             return
 
         case.status = "tracing"
-        db.add(AuditEvent(case_id=case_id, event="trace_started",
-                           detail=f"Tracing {case.reported_address} on {case.chain}"))
+        append_audit_event(db, case_id, "trace_started",
+                            f"Tracing {case.reported_address} on {case.chain}")
         db.commit()
 
         chain = Chain(case.chain)
@@ -43,7 +44,7 @@ def trace_wallet_task(case_id: str) -> None:
                 f"about the wallet. Retry once the provider is reachable."
             )
             case.completed_at = datetime.now(timezone.utc)
-            db.add(AuditEvent(case_id=case_id, event="trace_failed", detail=case.error))
+            append_audit_event(db, case_id, "trace_failed", case.error)
             db.commit()
             return
 
@@ -142,7 +143,7 @@ def trace_wallet_task(case_id: str) -> None:
         case.fraud_typology, case.typology_confidence = classify_typology(case.narrative)
 
         event = "exchange_identified" if result.nearest_exchange else "trace_completed"
-        db.add(AuditEvent(case_id=case_id, event=event, detail=case.recommended_action))
+        append_audit_event(db, case_id, event, case.recommended_action)
 
         if result.nearest_exchange or score >= 50:
             from app.integrations.mock_lea import send_alert
@@ -166,7 +167,7 @@ def trace_wallet_task(case_id: str) -> None:
         if case:
             case.status = "failed"
             case.error = str(exc)
-            db.add(AuditEvent(case_id=case_id, event="trace_failed", detail=str(exc)))
+            append_audit_event(db, case_id, "trace_failed", str(exc))
             db.commit()
     finally:
         db.close()

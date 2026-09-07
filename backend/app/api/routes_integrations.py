@@ -8,6 +8,7 @@ from app.config import get_settings
 from app.db.postgres import get_db
 from app.integrations.mock_lea import receive_ncrp_intake
 from app.models.orm import AuditEvent, Case
+from app.reports.audit_chain import append_audit_event
 from app.models.schemas import TraceAccepted
 
 router = APIRouter(prefix="/integrations", tags=["integrations"])
@@ -28,8 +29,8 @@ def ncrp_intake(payload: dict, db: Session = Depends(get_db)):
     )
     db.add(case)
     db.flush()
-    db.add(AuditEvent(case_id=case.id, event="ncrp_intake_received",
-                       detail="[SIMULATED] Received via mock NCRP intake endpoint", simulated=True))
+    append_audit_event(db, case.id, "ncrp_intake_received",
+                       "[SIMULATED] Received via mock NCRP intake endpoint", simulated=True)
     db.commit()
     db.refresh(case)
 

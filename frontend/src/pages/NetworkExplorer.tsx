@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getConvergence, getEntities } from '../api/client'
+import { ChainMark } from '../components/ChainMark'
 import { LoadingRing } from '../components/Logo'
 import {
   Address,
@@ -196,31 +197,32 @@ function ConvergenceTab({ points, note, minCases }: {
 function ConvergenceCard({ point }: { point: ConvergencePoint }) {
   return (
     <Panel dense>
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-ink-200 px-3.5 py-3">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-ink-200 px-3.5 py-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
+            <ChainMark chain={point.chain} size={16} />
             <Address address={point.address} chain={point.chain} short={false} />
-            {point.label_name
-              ? <Pill tone="info">{point.label_name}</Pill>
-              : <Pill tone="neutral">unlabeled</Pill>}
+            {point.label_name && (
+              <span className="text-[11px] text-ink-500">· {point.label_name}</span>
+            )}
           </div>
           <p className="mt-1 text-xs text-ink-500">
-            Closest approach: hop {point.min_hop}
+            Closest approach hop {point.min_hop}
             {point.min_hop === 0 && ' — reported directly by a complainant'}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="text-right">
-            <p className="tabular text-lg font-semibold leading-none text-critical">
+            <p className="tabular text-[17px] font-semibold leading-none text-ink-900">
               {point.case_count}
             </p>
-            <p className="text-[11px] text-ink-500">cases</p>
+            <p className="mt-0.5 text-[10px] uppercase tracking-wide text-ink-500">complaints</p>
           </div>
           <div className="text-right">
-            <p className="tabular text-lg font-semibold leading-none text-ink-900">
+            <p className="tabular text-[17px] font-semibold leading-none text-ink-900">
               {formatAmount(point.total_value)}
             </p>
-            <p className="text-[11px] text-ink-500">{point.chain} traced in</p>
+            <p className="mt-0.5 text-[10px] uppercase tracking-wide text-ink-500">traced in</p>
           </div>
         </div>
       </div>
