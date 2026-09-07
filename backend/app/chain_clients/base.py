@@ -7,6 +7,7 @@ class Chain(str, Enum):
     BSC = "bsc"
     POLYGON = "polygon"
     BITCOIN = "bitcoin"
+    TRON = "tron"
 
 
 EVM_CHAINS = {Chain.ETHEREUM, Chain.BSC, Chain.POLYGON}
@@ -20,8 +21,13 @@ class Transfer:
     chain: Chain
     from_address: str
     to_address: str
-    value: float  # in the chain's native unit (ETH / BNB / MATIC / BTC)
+    value: float  # denominated in `asset`
     timestamp: int  # unix seconds
+    # Which asset moved. Defaults to None, meaning the chain's native coin
+    # (ETH / BNB / MATIC / BTC). Named explicitly for token transfers,
+    # because a trace that silently added 100 USDT to 100 TRX would produce
+    # totals and taint ratios that mean nothing.
+    asset: str | None = None
 
 
 class ChainClient:
@@ -42,12 +48,19 @@ class ChainClient:
 
 import re
 
+# Base58 omits four glyphs that are easy to confuse by eye: 0, O, I and l.
+# Written as a named constant because the inline form was previously
+# "[1-9A-HJ-NP-Za-k-z]", where the trailing "a-k-z" parses as a-k, a literal
+# hyphen, and z - silently excluding every letter from m to y and rejecting
+# most real legacy Bitcoin and Tron addresses at submission.
+BASE58 = r"[1-9A-HJ-NP-Za-km-z]"
+
 EVM_ADDRESS_REGEX = re.compile(r"^0x[a-fA-F0-9]{40}$")
 BITCOIN_ADDRESS_REGEX = re.compile(
-    r"^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$"
+    rf"^(1{BASE58}{{25,34}}|3{BASE58}{{25,34}}|bc1[0-9a-z]{{38,59}})$"
 )
-TRON_ADDRESS_REGEX = re.compile(r"^T[1-9A-HJ-NP-Za-k-z]{33}$")
-SOLANA_ADDRESS_REGEX = re.compile(r"^[1-9A-HJ-NP-Za-k-z]{32,44}$")
+TRON_ADDRESS_REGEX = re.compile(rf"^T{BASE58}{{33}}$")
+SOLANA_ADDRESS_REGEX = re.compile(rf"^{BASE58}{{32,44}}$")
 
 
 def is_valid_address(address: str, chain: Chain | str) -> bool:
