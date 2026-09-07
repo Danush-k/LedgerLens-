@@ -18,7 +18,7 @@ import { RiskGauge } from '../components/RiskGauge'
 import { CardSkeleton } from '../components/Skeleton'
 import { StatusBadge } from '../components/StatusBadge'
 import { TypologyBadge } from '../components/TypologyBadge'
-import type { CaseDetail as CaseDetailType, GraphNode } from '../types'
+import type { CaseDetail as CaseDetailType, GraphEdge, GraphNode } from '../types'
 import { findPath } from '../utils/findPath'
 
 /**
@@ -59,20 +59,15 @@ export function CaseDetail() {
   const { caseId } = useParams<{ caseId: string }>()
   const [caseData, setCaseData] = useState<CaseDetailType | null>(null)
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
+  const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null)
   const [noticeModalOpen, setNoticeModalOpen] = useState(false)
   const [hashModalOpen, setHashModalOpen] = useState(false)
 
   // Clear the previous case before loading the next one.
-  //
-  // Without this, navigating between cases left the old case rendered until
-  // the new one arrived. Where the two look alike - the same wallet reported
-  // by several complainants scores the same and draws the same graph - the
-  // page appeared not to respond at all, and the click read as a broken
-  // link rather than a slow one. Resetting gives navigation a visible
-  // acknowledgement, and stops one case's data being shown under another
-  // case's URL.
   useEffect(() => {
     setCaseData(null)
+    setSelectedNode(null)
+    setSelectedEdge(null)
     window.scrollTo({ top: 0 })
   }, [caseId])
 
@@ -80,6 +75,7 @@ export function CaseDetail() {
     if (!caseId) return
     let active = true
     setSelectedNode(null)
+    setSelectedEdge(null)
 
     const load = async () => {
       const c = await getCase(caseId)
@@ -203,10 +199,19 @@ export function CaseDetail() {
               nodes={caseData.graph.nodes}
               edges={caseData.graph.edges || []}
               highlightPath={highlightPath}
-              onNodeClick={setSelectedNode}
+              onNodeClick={(node) => {
+                setSelectedNode(node)
+                setSelectedEdge(null)
+              }}
               clusters={caseData.clusters ?? []}
               selectedNode={selectedNode}
               onCloseNode={() => setSelectedNode(null)}
+              selectedEdge={selectedEdge}
+              onEdgeClick={(edge) => {
+                setSelectedEdge(edge)
+                setSelectedNode(null)
+              }}
+              onCloseEdge={() => setSelectedEdge(null)}
             />
           ) : caseData.status === 'queued' || caseData.status === 'tracing' ? (
             /* Still working. Saying "no activity found" here would assert a

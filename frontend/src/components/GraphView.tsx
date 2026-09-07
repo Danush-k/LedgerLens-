@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import type { GraphEdge, GraphNode, WalletCluster } from '../types'
 import { formatAmount } from '../utils/format'
 import { NodeInspector } from './NodeInspector'
+import { EdgeInspector } from './EdgeInspector'
 
 const NODE_COLORS: Record<string, string> = {
   reported: '#3b82f6',
@@ -34,6 +35,9 @@ interface Props {
   clusters?: WalletCluster[]
   selectedNode?: GraphNode | null
   onCloseNode?: () => void
+  selectedEdge?: GraphEdge | null
+  onEdgeClick?: (edge: GraphEdge) => void
+  onCloseEdge?: () => void
 }
 
 type LayoutType = 'hops' | 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
@@ -46,6 +50,9 @@ export function GraphView({
   clusters = [],
   selectedNode = null,
   onCloseNode,
+  selectedEdge = null,
+  onEdgeClick,
+  onCloseEdge,
 }: Props) {
   const cyRef = useRef<Core | null>(null)
 
@@ -57,13 +64,13 @@ export function GraphView({
   const [showValues, setShowValues] = useState(true)
   const [wheelZoomEnabled, setWheelZoomEnabled] = useState(false)
 
-  // Dynamically toggle prominent highlight classes on the selected node and its edges
+  // Dynamically toggle prominent highlight classes on the selected node/edge
   useEffect(() => {
     if (!cyRef.current) return
     const cy = cyRef.current
     cy.batch(() => {
       cy.nodes().removeClass('selected-node')
-      cy.edges().removeClass('connected-to-selected')
+      cy.edges().removeClass('connected-to-selected selected-edge')
       if (selectedNode) {
         const ele = cy.getElementById(selectedNode.id)
         if (ele.length > 0) {
@@ -71,8 +78,19 @@ export function GraphView({
           ele.connectedEdges().addClass('connected-to-selected')
         }
       }
+      if (selectedEdge) {
+        const matching = cy.edges().filter((ele: any) => {
+          const d = ele.data()
+          return (
+            d.tx_hash === selectedEdge.tx_hash &&
+            d.source === selectedEdge.source &&
+            d.target === selectedEdge.target
+          )
+        })
+        matching.addClass('selected-edge')
+      }
     })
-  }, [selectedNode])
+  }, [selectedNode, selectedEdge])
 
   /**
    * Addresses proven to share a key holder are drawn inside one box.
@@ -140,6 +158,11 @@ export function GraphView({
 
     const edgeEls = edges.map((e, i) => {
       const onPath = pathSet.has(e.source) && pathSet.has(e.target)
+      const isSelected =
+        selectedEdge &&
+        selectedEdge.tx_hash === e.tx_hash &&
+        selectedEdge.source === e.source &&
+        selectedEdge.target === e.target
       return {
         data: {
           id: `${e.tx_hash}-${i}`,
@@ -147,10 +170,15 @@ export function GraphView({
           target: e.target,
           value: showValues ? formatAmount(e.value) : '',
           amount: e.value,
+          tx_hash: e.tx_hash,
+          hop: e.hop,
+          timestamp: e.timestamp,
+          tainted_value: e.tainted_value,
         },
         classes: [
           onPath ? 'on-path' : '',
           pathOnly && !onPath ? 'dimmed' : '',
+          isSelected ? 'selected-edge' : '',
         ].filter(Boolean).join(' '),
       }
     })
@@ -162,7 +190,7 @@ export function GraphView({
 
     // Parents must precede their children or Cytoscape drops the parent.
     return [...parentEls, ...nodeEls, ...edgeEls]
-  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents, selectedNode])
+  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents, selectedNode, selectedEdge])
 
   // Edge thickness is proportional to amount, so the main flow is visually
   // obvious and dust transactions recede instead of competing with it.
@@ -266,6 +294,21 @@ export function GraphView({
         width: 2.5,
         opacity: 0.95,
         'z-index': 998,
+      },
+    },
+    {
+      selector: 'edge.selected-edge',
+      style: {
+        width: 4.5,
+        'line-color': '#0284c7',
+        'target-arrow-color': '#0284c7',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1.35,
+        opacity: 1,
+        'z-index': 999,
+        color: '#0284c7',
+        'font-weight': 'bold',
+        'font-size': 9.5,
       },
     },
     {
@@ -565,9 +608,30 @@ export function GraphView({
               if (node) onNodeClick(node)
             })
           }
+          if (onEdgeClick) {
+            cy.on('tap', 'edge', (evt) => {
+              const data = evt.target.data()
+              const edge = edges.find(
+                (e) =>
+                  e.tx_hash === data.tx_hash &&
+                  e.source === data.source &&
+                  e.target === data.target
+              ) || {
+                source: data.source,
+                target: data.target,
+                tx_hash: data.tx_hash,
+                value: data.amount ?? 0,
+                hop: data.hop ?? 1,
+                timestamp: data.timestamp,
+                tainted_value: data.tainted_value,
+              }
+              onEdgeClick(edge)
+            })
+          }
           cy.on('tap', (evt) => {
-            if (evt.target === cy && onCloseNode) {
-              onCloseNode()
+            if (evt.target === cy) {
+              if (onCloseNode) onCloseNode()
+              if (onCloseEdge) onCloseEdge()
             }
           })
         }}
@@ -576,6 +640,15 @@ export function GraphView({
       {/* Floating Right-Side Node Inspector */}
       {selectedNode && (
         <NodeInspector node={selectedNode} onClose={onCloseNode ?? (() => {})} />
+      )}
+
+      {/* Floating Right-Side Edge / Transfer Inspector */}
+      {selectedEdge && (
+        <EdgeInspector
+          edge={selectedEdge}
+          chain={nodes[0]?.chain || 'bitcoin'}
+          onClose={onCloseEdge ?? (() => {})}
+        />
       )}
     </div>
   )
