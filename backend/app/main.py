@@ -6,6 +6,7 @@ from app.api.routes_auth import router as auth_router
 from app.api.routes_auth import seed_default_users
 from app.api.routes_cases import router as cases_router
 from app.api.routes_integrations import router as integrations_router
+from app.api.routes_intel import router as intel_router
 from app.api.routes_trace import router as trace_router
 from app.auth.dependencies import get_current_user
 from app.config import get_settings
@@ -33,6 +34,7 @@ app.include_router(auth_router)  # login is necessarily public
 app.include_router(trace_router, dependencies=authenticated)
 app.include_router(cases_router, dependencies=authenticated)
 app.include_router(analytics_router, dependencies=authenticated)
+app.include_router(intel_router, dependencies=authenticated)
 app.include_router(integrations_router)  # mixed: NCRP intake is a public-facing webhook, see below
 
 

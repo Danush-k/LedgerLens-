@@ -47,8 +47,10 @@ class Case(Base):
 
 
 class TracedAddress(Base):
-    """Every address ever visited by any trace - lets us detect an address
-    reappearing across multiple, independently reported cases."""
+    """The *reported* address of each case - one row per case.
+
+    Powers the "has this exact wallet been reported before?" signal. For the
+    full set of addresses a trace walked through, see CaseAddress below."""
 
     __tablename__ = "traced_addresses"
 
@@ -83,3 +85,39 @@ class AuditEvent(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     case: Mapped[Case] = relationship(back_populates="audit_events")
+
+
+class CaseAddress(Base):
+    """Every address a trace walked through, one row per (case, address).
+
+    TracedAddress records only the wallet a complainant reported. This table
+    records the whole subgraph that trace touched, which is what makes
+    cross-case analysis possible: when wallets from several independent
+    complaints appear here against the same address, that address is a
+    convergence point - a wallet collecting from multiple victims. Neither
+    the per-case graph JSON nor TracedAddress can express that, because
+    neither is queryable across cases.
+
+    Kept in Postgres (not only Neo4j) so convergence analysis still works
+    when the graph database is unavailable, which it routinely is in local
+    development.
+    """
+
+    __tablename__ = "case_addresses"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    case_id: Mapped[str] = mapped_column(String, ForeignKey("cases.id"), index=True)
+    chain: Mapped[str] = mapped_column(String)
+    address: Mapped[str] = mapped_column(String, index=True)
+
+    hop: Mapped[int] = mapped_column(Integer, default=0)
+    # Traced value that reached this address along this case's paths. Not the
+    # wallet's balance - see the commingling detector for why those differ.
+    value_in: Mapped[float] = mapped_column(Float, default=0.0)
+    # Denormalized from the label set so convergence queries can exclude
+    # known services without a join. Exchanges collect from thousands of
+    # unrelated people by design; they are noise here, not signal.
+    node_type: Mapped[str | None] = mapped_column(String, nullable=True)
+    label_name: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

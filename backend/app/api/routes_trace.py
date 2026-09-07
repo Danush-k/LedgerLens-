@@ -58,7 +58,7 @@ def submit_trace(request: TraceRequest, db: Session = Depends(get_db),
         complaint_ref=request.complaint_ref,
         narrative=request.narrative,
         status="queued",
-        hop_limit=get_settings().hop_limit,
+        hop_limit=request.hop_limit or get_settings().hop_limit,
         created_by=user.username,
     )
     db.add(case)

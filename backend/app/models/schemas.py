@@ -10,6 +10,14 @@ class TraceRequest(BaseModel):
     chain: Chain
     complaint_ref: str | None = Field(None, description="NCRP/complaint reference number, if any")
     narrative: str | None = Field(None, description="Free-text complaint description, used for typology tagging")
+    hop_limit: int | None = Field(
+        None, ge=1, le=8,
+        description="How many hops to follow before stopping. Depth is a "
+                    "judgement call per case - a direct cash-out resolves at 1-2 "
+                    "hops, while a layered trail needs more - so it belongs to "
+                    "the investigator, not to global configuration. Defaults to "
+                    "the HOP_LIMIT setting when omitted.",
+    )
 
 
 class TraceAccepted(BaseModel):

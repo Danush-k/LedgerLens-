@@ -2,9 +2,9 @@ from datetime import datetime, timezone
 
 from app.chain_clients.base import Chain
 from app.config import get_settings
-from app.db.neo4j_client import record_transfer, upsert_address
+from app.db.neo4j_client import link_case_to_addresses, record_transfer, upsert_address
 from app.db.postgres import SessionLocal
-from app.models.orm import AuditEvent, Case, TracedAddress
+from app.models.orm import AuditEvent, Case, CaseAddress, TracedAddress
 from app.risk import ml as risk_ml
 from app.risk.rules import recommended_action, score_case
 from app.risk.typology import classify_typology
@@ -58,6 +58,30 @@ def trace_wallet_task(case_id: str) -> None:
             target_addr = result.nodes[edge["target"]]["address"]
             record_transfer(case_id, case.chain, source_addr, target_addr,
                              edge["tx_hash"], edge["value"], edge["timestamp"], edge["hop"])
+        link_case_to_addresses(case_id, case.chain,
+                                [n["address"] for n in result.nodes.values()],
+                                reported_address=case.reported_address)
+
+        # Record the trace's full address footprint in Postgres. The per-case
+        # graph JSON above is a render; this is the queryable record that lets
+        # convergence analysis find wallets collecting from several separate
+        # complaints. Value in is summed per address from the traced edges,
+        # so an address reached by two paths in one case counts both.
+        value_into: dict[str, float] = {}
+        for edge in result.edges:
+            target_addr = result.nodes[edge["target"]]["address"]
+            value_into[target_addr] = value_into.get(target_addr, 0.0) + edge["value"]
+        db.query(CaseAddress).filter(CaseAddress.case_id == case_id).delete()
+        for node in result.nodes.values():
+            db.add(CaseAddress(
+                case_id=case_id,
+                chain=node["chain"],
+                address=node["address"],
+                hop=node["hop"],
+                value_in=value_into.get(node["address"], 0.0),
+                node_type=node["node_type"],
+                label_name=node["label_name"],
+            ))
 
         # "Has this exact wallet been reported before?" - the prior-report signal.
         prior_report_count = (

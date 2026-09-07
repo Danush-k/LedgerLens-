@@ -48,3 +48,26 @@ def test_shared_funder_clusters_ignores_single_recipient_sources():
     edges = [{"source": "a", "target": "b"}]
 
     assert shared_funder_clusters(nodes, edges) == []
+
+
+def test_co_spend_failure_does_not_sink_the_trace():
+    """A provider timeout during clustering must not discard a completed trace.
+
+    Clustering makes one network call per traced address, after the trace
+    itself has already succeeded. Letting one of those failures propagate
+    would mark a fully-traced case as failed and persist nothing - which is
+    exactly what a rate-limited provider caused before this was isolated.
+    """
+    class FlakyClient:
+        chain = Chain.BITCOIN
+
+        def get_co_spent_addresses(self, address):
+            if address == "bc1qflaky":
+                raise TimeoutError("Read timed out.")
+            return {"bc1qcosigner"}
+
+    clusters = common_input_clusters(FlakyClient(), {"bc1qflaky", "bc1qgood"})
+
+    # The healthy address still yields its cluster; the failing one is skipped.
+    assert len(clusters) == 1
+    assert "bc1qgood" in clusters[0]["addresses"]

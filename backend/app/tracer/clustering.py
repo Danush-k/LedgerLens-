@@ -10,9 +10,12 @@
    (mule accounts, distribution wallets) rather than unrelated third
    parties - a weaker signal than (1), always labeled as such.
 """
+import logging
 from collections import defaultdict
 
 from app.chain_clients.base import Chain, ChainClient
+
+logger = logging.getLogger(__name__)
 
 
 def common_input_clusters(chain_client: ChainClient, visited_addresses: set[str]) -> list[dict]:
@@ -22,7 +25,16 @@ def common_input_clusters(chain_client: ChainClient, visited_addresses: set[str]
 
     clusters = []
     for address in visited_addresses:
-        co_spent = chain_client.get_co_spent_addresses(address)
+        # One network call per address, and a provider that rate-limits or
+        # times out part-way through must not discard an otherwise complete
+        # trace. Clustering enriches a result; it does not constitute it. A
+        # missing cluster is a smaller loss than a failed case, so failures
+        # are logged and skipped rather than raised.
+        try:
+            co_spent = chain_client.get_co_spent_addresses(address)
+        except Exception as exc:  # noqa: BLE001 - see above
+            logger.warning(f"Co-spend lookup failed for {address}, skipping: {exc}")
+            continue
         if co_spent:
             clusters.append({
                 "type": "common_input",

@@ -134,8 +134,22 @@ if ! docker info >/dev/null 2>&1; then
   fi
 fi
 
-info "Starting Postgres, Redis, Neo4j (docker compose)..."
-(cd "$ROOT_DIR" && docker compose up -d --wait postgres redis neo4j)
+# A local (homebrew) Postgres already listening on 5432 wins the bind over
+# docker's published port, so the app silently talks to that one instead of
+# the container - two databases, one port, and whichever booted first holds
+# it. Detect that rather than letting the data land somewhere unexpected.
+# A non-docker postgres process holding the port is the tell: docker's
+# published port shows up under com.docker.backend, never as "postgres".
+if lsof -iTCP:5432 -sTCP:LISTEN -P 2>/dev/null | grep -q "^postgres"; then
+  warn "A local Postgres already owns port 5432 - the app will use that one,"
+  echo "    not the container. Starting Redis and Neo4j only."
+  echo "    Inspect it with: psql -U fraudmap -h localhost -d fraudmap"
+  info "Starting Redis, Neo4j (docker compose)..."
+  (cd "$ROOT_DIR" && docker compose up -d --wait redis neo4j)
+else
+  info "Starting Postgres, Redis, Neo4j (docker compose)..."
+  (cd "$ROOT_DIR" && docker compose up -d --wait postgres redis neo4j)
+fi
 
 # Ensure the fraudmap user exists in local postgres (if using homebrew postgres)
 ensure_postgres_user
