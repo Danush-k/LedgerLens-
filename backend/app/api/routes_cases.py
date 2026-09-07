@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel
@@ -145,6 +147,106 @@ def get_related_cases(case_id: str, db: Session = Depends(get_db)):
         .order_by(Case.created_at.desc())
         .all()
     )
+
+
+class CaseLink(BaseModel):
+    """One other case this one is connected to, and the wallet that connects them."""
+
+    case_id: str
+    complaint_ref: str | None
+    reported_address: str
+    risk_score: float | None
+    status: str
+    created_at: datetime
+    # "same_wallet" - the identical address was reported again, the strongest
+    # link available. "shared_wallet" - the two traces pass through a wallet
+    # in common, which is corroboration from a separate victim but not proof
+    # the same person controls both.
+    relationship: str
+    shared_addresses: list[str]
+
+
+@router.get("/{case_id}/links", response_model=list[CaseLink])
+def get_case_links(case_id: str, db: Session = Depends(get_db)):
+    """Every other case connected to this one, and the wallet doing the connecting.
+
+    The two link types were previously answered in different places - repeat
+    reports by /related, shared downstream wallets buried inside a finding's
+    evidence - and neither named which wallet created the link. That naming
+    is the part an investigator can act on: "9 wallets across 5 cases" is a
+    statistic, while "this wallet also appears in case X" is a lead they can
+    open. Both are returned here, strongest first.
+    """
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+
+    links: dict[str, dict] = {}
+
+    # 1. The same wallet reported again - the strongest link there is.
+    same_wallet_ids = [
+        row[0] for row in
+        db.query(TracedAddress.case_id)
+        .filter(TracedAddress.chain == case.chain,
+                TracedAddress.address == case.reported_address,
+                TracedAddress.case_id != case_id)
+        .distinct().all()
+    ]
+    for other_id in same_wallet_ids:
+        links[other_id] = {"relationship": "same_wallet",
+                            "shared_addresses": [case.reported_address]}
+
+    # 2. Traces meeting at a wallet neither case reported. Read from the
+    #    stored finding rather than recomputed, so the page agrees with the
+    #    evidence report and the risk score, which were fixed at trace time.
+    for pattern in (case.patterns or []):
+        if pattern.get("pattern") != "shared_downstream":
+            continue
+        for link in pattern.get("links") or []:
+            other_id = link.get("case_id")
+            if not other_id or other_id in links:
+                continue  # a same-wallet link already says something stronger
+            links[other_id] = {"relationship": "shared_wallet",
+                                "shared_addresses": link.get("shared_addresses", [])}
+
+    if not links:
+        return []
+
+    others = db.query(Case).filter(Case.id.in_(list(links))).all()
+    result = [
+        CaseLink(
+            case_id=other.id,
+            complaint_ref=other.complaint_ref,
+            reported_address=other.reported_address,
+            risk_score=other.risk_score,
+            status=other.status,
+            created_at=other.created_at,
+            relationship=links[other.id]["relationship"],
+            shared_addresses=links[other.id]["shared_addresses"],
+        )
+        for other in others
+    ]
+    # Repeat reports first, then by how many wallets are shared, then risk.
+    result.sort(key=lambda l: (l.relationship != "same_wallet",
+                                -len(l.shared_addresses),
+                                -(l.risk_score or 0)))
+
+    # One complaint, one row. The same wallet traced repeatedly - a deeper
+    # hop limit, an investigator re-checking their work - produces a case
+    # row each time, and listing them all would present one complaint as a
+    # wall of corroboration. Cases are distinct when they carry different
+    # references or were filed by different people; otherwise the highest
+    # scoring is kept, since the sort above already put it first.
+    seen: set[tuple] = set()
+    deduplicated = []
+    for link in result:
+        other = next(o for o in others if o.id == link.case_id)
+        identity = (link.relationship, other.complaint_ref or "", other.created_by or "")
+        if identity in seen:
+            continue
+        seen.add(identity)
+        deduplicated.append(link)
+    return deduplicated
 
 
 @router.get("/{case_id}/shortest-path")

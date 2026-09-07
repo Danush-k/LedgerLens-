@@ -157,3 +157,113 @@ def test_case_list_carries_progress_for_running_traces(client, db_session):
 
     assert row["hop_progress"] == 3
     assert row["hop_limit"] >= 1
+
+
+# ── case links: which wallet connects which cases ─────────────────────────
+
+def test_links_names_the_wallet_behind_a_repeat_report(client, db_session):
+    """"Appears in 5 other cases" is a statistic. Which wallet created the
+    link is the part an investigator can act on."""
+    first = _make_case(db_session, reported_address="bc1qshared", chain="bitcoin",
+                        status="complete")
+    second = _make_case(db_session, reported_address="bc1qshared", chain="bitcoin",
+                         status="complete")
+    for case in (first, second):
+        db_session.add(TracedAddress(case_id=case.id, chain="bitcoin",
+                                     address="bc1qshared"))
+    db_session.commit()
+
+    links = client.get(f"/cases/{second.id}/links").json()
+
+    assert len(links) == 1
+    assert links[0]["case_id"] == first.id
+    assert links[0]["relationship"] == "same_wallet"
+    assert links[0]["shared_addresses"] == ["bc1qshared"]
+
+
+def test_links_surfaces_shared_downstream_wallets(client, db_session):
+    """Two traces meeting at a wallet neither case reported - corroboration
+    from a separate victim, and previously buried inside a finding."""
+    other = _make_case(db_session, reported_address="bc1qother", status="complete")
+    case = _make_case(db_session, reported_address="bc1qmine", status="complete",
+                      patterns=[{
+                          "pattern": "shared_downstream", "severity": "high",
+                          "title": "Shared wallets", "evidence": "...",
+                          "transactions": [], "addresses": ["bc1qmule"],
+                          "links": [{"case_id": other.id,
+                                     "shared_addresses": ["bc1qmule"]}],
+                      }])
+
+    links = client.get(f"/cases/{case.id}/links").json()
+
+    assert len(links) == 1
+    assert links[0]["relationship"] == "shared_wallet"
+    assert links[0]["shared_addresses"] == ["bc1qmule"]
+    assert links[0]["reported_address"] == "bc1qother"
+
+
+def test_a_repeat_report_outranks_a_shared_wallet(client, db_session):
+    """The same address reported twice is a stronger claim than two traces
+    passing through a wallet in common, and must not be downgraded to it."""
+    other = _make_case(db_session, reported_address="bc1qsame", chain="bitcoin",
+                        status="complete")
+    case = _make_case(db_session, reported_address="bc1qsame", chain="bitcoin",
+                       status="complete",
+                      patterns=[{
+                          "pattern": "shared_downstream", "severity": "high",
+                          "title": "Shared", "evidence": "...", "transactions": [],
+                          "addresses": [],
+                          "links": [{"case_id": other.id,
+                                     "shared_addresses": ["bc1qmule"]}],
+                      }])
+    for c in (other, case):
+        db_session.add(TracedAddress(case_id=c.id, chain="bitcoin", address="bc1qsame"))
+    db_session.commit()
+
+    links = client.get(f"/cases/{case.id}/links").json()
+
+    assert len(links) == 1                          # one case, not counted twice
+    assert links[0]["relationship"] == "same_wallet"
+
+
+def test_links_is_empty_when_nothing_connects(client, db_session):
+    case = _make_case(db_session, reported_address="bc1qlonely", status="complete")
+    assert client.get(f"/cases/{case.id}/links").json() == []
+
+
+def test_links_404s_for_an_unknown_case(client):
+    assert client.get("/cases/does-not-exist/links").status_code == 404
+
+
+def test_links_shows_one_row_per_complaint_not_per_retrace(client, db_session):
+    """Re-tracing a wallet produces a case row each time. Listing them all
+    presents one complaint as a wall of corroboration."""
+    address = "bc1qretraced"
+    for _ in range(4):
+        other = _make_case(db_session, reported_address=address, chain="bitcoin",
+                           status="complete", created_by="investigator")
+        db_session.add(TracedAddress(case_id=other.id, chain="bitcoin", address=address))
+    case = _make_case(db_session, reported_address=address, chain="bitcoin",
+                      status="complete", created_by="investigator")
+    db_session.add(TracedAddress(case_id=case.id, chain="bitcoin", address=address))
+    db_session.commit()
+
+    links = client.get(f"/cases/{case.id}/links").json()
+
+    assert len(links) == 1
+
+
+def test_links_keeps_genuinely_separate_complainants(client, db_session):
+    address = "bc1qsyndicate"
+    for ref, who in (("FIR/1", "officer_a"), ("FIR/2", "officer_b")):
+        other = _make_case(db_session, reported_address=address, chain="bitcoin",
+                           status="complete", complaint_ref=ref, created_by=who)
+        db_session.add(TracedAddress(case_id=other.id, chain="bitcoin", address=address))
+    case = _make_case(db_session, reported_address=address, chain="bitcoin",
+                      status="complete", created_by="officer_c")
+    db_session.add(TracedAddress(case_id=case.id, chain="bitcoin", address=address))
+    db_session.commit()
+
+    links = client.get(f"/cases/{case.id}/links").json()
+
+    assert len(links) == 2
