@@ -69,6 +69,13 @@ class CaseOut(BaseModel):
     status: str
     hop_progress: int
     hop_limit: int
+    status_message: str | None = None
+    last_progress_at: datetime | None = None
+    # Why a trace failed. Omitting this left the interface showing generic
+    # fallback text while the backend held a specific, honest explanation -
+    # losing exactly the "could not look" / "looked and found nothing"
+    # distinction the rest of the system works to preserve.
+    error: str | None = None
     risk_score: float | None
     risk_score_ml: float | None
     risk_breakdown: dict | None
@@ -92,6 +99,11 @@ class CaseSummary(BaseModel):
     reported_address: str
     chain: str
     status: str
+    # Carried in the summary so the case list can show live progress rather
+    # than an unexplained "Tracing" that looks identical to a stuck one.
+    hop_progress: int = 0
+    hop_limit: int = 5
+    status_message: str | None = None
     risk_score: float | None
     nearest_exchange: dict | None
     fraud_typology: str | None

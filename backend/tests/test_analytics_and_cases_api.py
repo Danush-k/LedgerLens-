@@ -122,3 +122,38 @@ def test_case_list_pagination_respects_filters(client, db_session):
 
 def test_case_list_rejects_an_oversized_page(client):
     assert client.get("/cases?limit=5000").status_code == 422
+
+
+# ── failure reasons must survive the trip to the client ───────────────────
+
+def test_case_detail_exposes_the_failure_reason(client, db_session):
+    """The backend writes a careful explanation of *why* a trace failed -
+    usually that the data provider was unreachable, which says nothing about
+    the wallet. Dropping it from the response left the interface showing
+    generic fallback text and lost that distinction entirely."""
+    case = _make_case(db_session, status="failed",
+                      error="Could not retrieve blockchain data (HTTPError 429).")
+
+    body = client.get(f"/cases/{case.id}").json()
+
+    assert body["error"] == "Could not retrieve blockchain data (HTTPError 429)."
+
+
+def test_case_detail_exposes_live_progress(client, db_session):
+    """A spinner with no progress cannot be told apart from a stalled one."""
+    case = _make_case(db_session, status="tracing", hop_progress=2,
+                      status_message="Reading hop 2 of 5 - 8 wallets to check")
+
+    body = client.get(f"/cases/{case.id}").json()
+
+    assert body["hop_progress"] == 2
+    assert body["status_message"] == "Reading hop 2 of 5 - 8 wallets to check"
+
+
+def test_case_list_carries_progress_for_running_traces(client, db_session):
+    _make_case(db_session, status="tracing", hop_progress=3)
+
+    row = next(c for c in client.get("/cases").json() if c["status"] == "tracing")
+
+    assert row["hop_progress"] == 3
+    assert row["hop_limit"] >= 1
