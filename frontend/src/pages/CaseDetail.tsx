@@ -12,7 +12,6 @@ import { GraphLegend } from '../components/GraphLegend'
 import { GraphView } from '../components/GraphView'
 import { HashVerifierModal } from '../components/HashVerifierModal'
 import { LegalNoticeModal } from '../components/LegalNoticeModal'
-import { NodeInspector } from '../components/NodeInspector'
 import { RelatedCases } from '../components/RelatedCases'
 import { RiskGauge } from '../components/RiskGauge'
 import { CardSkeleton } from '../components/Skeleton'
@@ -185,18 +184,17 @@ export function CaseDetail() {
           </h2>
           <GraphLegend />
         </div>
-        <div className="relative h-[520px] w-full">
+        <div className="relative h-[560px] w-full">
           {caseData.graph && caseData.graph.nodes && caseData.graph.nodes.length > 0 ? (
-            <>
-              <GraphView
-                nodes={caseData.graph.nodes}
-                edges={caseData.graph.edges || []}
-                highlightPath={highlightPath}
-                onNodeClick={setSelectedNode}
-                clusters={caseData.clusters ?? []}
-              />
-              {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
-            </>
+            <GraphView
+              nodes={caseData.graph.nodes}
+              edges={caseData.graph.edges || []}
+              highlightPath={highlightPath}
+              onNodeClick={setSelectedNode}
+              clusters={caseData.clusters ?? []}
+              selectedNode={selectedNode}
+              onCloseNode={() => setSelectedNode(null)}
+            />
           ) : caseData.status === 'queued' || caseData.status === 'tracing' ? (
             /* Still working. Saying "no activity found" here would assert a
                finding the trace has not reached yet - the same conflation of

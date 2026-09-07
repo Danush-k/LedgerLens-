@@ -18,13 +18,17 @@ from app.chain_clients.base import Chain, ChainClient
 logger = logging.getLogger(__name__)
 
 
-def common_input_clusters(chain_client: ChainClient, visited_addresses: set[str]) -> list[dict]:
+def common_input_clusters(chain_client: ChainClient, visited_addresses: set[str],
+                          max_lookups: int = 5) -> list[dict]:
     # Common-input-ownership only applies to UTXO-based chains like Bitcoin.
     if chain_client.chain != Chain.BITCOIN:
         return []
 
+    # Limit sequential external API calls so traces never stall or trigger 429 rate limits.
+    addrs_to_check = list(visited_addresses)[:max_lookups]
+
     clusters = []
-    for address in visited_addresses:
+    for address in addrs_to_check:
         # One network call per address, and a provider that rate-limits or
         # times out part-way through must not discard an otherwise complete
         # trace. Clustering enriches a result; it does not constitute it. A

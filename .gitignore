@@ -31,3 +31,7 @@ redis_data/
 # Reports generated at runtime
 backend/reports_output/
 /*.pdf
+
+# Local runtime logs
+.run-logs/
+

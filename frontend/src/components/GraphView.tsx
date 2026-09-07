@@ -15,6 +15,7 @@ import CytoscapeComponent from 'react-cytoscapejs'
 import { toast } from 'sonner'
 import type { GraphEdge, GraphNode, WalletCluster } from '../types'
 import { formatAmount } from '../utils/format'
+import { NodeInspector } from './NodeInspector'
 
 const NODE_COLORS: Record<string, string> = {
   reported: '#3b82f6',
@@ -31,11 +32,21 @@ interface Props {
   highlightPath?: string[] // node ids on the path to the nearest exchange
   onNodeClick?: (node: GraphNode) => void
   clusters?: WalletCluster[]
+  selectedNode?: GraphNode | null
+  onCloseNode?: () => void
 }
 
 type LayoutType = 'hops' | 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
 
-export function GraphView({ nodes, edges, highlightPath = [], onNodeClick, clusters = [] }: Props) {
+export function GraphView({
+  nodes,
+  edges,
+  highlightPath = [],
+  onNodeClick,
+  clusters = [],
+  selectedNode = null,
+  onCloseNode,
+}: Props) {
   const cyRef = useRef<Core | null>(null)
 
   // Money flows left to right by hop. A reader should never have to work
@@ -105,6 +116,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick, clust
         classes: [
           onPath ? 'on-path' : '',
           pathOnly && !onPath ? 'dimmed' : '',
+          selectedNode?.id === n.id ? 'selected-node' : '',
         ].filter(Boolean).join(' '),
       }
     })
@@ -210,6 +222,17 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick, clust
         'border-color': onPathRing,
         width: 34,
         height: 34,
+      },
+    },
+    {
+      selector: 'node.selected-node',
+      style: {
+        'border-width': 4,
+        'border-color': brandLine,
+        'border-opacity': 1,
+        'underlay-color': brandLine,
+        'underlay-padding': 4,
+        'underlay-opacity': 0.2,
       },
     },
     {
@@ -502,8 +525,18 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick, clust
               if (node) onNodeClick(node)
             })
           }
+          cy.on('tap', (evt) => {
+            if (evt.target === cy && onCloseNode) {
+              onCloseNode()
+            }
+          })
         }}
       />
+
+      {/* Floating Right-Side Node Inspector */}
+      {selectedNode && (
+        <NodeInspector node={selectedNode} onClose={onCloseNode ?? (() => {})} />
+      )}
     </div>
   )
 }
