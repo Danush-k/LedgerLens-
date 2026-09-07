@@ -14,6 +14,12 @@ WEIGHTS = {
     "rapid_layering": 10,
     "fast_cashout": 15,  # exchange found within 1-2 hops
     "prior_report": 20,
+    # Other independently reported cases route funds through the same
+    # non-service wallets as this one. Weighted close to prior_report: it is
+    # a weaker claim than the identical wallet being reported twice, but it
+    # is corroboration from a separate victim rather than from this trace
+    # alone, which is stronger than anything the trace can say by itself.
+    "shared_downstream": 18,
     # Shape-of-movement signals from tracer/patterns.py. Layering across
     # several hops is the strongest of these: one relay wallet is
     # unremarkable, a sustained chain of them is not.
@@ -26,11 +32,13 @@ WEIGHTS = {
 # Signals derived from arguments rather than flags, or that are outcomes
 # rather than risk (reaching a known exchange is good news for an
 # investigator - it means the trail resolved).
-_NON_FLAG_SIGNALS = {"prior_report", "fast_cashout", "exchange_identified"}
+_NON_FLAG_SIGNALS = {"prior_report", "fast_cashout", "exchange_identified",
+                     "shared_downstream"}
 
 
 def score_case(flags: set[str], nearest_exchange: dict | None,
-               prior_report_count: int, rapid_layering: bool) -> tuple[float, dict]:
+               prior_report_count: int, rapid_layering: bool,
+               shared_downstream_count: int = 0) -> tuple[float, dict]:
     breakdown: dict[str, int] = {}
 
     for flag in flags:
@@ -45,6 +53,9 @@ def score_case(flags: set[str], nearest_exchange: dict | None,
 
     if prior_report_count > 0:
         breakdown["prior_report"] = WEIGHTS["prior_report"]
+
+    if shared_downstream_count > 0:
+        breakdown["shared_downstream"] = WEIGHTS["shared_downstream"]
 
     score = min(100, sum(breakdown.values()))
     return float(score), breakdown

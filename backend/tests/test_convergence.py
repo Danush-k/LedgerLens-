@@ -217,3 +217,55 @@ def test_address_intel_unknown_is_404_not_a_verdict(client, db_session):
 
 def test_intel_requires_authentication(unauthenticated_client):
     assert unauthenticated_client.get("/intel/convergence").status_code == 401
+
+
+# ── shared downstream wallets, as a risk signal ───────────────────────────
+
+def test_shared_downstream_finds_other_cases(db_session):
+    from app.intel.convergence import shared_downstream_cases
+
+    mine = _make_case(db_session, "bc1qme")
+    theirs = _make_case(db_session, "bc1qthem")
+    _touch(db_session, mine, "bc1qmule")
+    _touch(db_session, theirs, "bc1qmule")
+
+    shared = shared_downstream_cases(db_session, mine.id, "bitcoin")
+
+    assert len(shared) == 1
+    assert shared[0]["case_id"] == theirs.id
+    assert shared[0]["shared_addresses"] == ["bc1qmule"]
+
+
+def test_shared_downstream_ignores_services(db_session):
+    """Every victim's money reaches an exchange, so sharing one is not
+    corroboration - it would fire on essentially every pair of cases."""
+    from app.intel.convergence import shared_downstream_cases
+
+    mine = _make_case(db_session, "bc1qme")
+    theirs = _make_case(db_session, "bc1qthem")
+    for case in (mine, theirs):
+        _touch(db_session, case, "1NDyBinanceHotWallet", node_type="exchange")
+
+    assert shared_downstream_cases(db_session, mine.id, "bitcoin") == []
+
+
+def test_shared_downstream_excludes_the_case_itself(db_session):
+    from app.intel.convergence import shared_downstream_cases
+
+    mine = _make_case(db_session, "bc1qme")
+    _touch(db_session, mine, "bc1qmule", hop=1)
+    _touch(db_session, mine, "bc1qmule", hop=3)  # reached twice in one trace
+
+    assert shared_downstream_cases(db_session, mine.id, "bitcoin") == []
+
+
+def test_shared_downstream_raises_the_risk_score():
+    """The signal has to actually move the number, or building it changed
+    nothing about how a case gets triaged."""
+    from app.risk.rules import score_case
+
+    without, _ = score_case(set(), None, 0, False, shared_downstream_count=0)
+    with_shared, breakdown = score_case(set(), None, 0, False, shared_downstream_count=2)
+
+    assert with_shared > without
+    assert "shared_downstream" in breakdown

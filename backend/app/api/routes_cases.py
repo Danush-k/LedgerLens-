@@ -26,7 +26,17 @@ def list_cases(
     status: str | None = Query(None),
     min_risk: float | None = Query(None, ge=0, le=100),
     search: str | None = Query(None, description="Substring match on the reported address"),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    response: Response = None,  # type: ignore[assignment]
 ):
+    """List cases, newest first.
+
+    Paginated rather than capped. The previous hard limit of 200 silently
+    dropped everything beyond it, so a deployment past 200 cases would show
+    an incomplete list with no indication that it was incomplete - the worst
+    kind of wrong, because it looks right.
+    """
     query = db.query(Case)
     if chain:
         query = query.filter(Case.chain == chain)
@@ -36,7 +46,20 @@ def list_cases(
         query = query.filter(Case.risk_score >= min_risk)
     if search:
         query = query.filter(Case.reported_address.ilike(f"%{search.lower()}%"))
-    return query.order_by(Case.created_at.desc()).limit(200).all()
+
+    # The total goes in a header so the client can say "50 of 312" instead of
+    # leaving the reader to guess whether the list ended or was truncated.
+    total = query.count()
+    if response is not None:
+        response.headers["X-Total-Count"] = str(total)
+        response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
+
+    return (
+        query.order_by(Case.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
 
 @router.post("/verify-hash")
@@ -180,7 +203,10 @@ def get_case_report(case_id: str, db: Session = Depends(get_db)):
         raise HTTPException(404, "Case not found")
     if case.status != "complete":
         raise HTTPException(409, "Case has not finished tracing yet")
-    pdf_bytes = build_case_report(case)
+    # The report carries the audit verification alongside its own snapshot
+    # hash, so a reader gets the evidence and the record of how it was
+    # produced in one document.
+    pdf_bytes = build_case_report(case, audit=verify_audit_chain(db, case_id).as_dict())
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

@@ -1,9 +1,10 @@
-import { FileText, Fingerprint, SearchX } from 'lucide-react'
+import { AlertTriangle, FileText, Fingerprint, SearchX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getCase, getRelatedCases } from '../api/client'
 import { AuditChainPanel } from '../components/AuditChainPanel'
 import { ChainBadge } from '../components/ChainMark'
+import { LoadingRing } from '../components/Logo'
 import { ClusterPanel } from '../components/ClusterPanel'
 import { FindingsPanel } from '../components/FindingsPanel'
 import { FlagPill } from '../components/FlagPill'
@@ -161,10 +162,44 @@ export function CaseDetail() {
               />
               {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
             </>
+          ) : caseData.status === 'queued' || caseData.status === 'tracing' ? (
+            /* Still working. Saying "no activity found" here would assert a
+               finding the trace has not reached yet - the same conflation of
+               "we could not look" with "we looked and found nothing" that the
+               backend takes care to avoid. */
+            <div className="flex h-full flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-ink-200 bg-surface px-8 text-center">
+              <LoadingRing
+                size={46}
+                label={
+                  caseData.status === 'queued'
+                    ? 'Queued — waiting for a worker'
+                    : `Walking the chain — hop ${caseData.hop_progress} of ${caseData.hop_limit}`
+                }
+              />
+              <p className="max-w-sm text-xs leading-relaxed text-ink-500">
+                Each hop is a live call to a public block explorer, so a deep trace on a busy
+                wallet can take a few minutes. This page updates on its own.
+              </p>
+            </div>
+          ) : caseData.status === 'failed' ? (
+            /* A failed fetch is a statement about the data provider, not about
+               the wallet. Reporting it as "no activity" would turn an outage
+               into an investigative conclusion. */
+            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-critical/40 bg-critical-soft px-8 text-center">
+              <AlertTriangle size={22} className="text-critical" />
+              <p className="text-sm font-medium text-critical">Trace could not be completed</p>
+              <p className="max-w-lg text-xs leading-relaxed text-ink-600">
+                {caseData.error ?? 'The trace failed before it produced a result.'}
+              </p>
+            </div>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 px-8 text-center bg-surface">
+            <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 bg-surface px-8 text-center">
               <SearchX size={22} className="text-ink-400" />
               <p className="text-sm font-medium text-ink-700">No outgoing on-chain activity found</p>
+              <p className="max-w-sm text-xs leading-relaxed text-ink-500">
+                The trace completed and this wallet has not sent funds anywhere. It may only have
+                received them, or its funds may still be unspent.
+              </p>
             </div>
           )}
         </div>
@@ -185,6 +220,15 @@ export function CaseDetail() {
                 </p>
                 <p className="text-xs text-ink-500 font-medium">
                   Distance: <span className="text-ink-800 font-semibold">{caseData.nearest_exchange.hops} hop{caseData.nearest_exchange.hops === 1 ? '' : 's'}</span> away
+                </p>
+                {/* The basis for the attribution, shown with it. Naming an
+                    exchange without saying how it was identified invites the
+                    reader to treat a label lookup as established fact. */}
+                <p className="border-t border-ink-100 pt-2 text-[11px] leading-relaxed text-ink-500">
+                  <span className="font-medium text-ink-600">Attribution basis: </span>
+                  {caseData.nearest_exchange.source || 'Seed label set; source not recorded'}.
+                  Deposit-address attribution only — it does not establish who holds the
+                  account, which requires a legal request to the exchange.
                 </p>
               </div>
             ) : (

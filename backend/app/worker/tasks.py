@@ -4,6 +4,7 @@ from app.chain_clients.base import Chain
 from app.config import get_settings
 from app.db.neo4j_client import link_case_to_addresses, record_transfer, upsert_address
 from app.db.postgres import SessionLocal
+from app.intel.convergence import shared_downstream_cases
 from app.models.orm import AuditEvent, Case, CaseAddress, TracedAddress
 from app.reports.audit_chain import append_audit_event
 from app.risk import ml as risk_ml
@@ -86,6 +87,15 @@ def trace_wallet_task(case_id: str) -> None:
                 taint_ratio=node.get("taint_ratio", 0.0),
             ))
 
+        db.flush()  # footprint must be visible before comparing it to other cases
+
+        # Corroboration from other complaints: do other cases route funds
+        # through the same non-service wallets? Computed here rather than at
+        # read time so the score, the flags and the evidence all describe the
+        # same moment - a score that silently changes as unrelated cases
+        # arrive is not reproducible.
+        shared_cases = shared_downstream_cases(db, case_id, case.chain)
+
         # "Has this exact wallet been reported before?" - the prior-report signal.
         prior_report_count = (
             db.query(TracedAddress)
@@ -105,7 +115,27 @@ def trace_wallet_task(case_id: str) -> None:
 
         rapid_layering = any(p["pattern"] == "rapid_movement" for p in patterns)
         score, breakdown = score_case(result.flags, result.nearest_exchange,
-                                       prior_report_count, rapid_layering)
+                                       prior_report_count, rapid_layering,
+                                       shared_downstream_count=len(shared_cases))
+        if shared_cases:
+            result.flags.add("shared_downstream")
+            total_shared = len({a for c in shared_cases for a in c["shared_addresses"]})
+            patterns.append({
+                "pattern": "shared_downstream",
+                "severity": "high",
+                "title": "Shared wallets with other complaints",
+                "evidence": (
+                    f"Funds from this case pass through {total_shared} wallet(s) that "
+                    f"{len(shared_cases)} other independently reported case(s) also route "
+                    f"through. Separate victims' money meeting at the same wallet is a "
+                    f"consolidation pattern and suggests one operation behind several "
+                    f"complaints. It is shared fund flow, not proof of common control."
+                ),
+                "transactions": [],
+                "addresses": sorted({a for c in shared_cases
+                                     for a in c["shared_addresses"]})[:10],
+                "flag": "shared_downstream",
+            })
         if prior_report_count > 0:
             result.flags.add("prior_report")
             patterns.append({

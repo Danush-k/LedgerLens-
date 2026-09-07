@@ -157,15 +157,21 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
             if to_uid not in result.nodes:
                 node_type = "unresolved"
                 label_name = None
+                label_source = None
                 if label:
                     node_type = label["type"]
                     label_name = label["name"]
+                    # Provenance travels with the attribution. "This wallet is
+                    # Binance" is a claim; "per an Etherscan public name tag"
+                    # is a claim someone can check and challenge.
+                    label_source = label.get("source") or None
                 result.nodes[to_uid] = {
                     "id": to_uid,
                     "address": normalize_address(transfer.to_address),
                     "chain": chain_value,
                     "node_type": node_type,
                     "label_name": label_name,
+                    "label_source": label_source,
                     "hop": hop + 1,
                     # Provenance: the specific transfer that pulled this
                     # wallet into the investigation.
@@ -210,6 +216,7 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
                         "address": transfer.to_address,
                         "chain": chain.value,
                         "hops": hop + 1,
+                        "source": label.get("source") or None,
                     }
                 seen_exchange = True
                 continue  # stop this branch - nearest VASP found

@@ -193,3 +193,48 @@ def address_footprint(db: Session, chain: str, address: str) -> dict | None:
         "reported_directly": any(r.hop == 0 for r in rows),
         "cases": cases,
     }
+
+
+def shared_downstream_cases(db: Session, case_id: str, chain: str) -> list[dict]:
+    """Other cases whose traces pass through the same non-service wallets.
+
+    Distinct from the existing prior-report signal, which asks whether this
+    exact wallet was reported before. This asks a broader question: does the
+    money from this complaint flow through wallets that other victims' money
+    also flowed through? Two frauds reported independently that share a
+    downstream wallet are more likely to be one operation than two.
+
+    Known services are excluded for the same reason as everywhere else -
+    every victim's funds reach an exchange, so sharing one says nothing.
+    """
+    mine = (
+        db.query(CaseAddress.address)
+        .filter(CaseAddress.case_id == case_id,
+                CaseAddress.chain == chain,
+                or_(CaseAddress.node_type.is_(None),
+                    CaseAddress.node_type.notin_(SERVICE_TYPES)))
+        .all()
+    )
+    addresses = [row.address for row in mine]
+    if not addresses:
+        return []
+
+    rows = (
+        db.query(CaseAddress.case_id, CaseAddress.address)
+        .filter(CaseAddress.chain == chain,
+                CaseAddress.case_id != case_id,
+                CaseAddress.address.in_(addresses),
+                or_(CaseAddress.node_type.is_(None),
+                    CaseAddress.node_type.notin_(SERVICE_TYPES)))
+        .all()
+    )
+
+    by_case: dict[str, set[str]] = {}
+    for other_case_id, address in rows:
+        by_case.setdefault(other_case_id, set()).add(address)
+
+    return [
+        {"case_id": other_id, "shared_addresses": sorted(shared)}
+        for other_id, shared in sorted(by_case.items(),
+                                       key=lambda kv: len(kv[1]), reverse=True)
+    ]

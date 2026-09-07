@@ -79,3 +79,46 @@ def test_related_cases_returns_other_cases_for_same_wallet(client, db_session):
 def test_related_cases_404s_for_unknown_case(client):
     resp = client.get("/cases/does-not-exist/related")
     assert resp.status_code == 404
+
+
+# ── pagination ────────────────────────────────────────────────────────────
+
+def test_case_list_paginates(client, db_session):
+    for i in range(7):
+        _make_case(db_session, reported_address=f"0xaaa{i:039x}")
+
+    page_1 = client.get("/cases?limit=3&offset=0")
+    page_2 = client.get("/cases?limit=3&offset=3")
+
+    assert len(page_1.json()) == 3
+    assert len(page_2.json()) == 3
+    # Pages must not overlap, or a reader scrolling through sees duplicates
+    # and silently misses cases.
+    assert {c["id"] for c in page_1.json()}.isdisjoint({c["id"] for c in page_2.json()})
+
+
+def test_case_list_reports_the_total(client, db_session):
+    """Without a total, a full page is indistinguishable from a truncated
+    one - the reader cannot tell whether the list ended."""
+    for i in range(5):
+        _make_case(db_session, reported_address=f"0xbbb{i:039x}")
+
+    response = client.get("/cases?limit=2")
+
+    assert response.headers["X-Total-Count"] == "5"
+    assert len(response.json()) == 2
+
+
+def test_case_list_pagination_respects_filters(client, db_session):
+    for i in range(4):
+        _make_case(db_session, chain="bitcoin", reported_address=f"bc1q{i}")
+    _make_case(db_session, chain="ethereum", reported_address="0xccc")
+
+    response = client.get("/cases?chain=bitcoin&limit=10")
+
+    assert response.headers["X-Total-Count"] == "4"
+    assert all(c["chain"] == "bitcoin" for c in response.json())
+
+
+def test_case_list_rejects_an_oversized_page(client):
+    assert client.get("/cases?limit=5000").status_code == 422

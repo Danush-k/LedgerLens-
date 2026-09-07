@@ -76,3 +76,20 @@ def test_trace_respects_hop_limit_and_flags_unresolved():
     assert result.nearest_exchange is None
     assert "no_exchange_found" in result.flags
     assert UNKNOWN_2 not in {n["address"] for n in result.nodes.values()}
+
+
+def test_exchange_attribution_carries_its_source():
+    """An attribution without provenance is an assertion. The report has to
+    be able to say on whose authority a wallet is called an exchange."""
+    root = "0x1110000000000000000000000000000000000f"
+
+    with patch("app.tracer.bfs.get_chain_client",
+               return_value=FakeClient({root: [EXCHANGE_ADDR]})):
+        result = trace_wallet(Chain.ETHEREUM, root, hop_limit=2)
+
+    assert result.nearest_exchange is not None
+    # The seed set records an origin for this label; it must survive the trace.
+    assert result.nearest_exchange.get("source")
+
+    node = next(n for n in result.nodes.values() if n["address"] == EXCHANGE_ADDR.lower())
+    assert node["label_source"]

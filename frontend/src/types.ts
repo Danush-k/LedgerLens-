@@ -16,6 +16,7 @@ export interface GraphNode {
   chain: string
   node_type: NodeType
   label_name: string | null
+  label_source?: string | null
   hop: number
   /** The specific transfer that pulled this wallet into the investigation. */
   why_included?: string
@@ -58,6 +59,8 @@ export interface NearestExchange {
   address: string
   chain: string
   hops: number
+  /** Where the attribution comes from, so it can be challenged. */
+  source?: string | null
 }
 
 export interface WalletCluster {
