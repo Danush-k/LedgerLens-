@@ -1,5 +1,5 @@
 {
-  "_note": "Expanded seed label set and VASP law enforcement directory for LedgerLens forensics and Section 91 CrPC / Section 94 BNSS legal notices. Sources: Public block explorer name tags (Etherscan, BscScan, PolygonScan, BitInfoCharts, Dune Analytics) and FIU-India registered reporting entities.",
+  "_note": "Expanded seed label set and VASP law enforcement directory for LedgerLens forensics and Section 91 CrPC / Section 94 BNSS legal notices. Sources: Public block explorer name tags (Etherscan, BscScan, PolygonScan, BitInfoCharts, Dune Analytics) and FIU-India registered reporting entities. Tron (TRC-20 USDT) coverage is deliberately minimal: only addresses whose attribution is publicly published AND whose activity was confirmed on-chain are included. Tron is the dominant rail for INR-denominated crypto fraud, so this set is the first thing a deployment should expand from a licensed attribution feed - guessing at deposit addresses would produce confident, wrong accusations.",
   "vasp_directory": {
     "Binance": {
       "full_name": "Binance Holdings Ltd.",
@@ -332,6 +332,22 @@
       "name": "Coinbase: Hot Wallet (BTC)",
       "vasp_key": "Coinbase",
       "source": "mempool.space public label"
+    },
+    {
+      "address": "TMuA6YqfCeX8EhbfYEg5y7S4DqzSJireY9",
+      "chain": "tron",
+      "type": "exchange",
+      "name": "Binance: Tron Hot Wallet",
+      "vasp_key": "Binance",
+      "source": "tronscan.org public label; outgoing USDT-TRC20 activity confirmed on-chain"
+    },
+    {
+      "address": "TWd4WrZ9wn84f5x1hZhL4DHvk738ns5jwb",
+      "chain": "tron",
+      "type": "exchange",
+      "name": "Binance: Tron Cold Wallet",
+      "vasp_key": "Binance",
+      "source": "tronscan.org public label; receives large sweeps from the Binance hot wallet"
     }
   ]
 }
