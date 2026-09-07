@@ -32,19 +32,19 @@ const GROUPS: { key: string; title: string; blurb: string; patterns: string[] }[
   {
     key: 'destination',
     title: 'Where the money went',
-    blurb: 'The actionable result — who to serve, and how directly funds reached them.',
+    blurb: 'Who to serve, and how directly funds reached them.',
     patterns: ['exchange_deposit', 'mixer_hit', 'bridge_hit', 'service_hit'],
   },
   {
     key: 'movement',
     title: 'How the money was moved',
-    blurb: 'The laundering behaviour visible in the traced subgraph.',
+    blurb: 'Laundering behaviour visible in the traced subgraph.',
     patterns: ['peel_chain', 'fan_out', 'fan_in', 'rapid_movement', 'pass_through'],
   },
   {
     key: 'limits',
     title: 'Limits of this trace',
-    blurb: 'What this trace could not establish. These qualify every finding above.',
+    blurb: 'What this trace could not establish.',
     patterns: ['untraced_termination', 'commingling', 'partial_data'],
   },
 ]
@@ -110,11 +110,11 @@ export function FindingsPanel({ patterns, chain }: { patterns: Pattern[] | null;
           if (inGroup.length === 0) return null
           return (
             <section key={group.key}>
-              <div className="border-b border-ink-200 bg-surface-sunk px-3.5 py-2">
+              <div className="flex flex-wrap items-baseline gap-x-2 border-b border-ink-200 bg-surface-sunk px-3.5 py-1.5">
                 <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-700">
                   {group.title}
                 </h3>
-                <p className="mt-0.5 text-[11px] leading-snug text-ink-500">{group.blurb}</p>
+                <p className="text-[11px] text-ink-500">{group.blurb}</p>
               </div>
               <ul className="divide-y divide-ink-100">
                 {inGroup.map((f, i) => (
