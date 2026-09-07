@@ -159,6 +159,7 @@ export function CaseDetail() {
                 edges={caseData.graph.edges || []}
                 highlightPath={highlightPath}
                 onNodeClick={setSelectedNode}
+                clusters={caseData.clusters ?? []}
               />
               {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
             </>

@@ -13,7 +13,7 @@ import {
 import { useMemo, useRef, useState } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
 import { toast } from 'sonner'
-import type { GraphEdge, GraphNode } from '../types'
+import type { GraphEdge, GraphNode, WalletCluster } from '../types'
 import { formatAmount } from '../utils/format'
 
 const NODE_COLORS: Record<string, string> = {
@@ -30,11 +30,12 @@ interface Props {
   edges: GraphEdge[]
   highlightPath?: string[] // node ids on the path to the nearest exchange
   onNodeClick?: (node: GraphNode) => void
+  clusters?: WalletCluster[]
 }
 
 type LayoutType = 'hops' | 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
 
-export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Props) {
+export function GraphView({ nodes, edges, highlightPath = [], onNodeClick, clusters = [] }: Props) {
   const cyRef = useRef<Core | null>(null)
 
   // Money flows left to right by hop. A reader should never have to work
@@ -44,6 +45,48 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
   const [pathOnly, setPathOnly] = useState(false)
   const [showValues, setShowValues] = useState(true)
   const [wheelZoomEnabled, setWheelZoomEnabled] = useState(false)
+
+  /**
+   * Addresses proven to share a key holder are drawn inside one box.
+   *
+   * Only common-input-ownership is grouped. Shared-funder is a much weaker
+   * signal - an exchange paying out to a thousand customers "shares a
+   * funder" with all of them - and drawing a box around that would assert
+   * on the canvas exactly the thing the backend refuses to merge.
+   *
+   * Cytoscape allows a node one parent, so an address appearing in several
+   * clusters is placed in the first, and the panel below the graph remains
+   * the complete account.
+   */
+  const clusterParents = useMemo(() => {
+    const parentOf = new Map<string, string>()
+    const parents: { id: string; label: string }[] = []
+
+    clusters
+      .filter((c) => c.type === 'common_input' && c.addresses.length > 1)
+      .forEach((cluster, index) => {
+        const parentId = `cluster-${index}`
+        let claimed = 0
+        cluster.addresses.forEach((address) => {
+          const node = nodes.find((n) => n.address === address)
+          if (node && !parentOf.has(node.id)) {
+            parentOf.set(node.id, parentId)
+            claimed += 1
+          }
+        })
+        // A box around a single visible wallet says nothing.
+        if (claimed > 1) {
+          parents.push({ id: parentId, label: `Same owner · ${claimed} wallets` })
+        } else {
+          cluster.addresses.forEach((address) => {
+            const node = nodes.find((n) => n.address === address)
+            if (node && parentOf.get(node.id) === parentId) parentOf.delete(node.id)
+          })
+        }
+      })
+
+    return { parentOf, parents }
+  }, [clusters, nodes])
 
   const elements = useMemo(() => {
     const pathSet = new Set(highlightPath)
@@ -57,6 +100,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           fullAddress: n.address,
           hop: n.hop ?? 0,
           taint: n.taint_ratio ?? 0,
+          parent: clusterParents.parentOf.get(n.id),
         },
         classes: [
           onPath ? 'on-path' : '',
@@ -82,8 +126,14 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       }
     })
 
-    return [...nodeEls, ...edgeEls]
-  }, [nodes, edges, highlightPath, pathOnly, showValues])
+    const parentEls = clusterParents.parents.map((p) => ({
+      data: { id: p.id, label: p.label, type: 'cluster' },
+      classes: 'cluster-parent',
+    }))
+
+    // Parents must precede their children or Cytoscape drops the parent.
+    return [...parentEls, ...nodeEls, ...edgeEls]
+  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents])
 
   // Edge thickness is proportional to amount, so the main flow is visually
   // obvious and dust transactions recede instead of competing with it.
@@ -131,6 +181,26 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
         height: 28,
         'border-width': 2,
         'border-color': nodeRing,
+      },
+    },
+    {
+      selector: 'node.cluster-parent',
+      style: {
+        'background-color': brandLine,
+        'background-opacity': 0.06,
+        'border-width': 1.5,
+        'border-style': 'dashed',
+        'border-color': brandLine,
+        'border-opacity': 0.6,
+        label: 'data(label)',
+        color: edgeLabelColor,
+        'font-size': 9,
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'text-margin-y': -4,
+        padding: 14,
+        'corner-radius': 6,
+        shape: 'round-rectangle',
       },
     },
     {
