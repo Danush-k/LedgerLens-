@@ -10,7 +10,7 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
 import { toast } from 'sonner'
 import type { GraphEdge, GraphNode, WalletCluster } from '../types'
@@ -56,6 +56,23 @@ export function GraphView({
   const [pathOnly, setPathOnly] = useState(false)
   const [showValues, setShowValues] = useState(true)
   const [wheelZoomEnabled, setWheelZoomEnabled] = useState(false)
+
+  // Dynamically toggle prominent highlight classes on the selected node and its edges
+  useEffect(() => {
+    if (!cyRef.current) return
+    const cy = cyRef.current
+    cy.batch(() => {
+      cy.nodes().removeClass('selected-node')
+      cy.edges().removeClass('connected-to-selected')
+      if (selectedNode) {
+        const ele = cy.getElementById(selectedNode.id)
+        if (ele.length > 0) {
+          ele.addClass('selected-node')
+          ele.connectedEdges().addClass('connected-to-selected')
+        }
+      }
+    })
+  }, [selectedNode])
 
   /**
    * Addresses proven to share a key holder are drawn inside one box.
@@ -145,7 +162,7 @@ export function GraphView({
 
     // Parents must precede their children or Cytoscape drops the parent.
     return [...parentEls, ...nodeEls, ...edgeEls]
-  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents])
+  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents, selectedNode])
 
   // Edge thickness is proportional to amount, so the main flow is visually
   // obvious and dust transactions recede instead of competing with it.
@@ -227,12 +244,28 @@ export function GraphView({
     {
       selector: 'node.selected-node',
       style: {
-        'border-width': 4,
-        'border-color': brandLine,
+        'border-width': 4.5,
+        'border-color': '#0284c7',
         'border-opacity': 1,
-        'underlay-color': brandLine,
-        'underlay-padding': 4,
-        'underlay-opacity': 0.2,
+        width: 38,
+        height: 38,
+        'underlay-color': '#38bdf8',
+        'underlay-padding': 10,
+        'underlay-opacity': 0.45,
+        'underlay-shape': 'ellipse',
+        'font-weight': 'bold',
+        'font-size': 11,
+        'z-index': 999,
+      },
+    },
+    {
+      selector: 'edge.connected-to-selected',
+      style: {
+        'line-color': '#0284c7',
+        'target-arrow-color': '#0284c7',
+        width: 2.5,
+        opacity: 0.95,
+        'z-index': 998,
       },
     },
     {
@@ -517,6 +550,13 @@ export function GraphView({
             cy.fit(undefined, 36)
             if (cy.zoom() > 1.8) cy.zoom(1.8)
             cy.center()
+            if (selectedNode) {
+              const ele = cy.getElementById(selectedNode.id)
+              if (ele.length > 0) {
+                ele.addClass('selected-node')
+                ele.connectedEdges().addClass('connected-to-selected')
+              }
+            }
           })
           if (onNodeClick) {
             cy.on('tap', 'node', (evt) => {
