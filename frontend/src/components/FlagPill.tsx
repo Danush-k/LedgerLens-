@@ -4,12 +4,12 @@ const FLAG_META: Record<string, { label: string; icon: React.ReactNode; classNam
   mixer_detected: {
     label: 'Mixer detected',
     icon: <ShieldAlert size={13} />,
-    className: 'bg-red-500/10 text-red-600 border-red-500/20',
+    className: 'bg-critical-soft text-critical border-critical/25',
   },
   cross_chain_bridge: {
     label: 'Cross-chain bridge',
     icon: <ArrowLeftRight size={13} />,
-    className: 'bg-purple-500/10 text-purple-600 border-purple-500/20',
+    className: 'bg-ink-100 text-ink-700 border-ink-200',
   },
   no_exchange_found: {
     label: 'No exchange found',
@@ -19,12 +19,12 @@ const FLAG_META: Record<string, { label: string; icon: React.ReactNode; classNam
   high_fan_out: {
     label: 'High fan-out',
     icon: <GitBranch size={13} />,
-    className: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+    className: 'bg-warning-soft text-warning border-warning/25',
   },
   rapid_layering: {
     label: 'Rapid layering',
     icon: <Zap size={13} />,
-    className: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+    className: 'bg-warning-soft text-warning border-warning/25',
   },
   prior_report: {
     label: 'Seen in prior case',

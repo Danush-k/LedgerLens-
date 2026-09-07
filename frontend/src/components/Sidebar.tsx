@@ -1,8 +1,9 @@
 import {
-  BarChart3, FolderSearch, LayoutGrid, LogOut, Network, ShieldCheck, Upload, UserCircle2,
+  BarChart3, FolderSearch, LayoutGrid, LogOut, Network, Upload, UserCircle2,
 } from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { Logo } from './Logo'
 import { ThemeToggle } from './ThemeToggle'
 
 // Grouped by what an investigator is doing, not by data model. "Intelligence"
@@ -37,14 +38,8 @@ export function Sidebar() {
 
   return (
     <aside className="flex h-screen w-60 shrink-0 flex-col border-r border-chrome-border bg-chrome-bg text-chrome-text-primary">
-      <div className="flex items-center gap-2.5 px-5 py-6">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500">
-          <ShieldCheck size={18} className="text-white" />
-        </div>
-        <div>
-          <p className="text-sm font-bold leading-tight">LedgerLens</p>
-          <p className="text-[11px] leading-tight text-chrome-text-muted">Crypto attribution</p>
-        </div>
+      <div className="px-5 py-5">
+        <Logo size={26} />
       </div>
 
       <nav className="flex-1 space-y-4 px-3">

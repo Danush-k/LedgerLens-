@@ -13,7 +13,7 @@ import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getAnalyticsOverview, getConvergence } from '../api/client'
 import { HorizontalBars } from '../components/HorizontalBars'
-import { CardSkeleton } from '../components/Skeleton'
+import { LoadingRing } from '../components/Logo'
 import {
   Address, EmptyState, Panel, Pill, RiskBadge, StatTile, StatusPill, Table, Td, Th,
 } from '../components/ui/Primitives'
@@ -40,9 +40,8 @@ export function Overview() {
 
   if (loading) {
     return (
-      <div className="mx-auto grid max-w-[1400px] gap-3 px-6 py-5">
-        <CardSkeleton lines={3} />
-        <CardSkeleton lines={6} />
+      <div className="flex h-full items-center justify-center py-24">
+        <LoadingRing size={40} label="Loading case load…" />
       </div>
     )
   }

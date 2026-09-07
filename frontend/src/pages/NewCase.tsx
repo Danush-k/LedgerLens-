@@ -103,7 +103,7 @@ export function NewCase() {
         <SmartComplaintParser onSelectWallet={handleWalletExtracted} />
 
         {/* Manual Intake Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-ink-100 bg-surface p-6 shadow-xs">
+        <form onSubmit={handleSubmit} className="space-y-4 rounded-md border border-ink-100 bg-surface p-6 shadow-xs">
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-ink-800">Target Blockchain</label>
             <div className="grid grid-cols-4 gap-2">
@@ -139,12 +139,12 @@ export function NewCase() {
               placeholder={activeChain.placeholder}
               className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${
                 validationError
-                  ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500'
+                  ? 'border-critical focus:border-critical'
                   : 'border-ink-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
               }`}
             />
             {validationError && (
-              <p className="mt-1.5 text-xs text-red-600 font-medium">{validationError}</p>
+              <p className="mt-1.5 text-xs text-critical font-medium">{validationError}</p>
             )}
           </div>
 
@@ -178,7 +178,7 @@ export function NewCase() {
             </p>
           </div>
 
-          {error && <p className="text-xs text-red-600 font-medium">{error}</p>}
+          {error && <p className="text-xs text-critical font-medium">{error}</p>}
 
           <button
             type="submit"

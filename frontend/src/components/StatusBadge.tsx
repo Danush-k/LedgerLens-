@@ -14,12 +14,12 @@ const CONFIG: Record<CaseStatus, { label: string; className: string; icon: React
   },
   complete: {
     label: 'Complete',
-    className: 'bg-emerald-500/10 text-emerald-600',
+    className: 'bg-good-soft text-good',
     icon: <CheckCircle2 size={13} />,
   },
   failed: {
     label: 'Failed',
-    className: 'bg-red-500/10 text-red-600',
+    className: 'bg-critical-soft text-critical',
     icon: <XCircle size={13} />,
   },
 }

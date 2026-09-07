@@ -9,9 +9,9 @@ import type { CaseFilters, CaseStatus, CaseSummary, Chain } from '../types'
 
 function riskDot(score: number | null) {
   if (score === null) return 'bg-ink-300'
-  if (score >= 70) return 'bg-red-500'
-  if (score >= 35) return 'bg-amber-500'
-  return 'bg-emerald-500'
+  if (score >= 70) return 'bg-risk-high'
+  if (score >= 35) return 'bg-risk-medium'
+  return 'bg-risk-low'
 }
 
 const CHAINS: Chain[] = ['ethereum', 'bsc', 'polygon', 'bitcoin']
@@ -113,7 +113,7 @@ export function CaseList() {
     <div className="mx-auto max-w-6xl px-8 py-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-ink-900">Investigation cases</h1>
+          <h1 className="text-xl font-semibold text-ink-900">Investigation cases</h1>
           <p className="mt-1 text-sm text-ink-500">
             Every wallet address traced through the attribution pipeline.
           </p>
@@ -196,7 +196,7 @@ export function CaseList() {
       </div>
 
       {loading ? (
-        <div className="overflow-hidden rounded-xl border border-ink-100 bg-surface shadow-sm">
+        <div className="overflow-hidden rounded-md border border-ink-100 bg-surface shadow-sm">
           <table className="w-full text-left text-sm">
             <tbody className="divide-y divide-ink-100">
               {Array.from({ length: 6 }).map((_, i) => <TableRowSkeleton key={i} columns={7} />)}
@@ -204,7 +204,7 @@ export function CaseList() {
           </table>
         </div>
       ) : cases.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-ink-300 py-24 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-md border border-dashed border-ink-300 py-24 text-center">
           <Search size={28} className="text-ink-300" />
           <p className="text-sm text-ink-500">
             {hasFilters ? 'No cases match these filters.' : 'No cases yet. Submit a wallet address to start tracing.'}
@@ -216,7 +216,7 @@ export function CaseList() {
           )}
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-ink-100 bg-surface shadow-sm">
+        <div className="overflow-hidden rounded-md border border-ink-100 bg-surface shadow-sm">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-ink-100 bg-ink-50 text-xs uppercase tracking-wide text-ink-500">
               <tr>

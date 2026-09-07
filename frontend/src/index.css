@@ -16,10 +16,12 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  /* IBM Plex Sans carries institutional weight without ornament and holds
+     up at the 11-13px sizes this interface runs at. */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   /* Addresses and hashes are compared character by character. A mono face
-     with disambiguated 0/O and 1/l is a correctness tool here, not a style. */
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+     that disambiguates 0/O and 1/l is a correctness tool here, not a style. */
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* Interaction accent. Institutional blue, deliberately a shade deeper and
      less saturated than the web-default link blue. */
@@ -239,6 +241,31 @@ body {
 }
 .animate-fade-in { animation: fade-in 110ms ease-out; }
 .animate-slide-up { animation: slide-up 130ms ease-out; }
+
+/* The mark's rings, turning at different rates and in opposite directions
+   so the figure reads as resolving rather than spinning. Slow enough not to
+   pull the eye away from the screen it sits on. */
+@keyframes ll-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes ll-spin-reverse {
+  to { transform: rotate(-360deg); }
+}
+.ll-ring-outer  { animation: ll-spin 5.5s linear infinite; }
+.ll-ring-middle { animation: ll-spin-reverse 4s linear infinite; }
+.ll-ring-inner  { animation: ll-spin 2.6s linear infinite; }
+
+/* Visible to screen readers only - loading states announce themselves
+   without putting a second copy of the label on screen. */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }

@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { getConvergence, getEntities } from '../api/client'
-import { CardSkeleton } from '../components/Skeleton'
+import { LoadingRing } from '../components/Logo'
 import {
   Address,
   EmptyState,
@@ -155,7 +155,9 @@ export function NetworkExplorer() {
       </div>
 
       {loading ? (
-        <div className="grid gap-3"><CardSkeleton lines={5} /><CardSkeleton lines={5} /></div>
+        <div className="rounded-md border border-ink-200 bg-surface py-16">
+          <LoadingRing size={40} label="Correlating cases…" />
+        </div>
       ) : tab === 'convergence' ? (
         <ConvergenceTab points={points} note={convergence?.note} minCases={minCases} />
       ) : (

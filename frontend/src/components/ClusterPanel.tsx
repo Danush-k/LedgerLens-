@@ -10,7 +10,7 @@ export function ClusterPanel({ clusters }: { clusters: WalletCluster[] }) {
   if (clusters.length === 0) return null
 
   return (
-    <div className="rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
+    <div className="rounded-md border border-ink-100 bg-surface p-6 shadow-sm">
       <div className="mb-3 flex items-center gap-1.5">
         <Link2 size={14} className="text-ink-400" />
         <h2 className="text-sm font-semibold text-ink-800">Wallet clusters</h2>

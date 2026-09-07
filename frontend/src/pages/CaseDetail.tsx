@@ -90,7 +90,7 @@ export function CaseDetail() {
       <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="break-all font-mono text-lg font-bold text-ink-900">
+            <h1 className="break-all font-mono text-lg font-semibold text-ink-900">
               {caseData.reported_address}
             </h1>
             <ChainBadge chain={caseData.chain} />
@@ -174,16 +174,16 @@ export function CaseDetail() {
         {/* Row 1: Target VASP & Risk Assessment Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Target Exchange & Attribution Card */}
-          <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-2xs">
+          <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-2xs">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-500">Target VASP / Nearest Exchange</h2>
             {caseData.nearest_exchange ? (
               <div className="mt-3 space-y-2">
-                <p className="text-lg font-extrabold text-emerald-600">{caseData.nearest_exchange.name}</p>
+                <p className="text-lg font-extrabold text-good">{caseData.nearest_exchange.name}</p>
                 <p className="break-all font-mono text-xs text-ink-600 bg-ink-50 p-2.5 rounded-lg border border-ink-100">
                   {caseData.nearest_exchange.address}
                 </p>
                 <p className="text-xs text-ink-500 font-medium">
-                  Distance: <span className="text-ink-800 font-bold">{caseData.nearest_exchange.hops} hop{caseData.nearest_exchange.hops === 1 ? '' : 's'}</span> away
+                  Distance: <span className="text-ink-800 font-semibold">{caseData.nearest_exchange.hops} hop{caseData.nearest_exchange.hops === 1 ? '' : 's'}</span> away
                 </p>
               </div>
             ) : (
@@ -203,7 +203,7 @@ export function CaseDetail() {
           </div>
 
           {/* Risk Assessment & Forensic Flags Card */}
-          <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-2xs">
+          <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-2xs">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-500 mb-3">Risk Assessment &amp; Flags</h2>
             {caseData.risk_score !== null ? (
               <div className="flex flex-col items-center">

@@ -1,8 +1,9 @@
 import axios from 'axios'
-import { Loader2, LogIn, ShieldCheck } from 'lucide-react'
+import { Loader2, LogIn } from 'lucide-react'
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { LogoMark } from '../components/Logo'
 
 export function Login() {
   const { login } = useAuth()
@@ -38,65 +39,67 @@ export function Login() {
   }
 
   return (
-    <div className="relative flex h-screen items-center justify-center overflow-hidden bg-[#0d1117] px-4">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 50% 0%, rgba(9,105,218,0.18), transparent 55%), linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)',
-          backgroundSize: '100% 100%, 32px 32px, 32px 32px',
-        }}
-      />
-
-      <div className="animate-slide-up relative w-full max-w-sm rounded-xl border border-[#30363d] bg-[#161b22] p-8 shadow-2xl">
-        <div className="mb-6 flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500">
-            <ShieldCheck size={19} className="text-white" />
-          </div>
+    <div className="flex h-screen items-center justify-center bg-[#131b24] px-4">
+      <div className="w-full max-w-[360px]">
+        <div className="mb-5 flex items-center gap-3">
+          <LogoMark size={34} className="text-brand-400" title="LedgerLens" />
           <div>
-            <p className="text-base font-bold text-white">LedgerLens</p>
-            <p className="text-xs text-[#6e7681]">Investigator sign-in</p>
+            <p className="text-[17px] font-semibold tracking-[-0.01em] text-[#e6ecf3]">
+              Ledger<span className="font-normal">Lens</span>
+            </p>
+            <p className="mt-0.5 text-[10px] uppercase tracking-[0.14em] text-[#6c7a8a]">
+              Fraud attribution
+            </p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="rounded border border-[#2c3742] bg-[#1c262f] p-6">
+          <p className="mb-4 text-[13px] font-medium text-[#93a2b3]">Investigator sign-in</p>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8b949e]">Username</label>
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-[#93a2b3]">Username</label>
             <input
               required
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-lg border border-[#30363d] bg-[#0d1117] px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded border border-[#2c3742] bg-[#131b24] px-3 py-2 text-[13px] text-[#e6ecf3] outline-none focus:border-brand-400"
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#8b949e]">Password</label>
+            <label className="mb-1.5 block text-[11px] font-medium uppercase tracking-wide text-[#93a2b3]">Password</label>
             <input
               required
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-[#30363d] bg-[#0d1117] px-3.5 py-2.5 text-sm text-white outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
+              className="w-full rounded border border-[#2c3742] bg-[#131b24] px-3 py-2 text-[13px] text-[#e6ecf3] outline-none focus:border-brand-400"
             />
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && (
+            <p className="rounded border border-[#5a2a26] bg-[#2e1614] px-3 py-2 text-xs text-[#f2867c]">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-600 disabled:opacity-60"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded bg-brand-500 px-4 py-2 text-[13px] font-medium text-white transition-colors hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? <Loader2 size={16} className="animate-spin" /> : <LogIn size={16} />}
             {submitting ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
 
-        <p className="mt-6 border-t border-[#30363d] pt-4 text-[11px] leading-relaxed text-[#6e7681]">
-          Demo credentials: <code className="text-[#8b949e]">investigator</code> /{' '}
-          <code className="text-[#8b949e]">changeme123</code> — change these in production via env
-          vars.
+        </div>
+
+        <p className="mt-4 text-[11px] leading-relaxed text-[#6c7a8a]">
+          Demo credentials <code className="text-[#93a2b3]">investigator</code> /{' '}
+          <code className="text-[#93a2b3]">changeme123</code>. Change these before any
+          deployment beyond this machine.
         </p>
       </div>
     </div>

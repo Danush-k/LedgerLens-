@@ -277,12 +277,12 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border border-ink-100 bg-surface shadow-xs transition-all ${
-        isFullscreen ? 'fixed inset-4 z-50 shadow-2xl ring-1 ring-ink-200' : 'h-full w-full'
+      className={`relative overflow-hidden rounded-md border border-ink-100 bg-surface shadow-xs transition-all ${
+        isFullscreen ? 'fixed inset-4 z-50 shadow-md ring-1 ring-ink-200' : 'h-full w-full'
       }`}
     >
       {/* Floating Graph Controls Toolbar */}
-      <div className="absolute top-3 right-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink-200/80 bg-surface/95 p-1.5 shadow-md backdrop-blur-xs">
+      <div className="absolute top-3 right-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink-200/80 bg-surface/95 p-1.5 shadow-md">
         {/* Zoom Controls */}
         <button
           type="button"
@@ -325,7 +325,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           title={wheelZoomEnabled ? 'Disable Mouse Wheel Canvas Zoom' : 'Enable Mouse Wheel Canvas Zoom'}
           className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
             wheelZoomEnabled
-              ? 'bg-brand-50 text-brand-600 font-bold border border-brand-200'
+              ? 'bg-brand-50 text-brand-600 font-semibold border border-brand-200'
               : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900'
           }`}
         >
@@ -402,10 +402,10 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       </div>
 
       {/* Floating Status & Interaction Hint */}
-      <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 rounded-md bg-surface/90 px-2.5 py-1 text-[11px] text-ink-500 shadow-xs backdrop-blur-xs">
+      <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 rounded-md bg-surface/90 px-2.5 py-1 text-[11px] text-ink-500 shadow-xs">
         <span className="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
         <span>{nodes.length} Wallets • {edges.length} Transfers</span>
-        {edges.length === 0 && <span className="text-amber-600 font-medium">(Single wallet / Target deposit address)</span>}
+        {edges.length === 0 && <span className="text-warning font-medium">(Single wallet / Target deposit address)</span>}
       </div>
 
       {/* Canvas - userZoomingEnabled is false by default so page scrolling works smoothly */}

@@ -52,16 +52,16 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
   const targetWallet = caseDetail.nearest_exchange?.address || caseDetail.reported_address
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-      <div className="w-full max-w-lg rounded-2xl border border-ink-200 bg-surface p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-lg rounded-md border border-ink-200 bg-surface p-6 shadow-md">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-ink-100">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-50 text-brand-600 font-bold">
+            <div className="flex h-11 w-11 items-center justify-center rounded-md bg-brand-50 text-brand-600 font-semibold">
               <FileText className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-ink-900">
+              <h2 className="text-base font-semibold text-ink-900">
                 Generate LEA Legal Preservation Notice
               </h2>
               <p className="text-xs text-ink-500">
@@ -79,10 +79,10 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
         </div>
 
         {/* Clean Brand Slate Target Addressee Banner */}
-        <div className="my-4 rounded-xl border border-brand-200 bg-brand-50/50 p-4 shadow-2xs">
+        <div className="my-4 rounded-md border border-brand-200 bg-brand-50/50 p-4 shadow-2xs">
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 shrink-0 text-brand-600" />
-            <span className="text-xs font-bold tracking-tight text-brand-950">
+            <span className="text-xs font-semibold tracking-tight text-brand-950">
               TARGET ADDRESSEE: {nearestVasp.toUpperCase()}
             </span>
           </div>
@@ -100,14 +100,14 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
         <form onSubmit={handleDownload} className="space-y-4">
           {/* Statutory Selector */}
           <div>
-            <label className="block text-xs font-bold text-ink-800">
+            <label className="block text-xs font-semibold text-ink-800">
               Statutory Legal Framework
             </label>
             <div className="mt-1.5 grid grid-cols-2 gap-2.5">
               <button
                 type="button"
                 onClick={() => setParams({ ...params, act_section: 'bnss_94' })}
-                className={`flex items-center justify-between rounded-xl p-3 text-left transition-all border-2 ${
+                className={`flex items-center justify-between rounded-md p-3 text-left transition-all border-2 ${
                   params.act_section === 'bnss_94'
                     ? 'border-brand-600 bg-brand-50/70 shadow-2xs'
                     : 'border-ink-200 bg-surface hover:border-ink-300'
@@ -115,7 +115,7 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
               >
                 <div>
                   <p
-                    className={`text-xs font-bold ${
+                    className={`text-xs font-semibold ${
                       params.act_section === 'bnss_94' ? 'text-brand-900' : 'text-ink-800'
                     }`}
                   >
@@ -131,7 +131,7 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
               <button
                 type="button"
                 onClick={() => setParams({ ...params, act_section: 'crpc_91' })}
-                className={`flex items-center justify-between rounded-xl p-3 text-left transition-all border-2 ${
+                className={`flex items-center justify-between rounded-md p-3 text-left transition-all border-2 ${
                   params.act_section === 'crpc_91'
                     ? 'border-brand-600 bg-brand-50/70 shadow-2xs'
                     : 'border-ink-200 bg-surface hover:border-ink-300'
@@ -139,7 +139,7 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
               >
                 <div>
                   <p
-                    className={`text-xs font-bold ${
+                    className={`text-xs font-semibold ${
                       params.act_section === 'crpc_91' ? 'text-brand-900' : 'text-ink-800'
                     }`}
                   >
@@ -157,8 +157,8 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
           {/* Officer Details */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-ink-800">
-                Investigating Officer Name <span className="text-red-500">*</span>
+              <label className="block text-xs font-semibold text-ink-800">
+                Investigating Officer Name <span className="text-critical">*</span>
               </label>
               <input
                 type="text"
@@ -170,8 +170,8 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-ink-800">
-                Rank / Designation <span className="text-red-500">*</span>
+              <label className="block text-xs font-semibold text-ink-800">
+                Rank / Designation <span className="text-critical">*</span>
               </label>
               <input
                 type="text"
@@ -185,8 +185,8 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-ink-800">
-              Police Station / LEA Unit <span className="text-red-500">*</span>
+            <label className="block text-xs font-semibold text-ink-800">
+              Police Station / LEA Unit <span className="text-critical">*</span>
             </label>
             <input
               type="text"
@@ -200,7 +200,7 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-ink-800">
+              <label className="block text-xs font-semibold text-ink-800">
                 FIR / Crime / NCRP Number
               </label>
               <input
@@ -212,7 +212,7 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-ink-800">
+              <label className="block text-xs font-semibold text-ink-800">
                 Complainant / Victim Name
               </label>
               <input
@@ -230,14 +230,14 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg px-4 py-2.5 text-xs font-bold text-ink-600 hover:bg-ink-100"
+              className="rounded-lg px-4 py-2.5 text-xs font-semibold text-ink-600 hover:bg-ink-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-2.5 text-xs font-bold text-white shadow-xs hover:bg-brand-700 disabled:opacity-50 transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded-md bg-brand-600 px-5 py-2.5 text-xs font-semibold text-white shadow-xs hover:bg-brand-700 disabled:opacity-50 transition-all cursor-pointer"
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
               Generate &amp; Download Legal Notice

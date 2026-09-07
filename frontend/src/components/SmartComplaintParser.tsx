@@ -46,7 +46,7 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-xs">
+    <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-xs">
       <div className="pb-3">
         <h3 className="text-sm font-semibold text-ink-900">Smart Intake — Extract from FIR / Complaint Narrative</h3>
         <p className="text-xs text-ink-500">Paste unformatted victim emails, NCRP reports, or FIR transcripts to auto-detect wallets &amp; entities.</p>

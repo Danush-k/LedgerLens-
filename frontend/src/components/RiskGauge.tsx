@@ -42,7 +42,7 @@ export function RiskGauge({ score, size = 128 }: { score: number; size?: number 
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-3xl font-bold text-ink-900">{Math.round(score)}</span>
+          <span className="text-3xl font-semibold text-ink-900">{Math.round(score)}</span>
           <span className="text-[11px] text-ink-500">/ 100</span>
         </div>
       </div>

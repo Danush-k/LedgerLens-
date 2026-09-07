@@ -26,13 +26,13 @@ export function NodeInspector({ node, onClose }: { node: GraphNode; onClose: () 
   }
 
   return (
-    <div className="absolute inset-x-3 bottom-3 rounded-lg border border-ink-200 bg-surface/95 p-3.5 shadow-lg backdrop-blur">
+    <div className="absolute inset-x-3 bottom-3 rounded-lg border border-ink-200 bg-surface/95 p-3.5 shadow-md">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-wide text-ink-400">
             {TYPE_LABELS[node.node_type] ?? node.node_type}
           </p>
-          {node.label_name && <p className="mt-0.5 text-sm font-bold text-ink-900">{node.label_name}</p>}
+          {node.label_name && <p className="mt-0.5 text-sm font-semibold text-ink-900">{node.label_name}</p>}
           <p className="mt-0.5 break-all font-mono text-xs text-ink-600">{node.address}</p>
         </div>
         <button onClick={onClose} className="shrink-0 text-ink-300 hover:text-ink-600">

@@ -54,7 +54,7 @@ export function BulkUpload() {
 
   return (
     <div className="mx-auto max-w-2xl px-8 py-8">
-      <h1 className="text-xl font-bold text-ink-900">Bulk wallet upload</h1>
+      <h1 className="text-xl font-semibold text-ink-900">Bulk wallet upload</h1>
       <p className="mt-1 text-sm text-ink-500">
         Investigators usually have a spreadsheet of wallets per case, not one address at a time — upload a CSV
         with <code className="rounded bg-ink-100 px-1 py-0.5 text-xs">address</code> and{' '}
@@ -63,7 +63,7 @@ export function BulkUpload() {
         <code className="rounded bg-ink-100 px-1 py-0.5 text-xs">narrative</code> are optional). Up to 200 rows.
       </p>
 
-      <div className="mt-6 rounded-xl border border-ink-100 bg-surface p-6 shadow-sm">
+      <div className="mt-6 rounded-md border border-ink-100 bg-surface p-6 shadow-sm">
         <div
           onClick={() => fileInput.current?.click()}
           onDragOver={(e) => e.preventDefault()}
@@ -96,13 +96,13 @@ export function BulkUpload() {
             <Loader2 size={14} className="animate-spin" /> Submitting rows…
           </p>
         )}
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-4 text-sm text-critical">{error}</p>}
       </div>
 
       {result && (
         <div className="mt-6 space-y-4">
-          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.06] p-5">
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-600">
+          <div className="rounded-md border border-emerald-500/20 bg-risk-low/[0.06] p-5">
+            <p className="flex items-center gap-2 text-sm font-semibold text-good">
               <CheckCircle2 size={16} />
               {result.accepted.length} trace{result.accepted.length === 1 ? '' : 's'} queued
             </p>
@@ -111,7 +111,7 @@ export function BulkUpload() {
                 {result.accepted.map((r) => (
                   <li key={r.case_id}>
                     Row {r.row}: {r.address.slice(0, 14)}… →{' '}
-                    <Link to={`/cases/${r.case_id}`} className="font-semibold text-emerald-600 hover:underline">
+                    <Link to={`/cases/${r.case_id}`} className="font-semibold text-good hover:underline">
                       view case
                     </Link>
                   </li>
@@ -121,8 +121,8 @@ export function BulkUpload() {
           </div>
 
           {result.rejected.length > 0 && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/[0.06] p-5">
-              <p className="flex items-center gap-2 text-sm font-semibold text-red-600">
+            <div className="rounded-md border border-critical/25 bg-risk-high/[0.06] p-5">
+              <p className="flex items-center gap-2 text-sm font-semibold text-critical">
                 <XCircle size={16} />
                 {result.rejected.length} row{result.rejected.length === 1 ? '' : 's'} rejected
               </p>
