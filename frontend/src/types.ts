@@ -74,6 +74,8 @@ export interface CaseSummary {
   reported_address: string
   chain: Chain
   status: CaseStatus
+  hop_progress?: number
+  hop_limit?: number
   risk_score: number | null
   nearest_exchange: NearestExchange | null
   fraud_typology: string | null
@@ -86,6 +88,10 @@ export interface CaseDetail extends CaseSummary {
   created_by: string | null
   hop_progress: number
   hop_limit: number
+  /** The worker's own description of the current step, e.g. "Reading hop 2 of 5". */
+  status_message?: string | null
+  /** Heartbeat: when the worker last reported. Absent means it never did. */
+  last_progress_at?: string | null
   risk_score_ml: number | null
   risk_breakdown: Record<string, number> | null
   flags: string[] | null

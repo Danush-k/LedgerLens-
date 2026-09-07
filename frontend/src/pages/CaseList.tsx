@@ -245,7 +245,7 @@ export function CaseList() {
                     <ChainBadge chain={c.chain} />
                   </td>
                   <td className="px-5 py-3.5">
-                    <StatusBadge status={c.status} />
+                    <StatusBadge status={c.status} hop={c.hop_progress} hopLimit={c.hop_limit} />
                   </td>
                   <td className="px-5 py-3.5">
                     {c.risk_score !== null ? (

@@ -21,6 +21,40 @@ import { TypologyBadge } from '../components/TypologyBadge'
 import type { CaseDetail as CaseDetailType, CaseSummary, GraphNode } from '../types'
 import { findPath } from '../utils/findPath'
 
+/**
+ * Shown when a running trace has stopped reporting progress.
+ *
+ * A spinner makes no distinction between working and wedged, so a trace
+ * whose worker died looks exactly like one that is merely slow - and the
+ * reader waits indefinitely on something that already stopped. The server
+ * reaps these after fifteen minutes; this says so before then, so the wait
+ * is an informed one rather than an act of faith.
+ */
+function StalledNotice({ lastProgressAt }: { lastProgressAt?: string | null }) {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 15_000)
+    return () => clearInterval(timer)
+  }, [])
+
+  if (!lastProgressAt) return null
+  const silentMs = now - new Date(lastProgressAt).getTime()
+  const silentMinutes = Math.floor(silentMs / 60_000)
+  // Below this a quiet spell is just a slow hop, and warning about it would
+  // train the reader to ignore the warning.
+  if (silentMinutes < 3) return null
+
+  return (
+    <p className="max-w-sm rounded border border-warning/40 bg-warning-soft px-3 py-2 text-xs leading-relaxed text-ink-700">
+      <span className="font-medium">No progress for {silentMinutes} minutes.</span>{' '}
+      A hop against a rate-limited explorer can take this long. If it stays
+      silent, the trace is marked failed automatically after 15 minutes — it
+      will not spin here indefinitely.
+    </p>
+  )
+}
+
 export function CaseDetail() {
   const { caseId } = useParams<{ caseId: string }>()
   const [caseData, setCaseData] = useState<CaseDetailType | null>(null)
@@ -174,13 +208,37 @@ export function CaseDetail() {
                 label={
                   caseData.status === 'queued'
                     ? 'Queued — waiting for a worker'
-                    : `Walking the chain — hop ${caseData.hop_progress} of ${caseData.hop_limit}`
+                    /* The worker's own words where it has reported them. A
+                       generic label cannot say how wide the current hop is,
+                       and that is the difference between a trace that looks
+                       stalled and one visibly doing something. */
+                    : caseData.status_message
+                      ?? `Walking the chain — hop ${caseData.hop_progress} of ${caseData.hop_limit}`
                 }
               />
+
+              {/* Hops completed, as a shape rather than a sentence. A reader
+                  glancing at this needs to know it is advancing, which a
+                  changing number alone does not convey. */}
+              {caseData.status === 'tracing' && caseData.hop_limit > 0 && (
+                <div className="flex items-center gap-1.5" aria-hidden="true">
+                  {Array.from({ length: caseData.hop_limit }, (_, i) => (
+                    <span
+                      key={i}
+                      className={`h-1 w-7 rounded-full transition-colors duration-500 ${
+                        i < caseData.hop_progress ? 'bg-brand-500' : 'bg-ink-200'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+
               <p className="max-w-sm text-xs leading-relaxed text-ink-500">
                 Each hop is a live call to a public block explorer, so a deep trace on a busy
                 wallet can take a few minutes. This page updates on its own.
               </p>
+
+              <StalledNotice lastProgressAt={caseData.last_progress_at} />
             </div>
           ) : caseData.status === 'failed' ? (
             /* A failed fetch is a statement about the data provider, not about

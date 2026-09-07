@@ -24,14 +24,32 @@ const CONFIG: Record<CaseStatus, { label: string; className: string; icon: React
   },
 }
 
-export function StatusBadge({ status }: { status: CaseStatus }) {
+/**
+ * A running trace shows how far it has got.
+ *
+ * "Tracing" on its own is the same badge whether the trace started two
+ * seconds or two hours ago, so a stalled case is indistinguishable from a
+ * healthy one in the list - which is exactly how a dead worker goes
+ * unnoticed. The hop count costs one line and removes that ambiguity.
+ */
+export function StatusBadge({ status, hop, hopLimit }: {
+  status: CaseStatus
+  hop?: number
+  hopLimit?: number
+}) {
   const config = CONFIG[status]
+  const showProgress = status === 'tracing' && typeof hop === 'number' && !!hopLimit
+
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${config.className}`}
+      title={showProgress ? `Completed ${hop} of ${hopLimit} hops` : undefined}
     >
       {config.icon}
       {config.label}
+      {showProgress && (
+        <span className="tabular font-normal opacity-70">{hop}/{hopLimit}</span>
+      )}
     </span>
   )
 }
