@@ -68,3 +68,50 @@ def test_empty_but_successful_response_is_not_a_rate_limit():
     assert not _is_rate_limited({"status": "1", "message": "OK", "result": []})
     assert not _is_rate_limited({"status": "0", "message": "No transactions found",
                                  "result": []})
+
+
+# ── request pacing ────────────────────────────────────────────────────────
+
+def test_rate_limiter_paces_serial_calls():
+    """The tracer fetches a hop's wallets concurrently, which is what makes
+    it fast. Pacing at the socket is what stops that becoming a burst the
+    provider refuses."""
+    import time
+
+    from app.chain_clients.http import RateLimiter
+
+    limiter = RateLimiter(10.0)
+    start = time.monotonic()
+    for _ in range(5):
+        limiter.acquire()
+    elapsed = time.monotonic() - start
+
+    assert 0.3 <= elapsed <= 1.0  # ~0.4s expected, generous for CI
+
+
+def test_rate_limiter_paces_concurrent_callers():
+    """The regression that mattered: an earlier token-bucket version leaked
+    tokens on the waiting path and slowed to a halt under threads."""
+    import threading
+    import time
+
+    from app.chain_clients.http import RateLimiter
+
+    limiter = RateLimiter(10.0)
+    start = time.monotonic()
+    threads = [threading.Thread(target=limiter.acquire) for _ in range(5)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    elapsed = time.monotonic() - start
+
+    assert elapsed >= 0.3   # actually paced, not all at once
+    assert elapsed <= 2.0   # and did not stall
+
+
+def test_backoff_grows_and_is_bounded():
+    from app.chain_clients.http import _backoff
+
+    assert _backoff(0) < _backoff(3)
+    assert _backoff(10) <= 8.5  # capped, so a retry never parks for minutes
