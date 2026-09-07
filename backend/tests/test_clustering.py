@@ -23,24 +23,47 @@ def test_common_input_clusters_empty_when_no_co_spends():
     assert common_input_clusters(client, {"addrA"}) == []
 
 
-def test_shared_funder_clusters_groups_fan_out_recipients():
-    nodes = {
-        "eth:0xsource": {"address": "0xsource"},
-        "eth:0xb": {"address": "0xb"},
-        "eth:0xc": {"address": "0xc"},
-        "eth:0xd": {"address": "0xd"},  # different funder, shouldn't cluster with b/c
-    }
-    edges = [
-        {"source": "eth:0xsource", "target": "eth:0xb"},
-        {"source": "eth:0xsource", "target": "eth:0xc"},
-        {"source": "eth:0xb", "target": "eth:0xd"},  # single recipient, not a cluster
-    ]
+def test_shared_funder_clusters_groups_a_real_distribution():
+    nodes = {f"eth:0x{c}": {"address": f"0x{c}"} for c in "sbcdef"}
+    edges = [{"source": "eth:0xs", "target": f"eth:0x{c}"} for c in "bcde"]
+    edges.append({"source": "eth:0xb", "target": "eth:0xf"})  # single recipient
 
     clusters = shared_funder_clusters(nodes, edges)
 
     assert len(clusters) == 1
     assert clusters[0]["type"] == "shared_funder"
-    assert clusters[0]["addresses"] == ["0xb", "0xc"]
+    assert clusters[0]["addresses"] == ["0xb", "0xc", "0xd", "0xe"]
+
+
+def test_a_wallet_paying_two_others_is_not_a_cluster():
+    """One wallet paying two others is an ordinary transaction, not a
+    discovery. At that size the "cluster" is the graph edge restated, and
+    every fan-out in a trace produces one - which buried the findings that
+    actually needed a decision under boxes that said nothing."""
+    nodes = {
+        "eth:0xsource": {"address": "0xsource"},
+        "eth:0xb": {"address": "0xb"},
+        "eth:0xc": {"address": "0xc"},
+    }
+    edges = [
+        {"source": "eth:0xsource", "target": "eth:0xb"},
+        {"source": "eth:0xsource", "target": "eth:0xc"},
+    ]
+
+    assert shared_funder_clusters(nodes, edges) == []
+
+
+def test_shared_funder_note_does_not_claim_ownership():
+    """These are shown beside common-input-ownership clusters, which do
+    establish a shared key holder. Being paid by the same wallet does not,
+    and the note has to say so or the two read as the same kind of claim."""
+    nodes = {f"eth:0x{c}": {"address": f"0x{c}"} for c in "sbcde"}
+    edges = [{"source": "eth:0xs", "target": f"eth:0x{c}"} for c in "bcde"]
+
+    note = shared_funder_clusters(nodes, edges)[0]["note"]
+
+    assert "does not establish" in note
+    assert "owner" in note
 
 
 def test_shared_funder_clusters_ignores_single_recipient_sources():
