@@ -62,6 +62,20 @@ export function CaseDetail() {
   const [noticeModalOpen, setNoticeModalOpen] = useState(false)
   const [hashModalOpen, setHashModalOpen] = useState(false)
 
+  // Clear the previous case before loading the next one.
+  //
+  // Without this, navigating between cases left the old case rendered until
+  // the new one arrived. Where the two look alike - the same wallet reported
+  // by several complainants scores the same and draws the same graph - the
+  // page appeared not to respond at all, and the click read as a broken
+  // link rather than a slow one. Resetting gives navigation a visible
+  // acknowledgement, and stops one case's data being shown under another
+  // case's URL.
+  useEffect(() => {
+    setCaseData(null)
+    window.scrollTo({ top: 0 })
+  }, [caseId])
+
   useEffect(() => {
     if (!caseId) return
     let active = true

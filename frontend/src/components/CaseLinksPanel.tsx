@@ -34,7 +34,7 @@ function CaseRow({ link, showWallet, chain }: {
 }) {
   const extra = link.shared_addresses.length - 1
   return (
-    <li className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 hover:bg-ink-50">
+    <li className="relative flex flex-wrap items-center gap-x-3 gap-y-1 px-3.5 py-2 transition-colors hover:bg-ink-50 focus-within:bg-ink-50">
       {showWallet && link.shared_addresses[0] && (
         <span className="flex min-w-0 items-center gap-1.5">
           <Address address={link.shared_addresses[0]} chain={chain} />
@@ -55,11 +55,16 @@ function CaseRow({ link, showWallet, chain }: {
       <span className="text-[11px] text-ink-400">
         {new Date(link.created_at).toLocaleDateString()}
       </span>
+      {/* The whole row is the target - a case is one thing, and asking the
+          reader to hit a short word at the far right of a wide row is a
+          smaller target than the row they are already looking at. The
+          button stays as the visible affordance. */}
       <Link
         to={`/cases/${link.case_id}`}
-        className="ml-auto flex shrink-0 items-center gap-1 text-[11px] font-medium text-brand-600 hover:underline"
+        className="ml-auto inline-flex shrink-0 items-center gap-1 rounded border border-ink-200 bg-surface px-2 py-1 text-[11px] font-medium text-brand-600 transition-colors hover:border-brand-500 hover:bg-brand-50"
       >
-        Open <ArrowUpRight size={11} />
+        Open case <ArrowUpRight size={11} />
+        <span className="absolute inset-0" aria-hidden="true" />
       </Link>
     </li>
   )
