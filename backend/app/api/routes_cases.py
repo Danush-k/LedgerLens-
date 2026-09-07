@@ -184,7 +184,7 @@ def get_case_links(case_id: str, db: Session = Depends(get_db)):
     links: dict[str, dict] = {}
 
     # 1. The same wallet reported again - the strongest link there is.
-    same_wallet_ids = [
+    traced_ids = [
         row[0] for row in
         db.query(TracedAddress.case_id)
         .filter(TracedAddress.chain == case.chain,
@@ -192,6 +192,15 @@ def get_case_links(case_id: str, db: Session = Depends(get_db)):
                 TracedAddress.case_id != case_id)
         .distinct().all()
     ]
+    direct_case_ids = [
+        row[0] for row in
+        db.query(Case.id)
+        .filter(Case.chain == case.chain,
+                Case.reported_address == case.reported_address,
+                Case.id != case_id)
+        .distinct().all()
+    ]
+    same_wallet_ids = list(set(traced_ids + direct_case_ids))
     for other_id in same_wallet_ids:
         links[other_id] = {"relationship": "same_wallet",
                             "shared_addresses": [case.reported_address]}
@@ -232,16 +241,22 @@ def get_case_links(case_id: str, db: Session = Depends(get_db)):
                                 -(l.risk_score or 0)))
 
     # One complaint, one row. The same wallet traced repeatedly - a deeper
-    # hop limit, an investigator re-checking their work - produces a case
-    # row each time, and listing them all would present one complaint as a
-    # wall of corroboration. Cases are distinct when they carry different
-    # references or were filed by different people; otherwise the highest
-    # scoring is kept, since the sort above already put it first.
+    # hop limit, an investigator re-checking their work - produces a case row
+    # each time, and listing them all would present one complaint as a wall
+    # of corroboration.
+    #
+    # The reported address is part of the identity, and has to be: keying on
+    # reference and filer alone collapsed every unreferenced case by the same
+    # investigator into a single row, which hid genuinely different wallets
+    # converging - the one signal this panel exists to show. Two cases are
+    # the same complaint only when they name the same wallet AND carry the
+    # same reference and filer.
     seen: set[tuple] = set()
     deduplicated = []
     for link in result:
         other = next(o for o in others if o.id == link.case_id)
-        identity = (link.relationship, other.complaint_ref or "", other.created_by or "")
+        identity = (link.relationship, other.reported_address,
+                    other.complaint_ref or "", other.created_by or "")
         if identity in seen:
             continue
         seen.add(identity)

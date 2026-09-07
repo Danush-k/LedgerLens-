@@ -267,3 +267,30 @@ def test_links_keeps_genuinely_separate_complainants(client, db_session):
     links = client.get(f"/cases/{case.id}/links").json()
 
     assert len(links) == 2
+
+
+def test_dedup_does_not_collapse_different_wallets(client, db_session):
+    """The regression: keying on reference and filer alone merged every
+    unreferenced case by the same investigator into one row, hiding the
+    genuinely different wallets converging - the signal the panel exists
+    for."""
+    mine = _make_case(db_session, reported_address="bc1qmine", chain="bitcoin",
+                      status="complete", created_by="investigator")
+    links = []
+    for addr in ("bc1qvictim1", "bc1qvictim2", "bc1qvictim3"):
+        other = _make_case(db_session, reported_address=addr, chain="bitcoin",
+                           status="complete", created_by="investigator")
+        links.append({"case_id": other.id, "shared_addresses": ["bc1qmule"]})
+    mine.patterns = [{
+        "pattern": "shared_downstream", "severity": "high", "title": "Shared",
+        "evidence": "...", "transactions": [], "addresses": ["bc1qmule"],
+        "links": links,
+    }]
+    db_session.commit()
+
+    result = client.get(f"/cases/{mine.id}/links").json()
+
+    # Three separate victims, all unreferenced, all filed by one officer.
+    assert len(result) == 3
+    assert {r["reported_address"] for r in result} == {
+        "bc1qvictim1", "bc1qvictim2", "bc1qvictim3"}

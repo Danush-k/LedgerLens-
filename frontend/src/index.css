@@ -76,6 +76,14 @@
   --color-info: #1f5eb8;
   --color-info-soft: #eef4fd;
 
+  /* Cross-case intelligence. Deliberately outside the severity ramp: a link
+     to another complaint is not a degree of badness, it is a different kind
+     of fact, and colouring it red or amber would put it in competition with
+     findings that do carry severity. Violet reads as its own category and
+     appears nowhere else in the interface. */
+  --color-intel: #6b3fa0;
+  --color-intel-soft: #f3eefb;
+
   /* Risk bands, matching the backend rubric: <35 low, 35-69 medium, >=70 high. */
   --color-risk-low: #116446;
   --color-risk-medium: #8a5a00;
@@ -126,6 +134,9 @@
     --color-good-soft: #10251c;
     --color-info: #7da9e9;
     --color-info-soft: #14243a;
+
+    --color-intel: #b79ae0;
+    --color-intel-soft: #221a33;
 
     --color-risk-low: #52bd8f;
     --color-risk-medium: #dda33f;

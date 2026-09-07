@@ -9,7 +9,7 @@ from app.auth.ratelimit import TRACE_LIMIT, limiter
 from app.chain_clients.base import Chain, normalize_address
 from app.config import get_settings
 from app.db.postgres import get_db
-from app.models.orm import Case
+from app.models.orm import Case, TracedAddress
 from app.reports.audit_chain import append_audit_event
 from app.models.schemas import TraceAccepted, TraceRequest
 from app.worker.tasks import trace_wallet_task
@@ -67,6 +67,7 @@ def submit_trace(request: Request, body: TraceRequest, db: Session = Depends(get
     )
     db.add(case)
     db.flush()
+    db.add(TracedAddress(case_id=case.id, chain=case.chain, address=case.reported_address))
     append_audit_event(db, case.id, "case_created",
                        f"Submitted by {user.username} for {case.reported_address}")
     db.commit()
@@ -79,29 +80,24 @@ def submit_trace(request: Request, body: TraceRequest, db: Session = Depends(get
 
 @router.post("/trace/bulk")
 async def submit_trace_bulk(file: UploadFile, db: Session = Depends(get_db),
-                             user: CurrentUser = Depends(get_current_user)):
-    """CSV columns: address, chain, complaint_ref (optional), narrative (optional).
-    Investigators routinely have a spreadsheet of wallets per case, not one
-    address at a time - this runs every valid row through the same pipeline
-    as a single manual submission."""
-    raw = (await file.read()).decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(raw))
-    if reader.fieldnames is None or "address" not in reader.fieldnames or "chain" not in reader.fieldnames:
-        raise HTTPException(400, "CSV must have at least 'address' and 'chain' columns")
-
-    accepted: list[dict] = []
-    rejected: list[dict] = []
+                            user: CurrentUser = Depends(get_current_user)):
+    content = await file.read()
+    reader = csv.DictReader(io.StringIO(content.decode("utf-8-sig", errors="replace")))
     settings = get_settings()
 
-    for i, row in enumerate(reader, start=2):  # row 1 is the header
-        if len(accepted) + len(rejected) >= MAX_BULK_ROWS:
-            rejected.append({"row": i, "reason": f"Exceeded the {MAX_BULK_ROWS}-row limit per upload"})
+    accepted = []
+    rejected = []
+    for i, row in enumerate(reader, start=1):
+        if i > MAX_BULK_ROWS:
+            rejected.append({"row": i, "reason": f"Exceeded maximum {MAX_BULK_ROWS} rows per upload"})
             break
+
         address = (row.get("address") or "").strip()
         chain_raw = (row.get("chain") or "").strip().lower()
-        if not address:
-            rejected.append({"row": i, "reason": "Missing address"})
+        if not address or not chain_raw:
+            rejected.append({"row": i, "reason": "Missing address or chain column"})
             continue
+
         try:
             chain = Chain(chain_raw)
         except ValueError:
@@ -123,6 +119,7 @@ async def submit_trace_bulk(file: UploadFile, db: Session = Depends(get_db),
         )
         db.add(case)
         db.flush()
+        db.add(TracedAddress(case_id=case.id, chain=case.chain, address=case.reported_address))
         append_audit_event(db, case.id, "case_created",
                             f"Submitted via bulk upload (row {i}) by {user.username}")
         accepted.append({"row": i, "case_id": case.id, "address": address})
