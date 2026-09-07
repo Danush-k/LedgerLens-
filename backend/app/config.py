@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     # Chain data providers
+    # Accepts a single key or a comma-separated list. Free explorer keys are
+    # capped at a few requests per second each, so adding keys is the only
+    # way to raise the ceiling; one value handles both cases so existing
+    # .env files keep working.
     etherscan_api_key: str = ""
     bscscan_api_key: str = ""
     polygonscan_api_key: str = ""
