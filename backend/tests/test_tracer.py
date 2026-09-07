@@ -93,3 +93,64 @@ def test_exchange_attribution_carries_its_source():
 
     node = next(n for n in result.nodes.values() if n["address"] == EXCHANGE_ADDR.lower())
     assert node["label_source"]
+
+
+# ── concurrent level fetching ─────────────────────────────────────────────
+
+def test_every_address_in_a_hop_is_processed():
+    """The frontier is fetched concurrently but processed per address. An
+    earlier version left the body outside the per-address loop, so only the
+    last wallet of each hop was ever expanded - and single-address test
+    graphs did not notice."""
+    root = "0x1110000000000000000000000000000000000f"
+    a = "0xaaa0000000000000000000000000000000000a"
+    b = "0xbbb0000000000000000000000000000000000b"
+    a_child = "0xccc0000000000000000000000000000000000c"
+    b_child = "0xddd0000000000000000000000000000000000d"
+
+    graph = {root: [a, b], a: [a_child], b: [b_child]}
+    with patch("app.tracer.bfs.get_chain_client", return_value=FakeClient(graph)):
+        result = trace_wallet(Chain.ETHEREUM, root, hop_limit=3)
+
+    addresses = {n["address"] for n in result.nodes.values()}
+    # Both branches of the fan-out must be expanded, not just one.
+    assert a_child in addresses
+    assert b_child in addresses
+
+
+def test_concurrent_fetching_is_deterministic():
+    """Two traces of the same wallet must produce the same graph. Fetching
+    in parallel but mutating serially is what guarantees that."""
+    root = "0x1110000000000000000000000000000000000f"
+    graph = {
+        root: [f"0x{i:040x}" for i in range(6)],
+        "0x" + "0" * 39 + "1": [EXCHANGE_ADDR],
+    }
+    runs = []
+    for _ in range(3):
+        with patch("app.tracer.bfs.get_chain_client", return_value=FakeClient(graph)):
+            r = trace_wallet(Chain.ETHEREUM, root, hop_limit=3)
+        runs.append(sorted(n["address"] for n in r.nodes.values()))
+
+    assert runs[0] == runs[1] == runs[2]
+
+
+def test_a_failing_address_does_not_stop_its_siblings():
+    """One dead fetch in a hop must leave the rest of that hop intact."""
+    root = "0x1110000000000000000000000000000000000f"
+    good = "0xaaa0000000000000000000000000000000000a"
+    bad = "0xbbb0000000000000000000000000000000000b"
+
+    class FlakyClient(FakeClient):
+        def get_outgoing_transfers(self, address):
+            if address == bad:
+                raise TimeoutError("explorer timed out")
+            return super().get_outgoing_transfers(address)
+
+    graph = {root: [good, bad], good: [EXCHANGE_ADDR]}
+    with patch("app.tracer.bfs.get_chain_client", return_value=FlakyClient(graph)):
+        result = trace_wallet(Chain.ETHEREUM, root, hop_limit=3)
+
+    assert result.nearest_exchange is not None          # the good branch resolved
+    assert any(e["address"] == bad for e in result.fetch_errors)
+    assert "partial_data" in result.flags               # and the gap is declared
