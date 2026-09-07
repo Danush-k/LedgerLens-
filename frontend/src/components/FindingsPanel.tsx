@@ -42,18 +42,14 @@ const GROUPS: { key: string; title: string; blurb: string; patterns: string[] }[
     patterns: ['peel_chain', 'fan_out', 'fan_in', 'rapid_movement', 'pass_through'],
   },
   {
-    key: 'links',
-    title: 'Links to other complaints',
-    blurb: 'Signals that reach outside this case — the strongest grounds for widening it.',
-    patterns: ['prior_report', 'shared_downstream'],
-  },
-  {
     key: 'limits',
     title: 'Limits of this trace',
     blurb: 'What this trace could not establish. These qualify every finding above.',
     patterns: ['untraced_termination', 'commingling', 'partial_data'],
   },
 ]
+
+const CROSS_CASE = ['prior_report', 'shared_downstream']
 
 function groupOf(pattern: string): string {
   return GROUPS.find(g => g.patterns.includes(pattern))?.key ?? 'movement'
@@ -72,11 +68,22 @@ function txUrl(chain: string, hash: string): string | null {
 }
 
 export function FindingsPanel({ patterns, chain }: { patterns: Pattern[] | null; chain: string }) {
-  const findings = [...(patterns ?? [])].sort(
-    (a, b) => (SEVERITY_ORDER[a.severity] ?? 3) - (SEVERITY_ORDER[b.severity] ?? 3),
-  )
+  const [showAll, setShowAll] = useState(false)
 
-  const counts = findings.reduce<Record<string, number>>((acc, f) => {
+  // Cross-case signals have their own panel, which names the wallet behind
+  // each link. Repeating them here would state the same thing twice.
+  const all = [...(patterns ?? [])]
+    .filter(f => !CROSS_CASE.includes(f.pattern))
+    .sort((a, b) => (SEVERITY_ORDER[a.severity] ?? 3) - (SEVERITY_ORDER[b.severity] ?? 3))
+
+  // Low-severity findings are context, not decisions. A trace produces
+  // several and they push what needs acting on below the fold, so they stay
+  // one click away rather than being dropped - the count is still shown, so
+  // nothing is hidden silently.
+  const minor = all.filter(f => f.severity === 'low').length
+  const findings = showAll ? all : all.filter(f => f.severity !== 'low')
+
+  const counts = all.reduce<Record<string, number>>((acc, f) => {
     acc[f.severity] = (acc[f.severity] ?? 0) + 1
     return acc
   }, {})
@@ -85,13 +92,13 @@ export function FindingsPanel({ patterns, chain }: { patterns: Pattern[] | null;
     <Panel
       title="Findings"
       subtitle={
-        findings.length
+        all.length
           ? `${counts.high ?? 0} high · ${counts.medium ?? 0} medium · ${counts.low ?? 0} low`
           : undefined
       }
       dense
     >
-      {findings.length === 0 ? (
+      {all.length === 0 ? (
         <EmptyState
           icon={<ShieldCheck size={24} />}
           title="No patterns detected"
@@ -117,6 +124,19 @@ export function FindingsPanel({ patterns, chain }: { patterns: Pattern[] | null;
             </section>
           )
         })
+      )}
+
+      {minor > 0 && (
+        <button
+          onClick={() => setShowAll(v => !v)}
+          aria-expanded={showAll}
+          className="flex w-full cursor-pointer items-center justify-center gap-1 border-t border-ink-200 py-2 text-[11px] font-medium text-ink-500 transition-colors hover:bg-ink-50 hover:text-brand-600"
+        >
+          {showAll
+            ? 'Show only what needs a decision'
+            : `Show ${minor} further low-severity finding${minor === 1 ? '' : 's'}`}
+          <ChevronDown size={12} className={showAll ? 'rotate-180' : ''} />
+        </button>
       )}
     </Panel>
   )

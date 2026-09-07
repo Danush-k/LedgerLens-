@@ -1,7 +1,7 @@
 import { AlertTriangle, FileText, Fingerprint, SearchX } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { getCase, getRelatedCases } from '../api/client'
+import { getCase } from '../api/client'
 import { AuditChainPanel } from '../components/AuditChainPanel'
 import { ChainBadge } from '../components/ChainMark'
 import { LoadingRing } from '../components/Logo'
@@ -12,12 +12,13 @@ import { GraphLegend } from '../components/GraphLegend'
 import { GraphView } from '../components/GraphView'
 import { HashVerifierModal } from '../components/HashVerifierModal'
 import { LegalNoticeModal } from '../components/LegalNoticeModal'
-import { RelatedCases } from '../components/RelatedCases'
+import { CaseLinksPanel } from '../components/CaseLinksPanel'
+import { Collapsible } from '../components/ui/Collapsible'
 import { RiskGauge } from '../components/RiskGauge'
 import { CardSkeleton } from '../components/Skeleton'
 import { StatusBadge } from '../components/StatusBadge'
 import { TypologyBadge } from '../components/TypologyBadge'
-import type { CaseDetail as CaseDetailType, CaseSummary, GraphNode } from '../types'
+import type { CaseDetail as CaseDetailType, GraphNode } from '../types'
 import { findPath } from '../utils/findPath'
 
 /**
@@ -57,7 +58,6 @@ function StalledNotice({ lastProgressAt }: { lastProgressAt?: string | null }) {
 export function CaseDetail() {
   const { caseId } = useParams<{ caseId: string }>()
   const [caseData, setCaseData] = useState<CaseDetailType | null>(null)
-  const [related, setRelated] = useState<CaseSummary[]>([])
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
   const [noticeModalOpen, setNoticeModalOpen] = useState(false)
   const [hashModalOpen, setHashModalOpen] = useState(false)
@@ -72,7 +72,6 @@ export function CaseDetail() {
       if (!active) return
       setCaseData(c)
       if (c.status === 'complete') {
-        getRelatedCases(caseId).then((r) => active && setRelated(r))
       }
     }
     load()
@@ -332,11 +331,23 @@ export function CaseDetail() {
             sit with the graph rather than below the secondary panels. */}
         <FindingsPanel patterns={caseData.patterns} chain={caseData.chain} />
 
-        {/* Row 2: Clusters, related cases, chain of custody */}
+        {/* Cross-case links sit directly under the findings: for an
+            investigator this is the highest-value section on the page, and
+            it is the one that names a wallet they can act on. It replaces
+            the old related-cases list, which reported a count without ever
+            saying which address produced it. */}
+        <CaseLinksPanel caseId={caseData.id} chain={caseData.chain} />
+
+        {/* Supporting detail. Both are reference rather than findings, so
+            they close by default and stop competing with the sections
+            above for a first read. */}
         <div className="space-y-6">
-          <ClusterPanel clusters={caseData.clusters ?? []} />
-          <RelatedCases cases={related} />
-          <AuditChainPanel caseId={caseData.id} />
+          <Collapsible title="Wallet clusters" hint="Addresses that share an owner">
+            <ClusterPanel clusters={caseData.clusters ?? []} />
+          </Collapsible>
+          <Collapsible title="Chain of custody" hint="Tamper-evident record of every action">
+            <AuditChainPanel caseId={caseData.id} />
+          </Collapsible>
         </div>
       </div>
 
