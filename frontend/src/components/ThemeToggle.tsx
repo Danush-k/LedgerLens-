@@ -7,27 +7,47 @@ const OPTIONS = [
   { value: 'dark' as const, icon: Moon, label: 'Dark theme' },
 ]
 
-export function ThemeToggle() {
+interface Props {
+  variant?: 'chrome' | 'surface'
+}
+
+export function ThemeToggle({ variant = 'chrome' }: Props) {
   const { choice, setChoice } = useTheme()
 
+  const isSurface = variant === 'surface'
+
   return (
-    <div className="flex items-center gap-0.5 rounded-lg bg-chrome-surface p-0.5">
-      {OPTIONS.map(({ value, icon: Icon, label }) => (
-        <button
-          key={value}
-          onClick={() => setChoice(value)}
-          title={label}
-          aria-label={label}
-          aria-pressed={choice === value}
-          className={`cursor-pointer flex h-6 w-6 items-center justify-center rounded-md transition-colors ${
-            choice === value
-              ? 'bg-brand-500/20 text-brand-300'
-              : 'text-chrome-text-secondary hover:text-chrome-text-primary'
-          }`}
-        >
-          <Icon size={13} />
-        </button>
-      ))}
+    <div
+      className={`flex items-center gap-0.5 rounded-lg p-0.5 transition-colors ${
+        isSurface
+          ? 'border border-ink-200 bg-surface shadow-2xs'
+          : 'bg-chrome-surface'
+      }`}
+    >
+      {OPTIONS.map(({ value, icon: Icon, label }) => {
+        const isSelected = choice === value
+        const activeClass = isSurface
+          ? 'bg-brand-50 text-brand-600 font-semibold dark:bg-brand-900/40 dark:text-brand-300'
+          : 'bg-brand-500/20 text-brand-300'
+        const inactiveClass = isSurface
+          ? 'text-ink-500 hover:bg-ink-100 hover:text-ink-900'
+          : 'text-chrome-text-secondary hover:text-chrome-text-primary'
+
+        return (
+          <button
+            key={value}
+            onClick={() => setChoice(value)}
+            title={label}
+            aria-label={label}
+            aria-pressed={isSelected}
+            className={`cursor-pointer flex h-6 w-6 items-center justify-center rounded-md transition-colors ${
+              isSelected ? activeClass : inactiveClass
+            }`}
+          >
+            <Icon size={13} />
+          </button>
+        )
+      })}
     </div>
   )
 }

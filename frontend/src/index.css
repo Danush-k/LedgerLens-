@@ -192,6 +192,9 @@
   --color-risk-medium: #dda33f;
   --color-risk-high: #f2867c;
 
+  --color-intel: #b79ae0;
+  --color-intel-soft: #221a33;
+
   --color-taint-0: #2a343f;
   --color-taint-25: #7a5a2c;
   --color-taint-50: #a8763a;
