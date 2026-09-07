@@ -14,6 +14,51 @@ import { Address, EmptyState, Panel, SeverityPill } from './ui/Primitives'
 
 const SEVERITY_ORDER: Record<string, number> = { high: 0, medium: 1, low: 2 }
 
+/**
+ * Findings grouped by the question each one answers.
+ *
+ * Severity alone ranks findings but does not explain them: it puts "reached
+ * an exchange" next to "seen in another case" purely because both are high,
+ * when one tells the investigator where to send a notice and the other
+ * tells them who else to call. Grouping by the decision a finding informs
+ * means the panel can be read top to bottom as an account of the case
+ * rather than a scoreboard.
+ *
+ * Order is deliberate: where the money went comes first, because that is
+ * the actionable answer. What limits the trace comes last, because it
+ * qualifies everything above it.
+ */
+const GROUPS: { key: string; title: string; blurb: string; patterns: string[] }[] = [
+  {
+    key: 'destination',
+    title: 'Where the money went',
+    blurb: 'The actionable result — who to serve, and how directly funds reached them.',
+    patterns: ['exchange_deposit', 'mixer_hit', 'bridge_hit', 'service_hit'],
+  },
+  {
+    key: 'movement',
+    title: 'How the money was moved',
+    blurb: 'The laundering behaviour visible in the traced subgraph.',
+    patterns: ['peel_chain', 'fan_out', 'fan_in', 'rapid_movement', 'pass_through'],
+  },
+  {
+    key: 'links',
+    title: 'Links to other complaints',
+    blurb: 'Signals that reach outside this case — the strongest grounds for widening it.',
+    patterns: ['prior_report', 'shared_downstream'],
+  },
+  {
+    key: 'limits',
+    title: 'Limits of this trace',
+    blurb: 'What this trace could not establish. These qualify every finding above.',
+    patterns: ['untraced_termination', 'commingling', 'partial_data'],
+  },
+]
+
+function groupOf(pattern: string): string {
+  return GROUPS.find(g => g.patterns.includes(pattern))?.key ?? 'movement'
+}
+
 const SEVERITY_STRIPE: Record<string, string> = {
   high: 'border-l-critical',
   medium: 'border-l-warning',
@@ -53,11 +98,25 @@ export function FindingsPanel({ patterns, chain }: { patterns: Pattern[] | null;
           detail="The detectors found nothing notable in this trace. That is a result about the traced subgraph, not a clearance of the wallet."
         />
       ) : (
-        <ul className="divide-y divide-ink-100">
-          {findings.map((f, i) => (
-            <Finding key={`${f.pattern}-${i}`} finding={f} chain={chain} />
-          ))}
-        </ul>
+        GROUPS.map(group => {
+          const inGroup = findings.filter(f => groupOf(f.pattern) === group.key)
+          if (inGroup.length === 0) return null
+          return (
+            <section key={group.key}>
+              <div className="border-b border-ink-200 bg-surface-sunk px-3.5 py-2">
+                <h3 className="text-[11px] font-semibold uppercase tracking-wide text-ink-700">
+                  {group.title}
+                </h3>
+                <p className="mt-0.5 text-[11px] leading-snug text-ink-500">{group.blurb}</p>
+              </div>
+              <ul className="divide-y divide-ink-100">
+                {inGroup.map((f, i) => (
+                  <Finding key={`${f.pattern}-${i}`} finding={f} chain={chain} />
+                ))}
+              </ul>
+            </section>
+          )
+        })
       )}
     </Panel>
   )
