@@ -25,12 +25,36 @@ def trace_wallet_task(case_id: str) -> None:
             return
 
         case.status = "tracing"
+        case.last_progress_at = datetime.now(timezone.utc)
+        case.status_message = "Connecting to the blockchain data provider"
         append_audit_event(db, case_id, "trace_started",
                             f"Tracing {case.reported_address} on {case.chain}")
         db.commit()
 
         chain = Chain(case.chain)
-        result = trace_wallet(chain, case.reported_address, hop_limit=case.hop_limit)
+
+        def report_progress(hop: int, limit: int, wallets: int) -> None:
+            """Write the frontier to the case so the UI can say what is
+            happening rather than spinning without explanation.
+
+            Committed on its own so the row is visible to the API process
+            while the trace is still running - the whole point is that this
+            is readable mid-flight. A failure here must never sink the
+            trace: progress reporting is not the work.
+            """
+            try:
+                case.hop_progress = hop
+                case.last_progress_at = datetime.now(timezone.utc)
+                case.status_message = (
+                    f"Reading hop {hop} of {limit} - "
+                    f"{wallets} wallet{'s' if wallets != 1 else ''} to check"
+                )
+                db.commit()
+            except Exception:  # noqa: BLE001 - never fail a trace to report on it
+                db.rollback()
+
+        result = trace_wallet(chain, case.reported_address, hop_limit=case.hop_limit,
+                               on_hop=report_progress)
 
         # If we could not retrieve the reported wallet's history at all, we
         # have no evidence - not "no findings". Scoring an empty fetch would
@@ -38,6 +62,7 @@ def trace_wallet_task(case_id: str) -> None:
         if result.root_fetch_failed:
             detail = result.fetch_errors[0]["error"] if result.fetch_errors else "unknown error"
             case.status = "failed"
+            case.status_message = None
             case.error = (
                 f"Could not retrieve blockchain data for {case.reported_address} "
                 f"from the {case.chain} data provider ({detail}). No trace was "
@@ -153,12 +178,19 @@ def trace_wallet_task(case_id: str) -> None:
             })
 
         # Clustering: common-input-ownership (Bitcoin, strong signal) +
-        # shared-funder fan-out (any chain, weaker signal) - both explainable,
-        # both computed from data already fetched during the trace.
-        clusters = common_input_clusters(result.chain_client, {n["address"] for n in result.nodes.values()})
+        # shared-funder fan-out (any chain, weaker signal) - both explainable.
+        # Only check the reported wallet and direct spending sources to keep
+        # execution fast and prevent public explorer 429 throttling.
+        source_addrs = {case.reported_address} | {
+            result.nodes[e["source"]]["address"]
+            for e in result.edges
+            if e.get("source") in result.nodes
+        }
+        clusters = common_input_clusters(result.chain_client, source_addrs)
         clusters += shared_funder_clusters(result.nodes, result.edges)
 
         case.status = "complete"
+        case.status_message = None  # a finished case must not advertise a hop
         case.hop_progress = result.hops_reached
         case.risk_score = score
         case.risk_breakdown = breakdown
@@ -196,6 +228,7 @@ def trace_wallet_task(case_id: str) -> None:
         case = db.get(Case, case_id)
         if case:
             case.status = "failed"
+            case.status_message = None
             case.error = str(exc)
             append_audit_event(db, case_id, "trace_failed", str(exc))
             db.commit()

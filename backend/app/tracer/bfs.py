@@ -1,4 +1,5 @@
 from collections import deque
+from typing import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field
 from typing import Any
@@ -99,7 +100,7 @@ def _fetch_level(client, level: list[tuple[str, int]]) -> dict[str, tuple[list, 
 
 
 def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
-                  on_hop: callable = None) -> TraceResult:
+                  on_hop: Callable[[int, int, int], None] | None = None) -> TraceResult:
     """Breadth-first walk of outgoing transfers from a reported wallet.
 
     Stops a branch as soon as it reaches a known exchange address (that's
@@ -151,8 +152,18 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
         while queue and queue[0][1] == current_hop:
             level.append(queue.popleft())
 
+        # BFS enqueues in non-decreasing hop order, so once the frontier
+        # reaches the limit every address still queued is at or beyond it.
+        # Breaking here is the same result as skipping each remaining level
+        # in turn, without the wasted passes.
         if current_hop >= hop_limit:
-            continue
+            break
+
+        # Report before fetching, not after. The fetch is the slow part, so
+        # a progress message written afterwards describes work the user
+        # already waited through.
+        if on_hop:
+            on_hop(current_hop, hop_limit, len(level))
 
         fetched = _fetch_level(client, level)
 
@@ -264,9 +275,6 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
                     "tainted_value": round(edge_taint, 12),
                 })
                 result.hops_reached = max(result.hops_reached, hop + 1)
-
-                if on_hop:
-                    on_hop(hop + 1, hop_limit)
 
                 if label and label["type"] == "exchange":
                     if not seen_exchange or hop + 1 < result.nearest_exchange["hops"]:
