@@ -16,12 +16,15 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* IBM Plex Sans carries institutional weight without ornament and holds
-     up at the 11-13px sizes this interface runs at. */
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  /* Public Sans is the typeface of the US Web Design System, drawn for
+     government interfaces rather than for marketing pages. It is slightly
+     narrow, which matters in dense tables, and it stays legible at the
+     11-13px this interface runs at. The choice is defensible in a review:
+     it is what a civic service is expected to look like. */
+  --font-sans: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
   /* Addresses and hashes are compared character by character. A mono face
      that disambiguates 0/O and 1/l is a correctness tool here, not a style. */
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-mono: 'Roboto Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
   /* Interaction accent. Institutional blue, deliberately a shade deeper and
      less saturated than the web-default link blue. */
