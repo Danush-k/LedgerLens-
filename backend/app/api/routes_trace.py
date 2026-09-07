@@ -1,10 +1,11 @@
 import csv
 import io
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import CurrentUser, get_current_user
+from app.auth.ratelimit import TRACE_LIMIT, limiter
 from app.chain_clients.base import Chain, normalize_address
 from app.config import get_settings
 from app.db.postgres import get_db
@@ -43,23 +44,25 @@ from app.chain_clients.base import Chain, is_valid_address, normalize_address
 
 
 @router.post("/trace", response_model=TraceAccepted, status_code=202)
-def submit_trace(request: TraceRequest, db: Session = Depends(get_db),
+@limiter.limit(TRACE_LIMIT)
+def submit_trace(request: Request, body: TraceRequest, db: Session = Depends(get_db),
                   user: CurrentUser = Depends(get_current_user)):
-    if not is_valid_address(request.address, request.chain):
+    if not is_valid_address(body.address, body.chain):
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid wallet address format for {request.chain.value.upper()}. "
-                   f"EVM addresses must be 42 characters starting with '0x'. "
-                   f"Bitcoin addresses must start with '1', '3', or 'bc1'."
+            detail=f"Invalid wallet address format for {body.chain.value.upper()}. "
+                   f"EVM addresses are 42 characters starting with '0x'. "
+                   f"Bitcoin addresses start with '1', '3' or 'bc1'. "
+                   f"Tron addresses are 34 characters starting with 'T'."
         )
 
     case = Case(
-        reported_address=normalize_address(request.address),
-        chain=request.chain.value,
-        complaint_ref=request.complaint_ref,
-        narrative=request.narrative,
+        reported_address=normalize_address(body.address),
+        chain=body.chain.value,
+        complaint_ref=body.complaint_ref,
+        narrative=body.narrative,
         status="queued",
-        hop_limit=request.hop_limit or get_settings().hop_limit,
+        hop_limit=body.hop_limit or get_settings().hop_limit,
         created_by=user.username,
     )
     db.add(case)
