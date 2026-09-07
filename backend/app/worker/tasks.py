@@ -122,13 +122,28 @@ def trace_wallet_task(case_id: str) -> None:
         shared_cases = shared_downstream_cases(db, case_id, case.chain)
 
         # "Has this exact wallet been reported before?" - the prior-report signal.
-        prior_report_count = (
-            db.query(TracedAddress)
+        #
+        # Counted as distinct complaints, not case rows. The signal is meant
+        # to mean independent corroboration: several victims naming the same
+        # wallet. Counting rows conflated that with the same wallet being
+        # traced repeatedly - re-running a trace to try a deeper hop limit,
+        # or an investigator checking their work, would inflate the score
+        # and the case would then cite itself as evidence against itself.
+        # Two cases count as separate complaints when they carry different
+        # complaint references, or were filed by different people.
+        prior_cases = (
+            db.query(Case.complaint_ref, Case.created_by)
+            .join(TracedAddress, TracedAddress.case_id == Case.id)
             .filter(TracedAddress.chain == case.chain,
-                    TracedAddress.address == case.reported_address,  # already normalized at submission
+                    TracedAddress.address == case.reported_address,  # normalized at submission
                     TracedAddress.case_id != case_id)
-            .count()
+            .all()
         )
+        distinct_complaints = {
+            (ref, submitter) if ref else ("__unreferenced__", submitter)
+            for ref, submitter in prior_cases
+        }
+        prior_report_count = len(distinct_complaints)
         db.add(TracedAddress(case_id=case_id, chain=case.chain, address=case.reported_address))
 
         # Pattern detection: turn the traced subgraph into structured,
@@ -159,6 +174,16 @@ def trace_wallet_task(case_id: str) -> None:
                 "transactions": [],
                 "addresses": sorted({a for c in shared_cases
                                      for a in c["shared_addresses"]})[:10],
+                # Which wallet ties this case to which other case. Flattening
+                # these into one address list loses the only part an
+                # investigator can act on: "9 wallets across 5 cases" is a
+                # statistic, whereas "this wallet also appears in case X" is
+                # a lead they can open.
+                "links": [
+                    {"case_id": c["case_id"],
+                     "shared_addresses": c["shared_addresses"][:10]}
+                    for c in shared_cases[:10]
+                ],
                 "flag": "shared_downstream",
             })
         if prior_report_count > 0:
