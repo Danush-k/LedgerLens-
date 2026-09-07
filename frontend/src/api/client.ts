@@ -2,6 +2,7 @@ import axios from 'axios'
 import { clearStoredAuth, getStoredToken } from '../auth/AuthContext'
 import type {
   AddressFootprint,
+  CaseLink,
   AuditChain,
   AnalyticsOverview,
   AuditEvent,
@@ -70,6 +71,11 @@ export async function parseComplaintText(text: string) {
 
 export async function listCases(filters: CaseFilters = {}) {
   const { data } = await api.get<CaseSummary[]>('/cases', { params: filters })
+  return data
+}
+
+export async function getCaseLinks(caseId: string) {
+  const { data } = await api.get<CaseLink[]>(`/cases/${caseId}/links`)
   return data
 }
 

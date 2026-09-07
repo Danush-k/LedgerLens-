@@ -279,3 +279,23 @@ export interface AuditChain {
   verification: AuditChainVerification
   entries: AuditChainEntry[]
 }
+
+
+/**
+ * One other case connected to this one, and the wallet that connects them.
+ *
+ * `same_wallet` means the identical address was reported again - the
+ * strongest link available. `shared_wallet` means the two traces pass
+ * through a wallet in common: corroboration from a separate victim, but not
+ * proof that one person controls both.
+ */
+export interface CaseLink {
+  case_id: string
+  complaint_ref: string | null
+  reported_address: string
+  risk_score: number | null
+  status: CaseStatus
+  created_at: string
+  relationship: 'same_wallet' | 'shared_wallet'
+  shared_addresses: string[]
+}
