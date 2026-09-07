@@ -1,0 +1,244 @@
+
+> ledgerlens-frontend@0.0.0 dev
+> vite --host
+
+2:36:56 PM [vite] (client) Re-optimizing dependencies because vite config has changed
+
+  VITE v8.2.2  ready in 468 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://10.59.143.142:5173/  en0
+2:36:59 PM [vite] (client) [Unhandled rejection] AxiosError: Request failed with status code 401
+ > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:109:8
+
+2:36:59 PM [vite] (client) [Unhandled rejection] AxiosError: Request failed with status code 401
+ > settle node_modules/axios/lib/core/settle.js:19:11
+ > XMLHttpRequest.onloadend node_modules/axios/lib/adapters/xhr.js:109:8
+
+3:17:48 PM [vite] (client) hmr update /src/index.css
+3:18:02 PM [vite] (client) hmr update /src/auth/AuthContext.tsx, /src/components/CommandPalette.tsx, /src/pages/BulkUpload.tsx, /src/pages/CaseList.tsx, /src/pages/CaseDetail.tsx, /src/pages/NewCase.tsx, /src/pages/Overview.tsx, /src/components/HashVerifierModal.tsx, /src/components/LegalNoticeModal.tsx, /src/components/SmartComplaintParser.tsx, /src/index.css
+3:18:02 PM [vite] (client) hmr invalidate /src/auth/AuthContext.tsx Could not Fast Refresh ("clearStoredAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:18:02 PM [vite] (client) page reload src/auth/AuthContext.tsx
+3:18:02 PM [vite] (client) [Unhandled error] Error: useAuth must be used within AuthProvider
+ > useAuth src/auth/AuthContext.tsx:72:18
+ > Login src/pages/Login.tsx:11:20
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+ > renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:10
+
+3:18:02 PM [vite] (client) [console.warn] An error occurred in the <Login> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+3:18:58 PM [vite] (client) hmr update /src/index.css
+3:19:09 PM [vite] (client) hmr update /src/index.css
+3:21:36 PM [vite] (client) hmr update /src/components/Sidebar.tsx, /src/index.css
+3:21:36 PM [vite] (client) hmr update /src/App.tsx, /src/index.css
+3:21:48 PM [vite] (client) hmr update /src/index.css, /src/components/ui/Primitives.tsx
+3:21:48 PM [vite] (client) hmr invalidate /src/components/ui/Primitives.tsx Could not Fast Refresh ("riskBand" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:21:48 PM [vite] (client) hmr update /src/pages/NetworkExplorer.tsx
+3:22:28 PM [vite] (client) hmr update /src/pages/Overview.tsx, /src/index.css
+3:22:56 PM [vite] (client) hmr update /src/index.css, /src/components/HorizontalBars.tsx
+3:22:56 PM [vite] (client) hmr update /src/pages/Overview.tsx, /src/index.css
+3:23:16 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+3:23:39 PM [vite] (client) hmr update /src/index.css, /src/components/NodeInspector.tsx
+3:24:10 PM [vite] (client) hmr update /src/index.css, /src/components/GraphView.tsx
+3:24:43 PM [vite] (client) hmr update /src/index.css, /src/components/GraphView.tsx
+3:29:23 PM [vite] (client) hmr update /src/index.css
+3:29:23 PM [vite] (client) hmr update /src/index.css, /src/pages/NetworkExplorer.tsx
+3:37:59 PM [vite] (client) page reload index.html
+3:37:59 PM [vite] (client) hmr update /src/index.css
+3:38:27 PM [vite] (client) hmr update /src/pages/Login.tsx, /src/index.css
+3:38:49 PM [vite] (client) hmr update /src/pages/Login.tsx, /src/index.css
+3:38:49 PM [vite] (client) hmr update /src/components/Sidebar.tsx, /src/index.css
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/SmartComplaintParser.tsx
+3:39:06 PM [vite] (client) hmr update /src/components/CommandPalette.tsx, /src/index.css
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/RelatedCases.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/HashVerifierModal.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/StatTile.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/GraphView.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/LegalNoticeModal.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/NodeInspector.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/RiskGauge.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/ClusterPanel.tsx
+3:39:06 PM [vite] (client) hmr update /src/index.css, /src/components/Skeleton.tsx
+3:39:06 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+3:39:06 PM [vite] (client) hmr update /src/pages/CaseList.tsx, /src/index.css
+3:39:06 PM [vite] (client) hmr update /src/pages/NewCase.tsx, /src/index.css
+3:39:06 PM [vite] (client) hmr update /src/pages/BulkUpload.tsx, /src/index.css
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/RelatedCases.tsx
+3:39:32 PM [vite] (client) hmr update /src/index.css
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/HashVerifierModal.tsx
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/GraphView.tsx
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/StatusBadge.tsx
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/LegalNoticeModal.tsx
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/FlagPill.tsx
+3:39:32 PM [vite] (client) hmr update /src/index.css, /src/components/ChainBadge.tsx
+3:39:32 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+3:39:32 PM [vite] (client) hmr update /src/pages/NewCase.tsx, /src/index.css
+3:39:32 PM [vite] (client) hmr update /src/pages/BulkUpload.tsx, /src/index.css
+3:39:45 PM [vite] (client) hmr update /src/index.css, /src/components/RelatedCases.tsx
+3:39:45 PM [vite] (client) hmr update /src/index.css, /src/components/StatusBadge.tsx
+3:39:45 PM [vite] (client) hmr update /src/index.css, /src/components/FlagPill.tsx
+3:39:45 PM [vite] (client) hmr update /src/pages/CaseList.tsx, /src/index.css
+3:39:45 PM [vite] (client) hmr update /src/pages/BulkUpload.tsx, /src/index.css
+3:39:57 PM [vite] (client) hmr update /src/pages/NewCase.tsx, /src/index.css
+3:40:21 PM [vite] (client) hmr update /src/auth/ProtectedRoute.tsx, /src/index.css
+3:40:21 PM [vite] (client) hmr update /src/index.css, /src/pages/NetworkExplorer.tsx
+3:40:21 PM [vite] (client) hmr update /src/pages/Overview.tsx, /src/index.css
+3:41:17 PM [vite] (client) hmr update /src/index.css, /src/components/Logo.tsx
+3:42:23 PM [vite] (client) hmr update /src/index.css, /src/components/Logo.tsx
+3:51:03 PM [vite] (client) hmr update /src/pages/Overview.tsx, /src/index.css
+3:51:24 PM [vite] (client) hmr update /src/pages/Overview.tsx, /src/index.css
+3:51:26 PM [vite] (client) hmr update /src/index.css, /src/pages/NetworkExplorer.tsx
+3:51:41 PM [vite] (client) hmr update /src/index.css, /src/pages/NetworkExplorer.tsx
+3:51:58 PM [vite] (client) hmr update /src/index.css, /src/components/ChainBadge.tsx
+3:51:58 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+3:51:58 PM [vite] (client) hmr update /src/pages/CaseList.tsx, /src/index.css
+3:51:58 PM [vite] (client) [console.error] [vite] Failed to reload /src/components/ChainBadge.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+3:51:58 PM [vite] (client) [console.error] [vite] Failed to reload /src/components/ChainBadge.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+3:51:58 PM [vite] (client) [console.error] [vite] Failed to reload /src/components/ChainBadge.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above)
+3:52:16 PM [vite] (client) hmr update /src/pages/NewCase.tsx, /src/index.css
+3:53:49 PM [vite] (client) hmr update /src/pages/Overview.tsx, /src/index.css
+3:58:11 PM [vite] (client) hmr update /src/index.css
+3:58:11 PM [vite] (client) hmr update /src/auth/AuthContext.tsx, /src/components/CommandPalette.tsx, /src/pages/BulkUpload.tsx, /src/pages/CaseList.tsx, /src/pages/CaseDetail.tsx, /src/pages/NewCase.tsx, /src/pages/Overview.tsx, /src/components/HashVerifierModal.tsx, /src/components/LegalNoticeModal.tsx, /src/components/SmartComplaintParser.tsx, /src/pages/NetworkExplorer.tsx, /src/index.css
+3:58:12 PM [vite] (client) hmr invalidate /src/auth/AuthContext.tsx Could not Fast Refresh ("clearStoredAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:58:12 PM [vite] (client) page reload src/auth/AuthContext.tsx
+3:58:12 PM [vite] (client) hmr invalidate /src/auth/AuthContext.tsx Could not Fast Refresh ("clearStoredAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:58:12 PM [vite] (client) page reload src/auth/AuthContext.tsx
+3:58:12 PM [vite] (client) hmr invalidate /src/auth/AuthContext.tsx Could not Fast Refresh ("clearStoredAuth" export is incompatible). Learn more at https://github.com/vitejs/vite-plugin-react/tree/main/packages/plugin-react#consistent-components-exports
+3:58:12 PM [vite] (client) page reload src/auth/AuthContext.tsx
+3:58:12 PM [vite] (client) [Unhandled error] Error: useAuth must be used within AuthProvider
+ > useAuth src/auth/AuthContext.tsx?t=1788774482064:72:18
+ > Login src/pages/Login.tsx?t=1788775943083:12:20
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+ > renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:10
+
+3:58:12 PM [vite] (client) [console.warn] An error occurred in the <Login> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+3:58:12 PM [vite] (client) [Unhandled error] Error: useAuth must be used within AuthProvider
+ > useAuth src/auth/AuthContext.tsx?t=1788774482064:72:18
+ > ProtectedRoute src/auth/ProtectedRoute.tsx?t=1788775943083:9:29
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+ > renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:10
+
+3:58:12 PM [vite] (client) [console.warn] An error occurred in the <ProtectedRoute> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+3:58:12 PM [vite] (client) [Unhandled error] Error: useAuth must be used within AuthProvider
+ > useAuth src/auth/AuthContext.tsx?t=1788774482064:72:18
+ > ProtectedRoute src/auth/ProtectedRoute.tsx?t=1788775943083:9:29
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25904:19
+ > renderWithHooks node_modules/react-dom/cjs/react-dom-client.development.js:7662:21
+ > updateFunctionComponent node_modules/react-dom/cjs/react-dom-client.development.js:10166:18
+ > beginWork node_modules/react-dom/cjs/react-dom-client.development.js:11778:17
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > performUnitOfWork node_modules/react-dom/cjs/react-dom-client.development.js:17641:21
+ > workLoopSync node_modules/react-dom/cjs/react-dom-client.development.js:17469:40
+ > renderRootSync node_modules/react-dom/cjs/react-dom-client.development.js:17450:10
+
+3:58:12 PM [vite] (client) [console.warn] An error occurred in the <ProtectedRoute> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+3:58:50 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+4:40:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:40:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:40:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:40:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:41:57 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:41:57 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:41:57 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:41:58 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:41:58 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:41:58 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:42:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:43:07 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:43:07 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:43:07 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:43:07 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:43:07 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:43:07 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:48:10 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+4:48:44 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+4:52:26 PM [vite] (client) hmr update /src/index.css
+4:52:48 PM [vite] (client) hmr update /src/pages/CaseDetail.tsx, /src/index.css
+4:58:18 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:58:18 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:58:18 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:58:18 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:58:18 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:58:18 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:59:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:59:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+4:59:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:11:46 PM [vite] (client) [console.warn] Feature flags __VUE_OPTIONS_API__, __VUE_PROD_DEVTOOLS__, __VUE_PROD_HYDRATION_MISMATCH_DETAILS__ are not explicitly defined. You are running the esm-bundler build of Vue, which expects these compile-time feature flags to be globally injected via the bundler config in order to get better tree-shaking in the production bundle.
+
+For more details, see https://link.vuejs.org/feature-flags.
+5:14:23 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:14:23 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:14:23 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:14:23 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:14:23 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:14:23 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:24 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:24 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:24 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:42 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:57 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:57 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:15:57 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:04 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:04 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:04 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:05 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:10 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:10 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:10 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:29 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:29 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:29 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:29 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:29 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:16:29 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:17:15 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:17:15 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:17:15 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:17:16 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:17:16 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:17:16 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:24:44 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:24:44 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:24:44 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:24:44 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:24:44 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.
+5:24:44 PM [vite] (client) [console.error] Encountered two children with the same key, `0`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or omitted — the behavior is unsupported and could change in a future version.

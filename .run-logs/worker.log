@@ -1,0 +1,75 @@
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+ 
+ -------------- celery@Danushs-MacBook-Air.local v5.4.0 (opalescent)
+--- ***** ----- 
+-- ******* ---- macOS-26.2-arm64-arm-64bit 2026-09-07 14:36:57
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         fraudmap:0x10a145690
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     redis://localhost:6379/0
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . trace_wallet_task
+
+[2026-09-07 14:36:58,130: WARNING/MainProcess] /Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2026-09-07 14:36:58,152: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-09-07 14:36:58,155: WARNING/MainProcess] /Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2026-09-07 14:36:58,170: INFO/MainProcess] mingle: searching for neighbors
+[2026-09-07 14:36:59,193: INFO/MainProcess] mingle: all alone
+[2026-09-07 14:36:59,209: INFO/MainProcess] celery@Danushs-MacBook-Air.local ready.
+./run-mac.sh: line 169: 34704 Killed: 9               ".venv/bin/celery" -A app.worker.celery_app worker --loglevel=info
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+ 
+ -------------- celery@Danushs-MacBook-Air.local v5.4.0 (opalescent)
+--- ***** ----- 
+-- ******* ---- macOS-26.2-arm64-arm-64bit 2026-09-07 14:53:29
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         fraudmap:0x109567f10
+- ** ---------- .> transport:   redis://localhost:6379/0
+- ** ---------- .> results:     redis://localhost:6379/0
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . trace_wallet_task
+
+[2026-09-07 14:53:29,790: WARNING/MainProcess] /Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2026-09-07 14:53:29,800: INFO/MainProcess] Connected to redis://localhost:6379/0
+[2026-09-07 14:53:29,800: WARNING/MainProcess] /Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/celery/worker/consumer/consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2026-09-07 14:53:29,804: INFO/MainProcess] mingle: searching for neighbors
+[2026-09-07 14:53:30,818: INFO/MainProcess] mingle: all alone
+[2026-09-07 14:53:30,853: INFO/MainProcess] celery@Danushs-MacBook-Air.local ready.

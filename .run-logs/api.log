@@ -1,0 +1,1516 @@
+INFO:     Will watch for changes in these directories: ['/Users/danush/Documents/Projects/sih/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [34703] using WatchFiles
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [34712]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50465 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50465 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50465 - "GET /analytics/overview HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:50472 - "GET /analytics/overview HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:50477 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50479 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50481 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50484 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50486 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:50489 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:50499 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50501 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50504 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50506 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50508 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50511 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50513 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50515 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50517 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50520 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50522 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50528 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50531 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50539 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50542 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50545 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50547 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50551 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50553 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50555 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50559 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50562 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50564 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50567 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50570 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50572 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50576 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50580 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50583 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50585 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50587 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50589 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50592 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50594 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50597 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50599 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50602 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50611 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50629 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50633 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50635 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50638 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50641 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50643 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50645 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50647 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50649 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50652 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50654 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50656 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50658 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50660 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50666 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50668 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50671 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50674 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50676 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50680 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50682 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50684 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50690 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/api/routes_trace.py', 'app/models/schemas.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [34712]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [45109]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50707 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:50710 - "POST /trace HTTP/1.1" 202 Accepted
+WARNING:  WatchFiles detected changes in 'app/tracer/clustering.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [45109]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [47743]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_clustering.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [47743]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [47936]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50805 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:50808 - "POST /trace HTTP/1.1" 202 Accepted
+WARNING:  WatchFiles detected changes in 'tests/test_convergence_pipeline.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [47936]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [50338]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:50832 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:50835 - "POST /trace HTTP/1.1" 202 Accepted
+Co-spend lookup failed for 14drZrrguhkD3G7V5hrVeCq4NZLqBLmCjN, skipping: HTTPSConnectionPool(host='blockstream.info', port=443): Read timed out.
+Co-spend lookup failed for 3GopZWttbQXxFx1QakC2MvXVwFMfRTzCHk, skipping: ('Connection aborted.', ConnectionResetError(54, 'Connection reset by peer'))
+INFO:     127.0.0.1:50887 - "GET /intel/convergence HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50893 - "GET /intel/address/bitcoin/bc1qy4s77p8j9wss0l3yrsu9rtu96fdf3dv6ug6ajt HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/tracer/bfs.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [50338]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [64849]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/tracer/bfs.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [64849]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [65177]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_taint.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [65177]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [65578]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/intel/entities.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [65578]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [66171]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_entities.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [66171]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [66551]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/models/orm.py', 'app/worker/tasks.py', 'app/api/routes_intel.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [66551]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [66920]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51129 - "GET /health HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/db/postgres.py', 'app/main.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [66920]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [74396]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51144 - "GET /health HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'tests/test_schema_migration.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [74396]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [74831]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51154 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:51170 - "GET /intel/convergence HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51172 - "GET /intel/entities HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/chain_clients/bitcoin.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [74831]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [76273]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/intel/entities.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [76273]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [76577]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_entities.py', 'tests/test_clustering.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [76577]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [76857]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51192 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51199 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51208 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51208 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51212 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51213 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51214 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51212 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51208 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51214 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51213 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51218 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51222 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51218 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51222 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51221 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51222 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51225 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51225 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51225 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51225 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51225 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51226 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51235 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51234 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51237 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51235 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51239 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51242 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51245 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51243 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51245 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51249 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51248 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51249 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51249 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51253 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51253 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51251 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51313 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51315 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51315 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51315 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51315 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51324 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51326 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51326 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51326 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51326 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51364 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51378 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51380 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51380 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51380 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51380 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51390 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51392 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51392 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51392 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51392 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51400 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51409 - "OPTIONS /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51409 - "POST /auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51409 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51414 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51415 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51409 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51415 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51415 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51415 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51415 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51415 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51417 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51413 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51419 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51427 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51426 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51429 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51427 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51427 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51426 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51429 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51426 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51436 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51436 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51437 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51436 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/models/orm.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [76857]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [97920]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/reports/audit_chain.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [97920]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [98288]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/routes_trace.py', 'app/integrations/mock_lea.py', 'app/api/routes_integrations.py', 'app/worker/tasks.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [98288]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [98592]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/routes_trace.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [98592]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [98827]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/routes_trace.py', 'app/api/routes_cases.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [98827]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [99168]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_audit_chain.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [99168]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [99687]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_audit_chain.py', 'app/reports/audit_chain.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [99687]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [1021]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_audit_chain.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1021]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [1235]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51590 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51592 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51594 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51590 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51597 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51592 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51599 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51594 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51594 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51590 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51590 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51600 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51610 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51613 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:51621 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51631 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51634 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51648 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51652 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51648 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51652 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51650 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51652 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51650 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51652 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51781 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51782 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51782 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51779 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51781 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51782 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51785 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51786 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51786 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51785 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51785 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51785 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51786 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51785 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51792 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51788 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51792 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51792 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51806 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51800 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51808 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51806 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51806 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51815 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51814 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51817 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51815 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51815 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51814 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51817 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51814 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51814 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51817 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51814 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51817 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51815 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51814 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51822 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51827 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51825 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51827 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51832 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51831 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51834 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51832 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51839 - "OPTIONS /cases/4447513a-4f9f-45e9-88be-57e005a73a1a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51840 - "OPTIONS /cases/4447513a-4f9f-45e9-88be-57e005a73a1a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51840 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51839 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51839 - "OPTIONS /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51839 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51839 - "OPTIONS /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51842 - "OPTIONS /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51840 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51839 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51842 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51842 - "GET /cases/4447513a-4f9f-45e9-88be-57e005a73a1a/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51851 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51856 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51856 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51856 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51856 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51857 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "OPTIONS /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "OPTIONS /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "GET /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "OPTIONS /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51865 - "OPTIONS /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51863 - "GET /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51865 - "GET /cases/72ee6be2-c2dd-416c-a073-3a8a68af77c6/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51865 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "OPTIONS /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51867 - "OPTIONS /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51867 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51867 - "OPTIONS /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51869 - "OPTIONS /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51867 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51859 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51867 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "OPTIONS /trace HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:51872 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51874 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51874 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51874 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51876 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51874 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51872 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51886 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/f113e215-cc3d-41a4-a9bc-b03837bad231/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51891 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51888 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in '.venv/lib/python3.11/site-packages/coverage/sqlitedb.py', '.venv/lib/python3.11/site-packages/coverage/numbits.py', '.venv/lib/python3.11/site-packages/coverage/inorout.py', '.venv/lib/python3.11/site-packages/coverage/bytecode.py', '.venv/lib/python3.11/site-packages/coverage/multiproc.py', '.venv/lib/python3.11/site-packages/coverage/exceptions.py', '.venv/lib/python3.11/site-packages/coverage/pytracer.py', '.venv/lib/python3.11/site-packages/coverage/parser.py', '.venv/lib/python3.11/site-packages/coverage/sqldata.py', '.venv/lib/python3.11/site-packages/coverage/python.py', '.venv/lib/python3.11/site-packages/coverage/env.py', '.venv/lib/python3.11/site-packages/coverage/__main__.py', '.venv/lib/python3.11/site-packages/coverage/files.py', '.venv/lib/python3.11/site-packages/coverage/html.py', '.venv/lib/python3.11/site-packages/coverage/plugin_support.py', '.venv/lib/python3.11/site-packages/coverage/config.py', '.venv/lib/python3.11/site-packages/coverage/jsonreport.py', '.venv/lib/python3.11/site-packages/coverage/data.py', '.venv/lib/python3.11/site-packages/pytest_cov/engine.py', '.venv/lib/python3.11/site-packages/coverage/pth_file.py', '.venv/lib/python3.11/site-packages/coverage/tomlconfig.py', '.venv/lib/python3.11/site-packages/coverage/version.py', '.venv/lib/python3.11/site-packages/coverage/phystokens.py', '.venv/lib/python3.11/site-packages/coverage/report_core.py', '.venv/lib/python3.11/site-packages/coverage/results.py', '.venv/lib/python3.11/site-packages/coverage/report.py', '.venv/lib/python3.11/site-packages/coverage/regions.py', '.venv/lib/python3.11/site-packages/coverage/misc.py', '.venv/lib/python3.11/site-packages/coverage/lcovreport.py', '.venv/lib/python3.11/site-packages/coverage/core.py', '.venv/lib/python3.11/site-packages/coverage/collector.py', '.venv/lib/python3.11/site-packages/pytest_cov/__init__.py', '.venv/lib/python3.11/site-packages/coverage/cmdline.py', '.venv/lib/python3.11/site-packages/coverage/__init__.py', '.venv/lib/python3.11/site-packages/pytest_cov/plugin.py', '.venv/lib/python3.11/site-packages/coverage/plugin.py', '.venv/lib/python3.11/site-packages/coverage/debug.py', '.venv/lib/python3.11/site-packages/coverage/templite.py', '.venv/lib/python3.11/site-packages/coverage/sysmon.py', '.venv/lib/python3.11/site-packages/coverage/control.py', '.venv/lib/python3.11/site-packages/coverage/xmlreport.py', '.venv/lib/python3.11/site-packages/coverage/patch.py', '.venv/lib/python3.11/site-packages/coverage/annotate.py', '.venv/lib/python3.11/site-packages/coverage/execfile.py', '.venv/lib/python3.11/site-packages/coverage/disposition.py', '.venv/lib/python3.11/site-packages/coverage/types.py', '.venv/lib/python3.11/site-packages/coverage/context.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [1235]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [9956]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:51907 - "POST /trace HTTP/1.1" 202 Accepted
+INFO:     127.0.0.1:51907 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51907 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51907 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51913 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51907 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51910 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51934 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51934 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51936 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51938 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51940 - "GET /intel/convergence HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51934 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51934 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51945 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51944 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51934 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51945 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51944 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51948 - "OPTIONS /intel/convergence?min_cases=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51948 - "GET /intel/convergence?min_cases=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51949 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51948 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51949 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51954 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51956 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51956 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51958 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51956 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51958 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51954 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51958 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51958 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51971 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51978 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51998 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51998 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52014 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/risk/rules.py', 'app/intel/convergence.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [9956]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [15081]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/worker/tasks.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15081]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [15311]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'tests/test_convergence.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15311]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [15691]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52037 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'app/reports/pdf.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [15691]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [16209]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/reports/pdf.py', 'app/api/routes_cases.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [16209]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [16467]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52057 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'tests/test_report.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [16467]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [16913]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/reports/pdf.py', 'app/tracer/bfs.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [16913]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [17242]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52085 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'tests/test_tracer.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [17242]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [17550]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'app/api/routes_cases.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [17550]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [18378]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52119 - "GET /cases HTTP/1.1" 200 OK
+WARNING:  WatchFiles detected changes in 'tests/test_analytics_and_cases_api.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [18378]
+/Users/danush/Documents/Projects/sih/backend/.venv/lib/python3.11/site-packages/requests/__init__.py:113: RequestsDependencyWarning: urllib3 (2.7.0) or chardet (7.6.0)/charset_normalizer (3.5.1) doesn't match a supported version!
+  warnings.warn(
+INFO:     Started server process [18606]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:52135 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52137 - "GET /cases?limit=3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52140 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/report HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52152 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52163 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52169 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52183 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52188 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52183 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52188 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52188 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52183 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52183 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52188 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52192 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52186 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52200 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52200 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52200 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52189 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52206 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52206 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52202 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52204 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52206 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52206 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52216 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52218 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52279 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52281 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52282 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52224 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52281 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52282 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52281 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52281 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52281 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52285 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52344 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52344 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52344 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52344 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52344 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52346 - "OPTIONS /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52287 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52344 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52346 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52346 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52348 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52355 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52357 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52359 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52359 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52357 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52357 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52359 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52357 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52357 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52357 - "GET /cases/df8362bc-a332-4775-81d8-dc03b6d2352b/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52361 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52369 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52370 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52369 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52367 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52370 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52369 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52374 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52373 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52376 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52374 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52378 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52385 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52380 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52387 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52385 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52391 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52391 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52391 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52391 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52395 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52395 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52395 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52391 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52393 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52398 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52400 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52402 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "OPTIONS /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52406 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52404 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /cases/b80302bf-8da3-484b-8f54-177204853dcf HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52408 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52416 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52416 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52418 - "OPTIONS /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52416 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52416 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52410 - "GET /cases/07b5e3a4-fc8e-4788-a376-d90e740a6819/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52423 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52426 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52424 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52426 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52426 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52424 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52426 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52424 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52423 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52426 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52428 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52430 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52430 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52435 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52440 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52444 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52454 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52455 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52455 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52454 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52454 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52454 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52454 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52457 - "OPTIONS /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52455 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52454 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52457 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/audit HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52457 - "GET /cases/56f70c34-a33e-4e0f-b4f3-59c838651857/related HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52460 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52463 - "OPTIONS /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52461 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52460 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52463 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52461 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52467 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52465 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52469 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52471 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52471 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52469 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52469 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52469 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52469 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52475 - "OPTIONS /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52469 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52475 - "GET /analytics/overview HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52474 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52475 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "OPTIONS /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52478 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52486 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52488 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52495 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52497 - "OPTIONS /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52495 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52494 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52497 - "GET /intel/entities HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52495 - "GET /intel/convergence?min_cases=2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52495 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52499 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52499 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52499 - "POST /cases/verify-hash HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52501 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52504 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52509 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52536 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52547 - "OPTIONS /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52547 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52555 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52558 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52561 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52563 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52574 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52579 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52584 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52586 - "GET /cases HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52588 - "GET /cases HTTP/1.1" 200 OK
