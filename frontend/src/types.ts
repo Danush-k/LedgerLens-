@@ -16,6 +16,20 @@ export interface GraphNode {
   chain: string
   node_type: NodeType
   label_name: string | null
+  hop: number
+  /** The specific transfer that pulled this wallet into the investigation. */
+  why_included?: string
+  provenance?: {
+    from_address: string
+    tx_hash: string
+    value: number
+    timestamp: number
+    hop: number
+  } | null
+  /** Victim funds attributable to this wallet (haircut method). */
+  tainted_value?: number
+  /** Share of value arriving here that is the victim's, 0-1. */
+  taint_ratio?: number
 }
 
 export interface GraphEdge {
@@ -25,6 +39,18 @@ export interface GraphEdge {
   value: number
   timestamp: number
   hop: number
+  tainted_value?: number
+}
+
+/** Evidence-backed finding from the pattern detectors. */
+export interface Pattern {
+  pattern: string
+  severity: 'high' | 'medium' | 'low'
+  title: string
+  evidence: string
+  transactions: string[]
+  addresses: string[]
+  flag: string | null
 }
 
 export interface NearestExchange {
@@ -61,6 +87,8 @@ export interface CaseDetail extends CaseSummary {
   risk_breakdown: Record<string, number> | null
   flags: string[] | null
   clusters: WalletCluster[] | null
+  patterns: Pattern[] | null
+  error: string | null
   typology_confidence: number | null
   recommended_action: string | null
   graph: { nodes: GraphNode[]; edges: GraphEdge[] } | null
@@ -147,3 +175,71 @@ export interface HashVerificationResult {
   message?: string
 }
 
+
+
+// ── Cross-case intelligence ───────────────────────────────────────────────
+
+export interface ConvergenceCase {
+  case_id: string
+  complaint_ref: string | null
+  reported_address: string
+  fraud_typology: string | null
+  risk_score: number | null
+  status: CaseStatus
+  created_at: string
+  hop: number
+  value_in: number
+}
+
+export interface ConvergencePoint {
+  chain: string
+  address: string
+  case_count: number
+  total_value: number
+  min_hop: number
+  node_type: string | null
+  label_name: string | null
+  cases: ConvergenceCase[]
+  evidence: string
+}
+
+export interface ConvergenceResult {
+  min_cases: number
+  count: number
+  convergence_points: ConvergencePoint[]
+  note: string
+}
+
+export interface Entity {
+  entity_id: string
+  chain: string
+  address_count: number
+  addresses: string[]
+  case_count: number
+  case_ids: string[]
+  complaint_refs: string[]
+  tainted_value: number
+  labels: string[]
+  possible_associates: string[]
+  evidence: string
+  /** Clusters too large to be one person - almost always an exchange. */
+  likely_service: boolean
+}
+
+export interface EntityResult {
+  count: number
+  entities: Entity[]
+  note: string
+}
+
+export interface AddressFootprint {
+  chain: string
+  address: string
+  case_count: number
+  total_value: number
+  min_hop: number
+  node_type: string | null
+  label_name: string | null
+  reported_directly: boolean
+  cases: ConvergenceCase[]
+}

@@ -81,6 +81,8 @@ def trace_wallet_task(case_id: str) -> None:
                 value_in=value_into.get(node["address"], 0.0),
                 node_type=node["node_type"],
                 label_name=node["label_name"],
+                tainted_value=node.get("tainted_value", 0.0),
+                taint_ratio=node.get("taint_ratio", 0.0),
             ))
 
         # "Has this exact wallet been reported before?" - the prior-report signal.

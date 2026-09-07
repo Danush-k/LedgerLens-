@@ -2,6 +2,7 @@ import { Copy, ExternalLink, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { GraphNode } from '../types'
 import { explorerUrl } from '../utils/explorer'
+import { TaintBar } from './ui/Primitives'
 
 const TYPE_LABELS: Record<string, string> = {
   reported: 'Reported wallet',
@@ -38,6 +39,32 @@ export function NodeInspector({ node, onClose }: { node: GraphNode; onClose: () 
           <X size={16} />
         </button>
       </div>
+
+      {/* Taint: the evidentiary claim about this wallet. "Connected to the
+          victim" is weak; a percentage is what supports a seizure request. */}
+      {node.taint_ratio !== undefined && (
+        <div className="mt-2.5 rounded border border-ink-200 bg-surface-sunk px-2.5 py-2">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wide text-ink-500">
+              Victim funds
+            </span>
+            <TaintBar ratio={node.taint_ratio} value={node.tainted_value} />
+          </div>
+          <p className="mt-1 text-[11px] leading-relaxed text-ink-500">
+            {Math.round(node.taint_ratio * 100)}% of the value reaching this wallet along
+            traced paths is attributable to the reported victim
+            {node.tainted_value !== undefined && ` (${node.tainted_value} ${node.chain})`}.
+          </p>
+        </div>
+      )}
+
+      {/* Provenance: why this wallet is in the investigation at all. */}
+      {node.why_included && (
+        <p className="mt-2 text-[11px] leading-relaxed text-ink-600">
+          <span className="font-semibold text-ink-500">Why included: </span>
+          {node.why_included}
+        </p>
+      )}
       <div className="mt-2 flex items-center gap-3">
         <button
           onClick={copyAddress}

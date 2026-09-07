@@ -7,6 +7,13 @@ from app.config import get_settings
 _SATOSHIS_PER_BTC = 100_000_000
 
 
+# Above this many inputs a transaction is a service consolidating deposits,
+# not one person spending from their own wallets. The threshold is generous:
+# a personal wallet rarely spends more than a handful of UTXOs at once, while
+# exchange sweeps run to hundreds or thousands.
+MAX_COSPEND_INPUTS = 50
+
+
 class BitcoinClient(ChainClient):
     """Reads outgoing transfers for a Bitcoin address via Blockstream's
     public Esplora API. Bitcoin uses the UTXO model, not the account model
@@ -71,6 +78,15 @@ class BitcoinClient(ChainClient):
         controls `address` too - a wallet can't spend a UTXO it doesn't
         hold the key for. That's a strong same-owner signal, not a guess.
         Reuses the same tx list `get_outgoing_transfers` already fetched.
+
+        Consolidation sweeps are excluded. An exchange periodically gathers
+        thousands of customer deposit addresses into one transaction, and
+        while the heuristic is still technically true there - the exchange
+        does hold all those keys - the "owner" it identifies is the exchange,
+        not a suspect. Merging on those transactions chains unrelated
+        customers into one entity of several thousand addresses, which is
+        how this heuristic produces a criminal organisation out of an
+        exchange's cold-storage routine.
         """
         co_spent: set[str] = set()
         for tx in self._get_txs(address):
@@ -79,6 +95,8 @@ class BitcoinClient(ChainClient):
                 for vin in tx.get("vin", [])
             }
             input_addrs.discard(None)
+            if len(input_addrs) > MAX_COSPEND_INPUTS:
+                continue  # consolidation sweep, not a personal wallet set
             if address in input_addrs and len(input_addrs) > 1:
                 co_spent |= input_addrs - {address}
         return co_spent

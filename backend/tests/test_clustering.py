@@ -71,3 +71,26 @@ def test_co_spend_failure_does_not_sink_the_trace():
     # The healthy address still yields its cluster; the failing one is skipped.
     assert len(clusters) == 1
     assert "bc1qgood" in clusters[0]["addresses"]
+
+
+def test_consolidation_sweeps_are_not_treated_as_one_wallet_set():
+    """An exchange gathering thousands of deposit addresses into one
+    transaction does technically satisfy common-input-ownership - it holds
+    all those keys - but the owner it identifies is the exchange. Merging on
+    it chains unrelated customers into one entity, which is how this
+    heuristic manufactures a syndicate out of a cold-storage routine."""
+    from app.chain_clients.bitcoin import MAX_COSPEND_INPUTS, BitcoinClient
+
+    sweep_inputs = [{"prevout": {"scriptpubkey_address": f"bc1qcustomer{i}"}}
+                    for i in range(MAX_COSPEND_INPUTS + 10)]
+    sweep_inputs.append({"prevout": {"scriptpubkey_address": "bc1qme"}})
+    normal_inputs = [{"prevout": {"scriptpubkey_address": "bc1qme"}},
+                     {"prevout": {"scriptpubkey_address": "bc1qmyother"}}]
+
+    client = BitcoinClient()
+    client._get_txs = lambda _addr: [{"vin": sweep_inputs}, {"vin": normal_inputs}]
+
+    co_spent = client.get_co_spent_addresses("bc1qme")
+
+    # The genuine two-input co-spend still merges.
+    assert co_spent == {"bc1qmyother"}

@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom'
 import { getCase, getRelatedCases } from '../api/client'
 import { ChainBadge } from '../components/ChainBadge'
 import { ClusterPanel } from '../components/ClusterPanel'
+import { FindingsPanel } from '../components/FindingsPanel'
 import { FlagPill } from '../components/FlagPill'
 import { GraphLegend } from '../components/GraphLegend'
 import { GraphView } from '../components/GraphView'
@@ -224,6 +225,10 @@ export function CaseDetail() {
             )}
           </div>
         </div>
+
+        {/* Findings carry the transaction hashes behind every claim, so they
+            sit with the graph rather than below the secondary panels. */}
+        <FindingsPanel patterns={caseData.patterns} chain={caseData.chain} />
 
         {/* Row 2: Clusters & Related Cases */}
         <div className="space-y-6">

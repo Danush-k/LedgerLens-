@@ -9,6 +9,7 @@ import { BulkUpload } from './pages/BulkUpload'
 import { CaseDetail } from './pages/CaseDetail'
 import { CaseList } from './pages/CaseList'
 import { Login } from './pages/Login'
+import { NetworkExplorer } from './pages/NetworkExplorer'
 import { NewCase } from './pages/NewCase'
 import { Overview } from './pages/Overview'
 import { useTheme } from './theme/ThemeContext'
@@ -38,6 +39,7 @@ function AppShell() {
             <Routes>
               <Route path="/" element={<Overview />} />
               <Route path="/cases" element={<CaseList />} />
+              <Route path="/network" element={<NetworkExplorer />} />
               <Route path="/new" element={<NewCase />} />
               <Route path="/bulk" element={<BulkUpload />} />
               <Route path="/cases/:caseId" element={<CaseDetail />} />

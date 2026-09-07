@@ -32,12 +32,14 @@ interface Props {
   onNodeClick?: (node: GraphNode) => void
 }
 
-type LayoutType = 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
+type LayoutType = 'hops' | 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
 
 export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Props) {
   const cyRef = useRef<Core | null>(null)
 
-  const [layoutName, setLayoutName] = useState<LayoutType>('breadthfirst')
+  // Money flows left to right by hop. A reader should never have to work
+  // out which direction the funds moved.
+  const [layoutName, setLayoutName] = useState<LayoutType>('hops')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [pathOnly, setPathOnly] = useState(false)
   const [showValues, setShowValues] = useState(true)
@@ -53,6 +55,8 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           label: n.label_name ?? `${n.address.slice(0, 6)}…${n.address.slice(-4)}`,
           type: n.node_type,
           fullAddress: n.address,
+          hop: n.hop ?? 0,
+          taint: n.taint_ratio ?? 0,
         },
         classes: [
           onPath ? 'on-path' : '',
@@ -69,6 +73,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           source: e.source,
           target: e.target,
           value: showValues ? formatAmount(e.value) : '',
+          amount: e.value,
         },
         classes: [
           onPath ? 'on-path' : '',
@@ -79,6 +84,15 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
 
     return [...nodeEls, ...edgeEls]
   }, [nodes, edges, highlightPath, pathOnly, showValues])
+
+  // Edge thickness is proportional to amount, so the main flow is visually
+  // obvious and dust transactions recede instead of competing with it.
+  // Scaled against the largest transfer in this graph rather than an
+  // absolute scale, since a graph may span eight orders of magnitude.
+  const maxAmount = useMemo(
+    () => Math.max(...edges.map((e) => e.value), Number.EPSILON),
+    [edges],
+  )
 
   const surface = '#ffffff'
   const labelColor = '#1f2328'
@@ -92,7 +106,21 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
     {
       selector: 'node',
       style: {
-        'background-color': (ele: any) => NODE_COLORS[ele.data('type')] ?? '#64748b',
+        // Known services keep their categorical colour; unlabeled wallets are
+        // shaded by taint, turning the graph into a heat map of where the
+        // victim's money actually went rather than a uniform blob of grey.
+        'background-color': (ele: any) => {
+          const type = ele.data('type')
+          if (type !== 'unresolved' && type !== 'intermediate') {
+            return NODE_COLORS[type] ?? '#64748b'
+          }
+          const t = ele.data('taint') ?? 0
+          if (t >= 0.75) return '#a83e14'
+          if (t >= 0.5) return '#cf7331'
+          if (t >= 0.25) return '#e0a154'
+          if (t > 0) return '#f0c98a'
+          return '#94a3b8'
+        },
         label: 'data(label)',
         color: labelColor,
         'font-size': 10,
@@ -123,7 +151,12 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
     {
       selector: 'edge',
       style: {
-        width: 1.5,
+        width: (ele: any) => {
+          const amount = ele.data('amount') ?? 0
+          // Square root keeps a 1000x value difference from becoming a 1000x
+          // stroke; the thinnest edge stays visible at 1px.
+          return 1 + 4 * Math.sqrt(Math.min(1, amount / maxAmount))
+        },
         'line-color': edgeLine,
         'target-arrow-color': edgeLine,
         'target-arrow-shape': 'triangle',
@@ -180,14 +213,48 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
     }
   }
 
+  /**
+   * Cytoscape has no hop-column layout, so 'hops' is resolved here into a
+   * preset with computed positions: x by hop distance, y stacked within the
+   * hop. Money then always reads left to right, which no force-directed
+   * layout guarantees - and on a 70-node graph that difference is the
+   * difference between a diagram and a hairball.
+   */
+  const resolveLayout = (name: LayoutType) => {
+    if (name !== 'hops') {
+      return { name, directed: true, padding: 36, spacingFactor: 1.4 }
+    }
+    const COLUMN = 190
+    const ROW = 74
+    const byHop = new Map<number, GraphNode[]>()
+    for (const n of nodes) {
+      const hop = n.hop ?? 0
+      byHop.set(hop, [...(byHop.get(hop) ?? []), n])
+    }
+    const positions: Record<string, { x: number; y: number }> = {}
+    for (const [hop, group] of byHop) {
+      group.forEach((n, i) => {
+        positions[n.id] = {
+          x: hop * COLUMN,
+          // Centre each column vertically so the trunk of the flow stays
+          // near the middle instead of hanging off the top edge.
+          y: (i - (group.length - 1) / 2) * ROW,
+        }
+      })
+    }
+    return {
+      name: 'preset',
+      positions: (node: any) => positions[node.id()] ?? { x: 0, y: 0 },
+      padding: 40,
+      fit: true,
+    }
+  }
+
   const handleLayoutChange = (newLayout: LayoutType) => {
     setLayoutName(newLayout)
     if (cyRef.current) {
       const layout = cyRef.current.layout({
-        name: newLayout,
-        directed: true,
-        padding: 30,
-        spacingFactor: 1.4,
+        ...resolveLayout(newLayout),
         animate: true,
         animationDuration: 400,
       } as any)
@@ -275,6 +342,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           className="rounded border-none bg-transparent px-2 py-1 text-xs font-medium text-ink-700 outline-hidden hover:bg-ink-100"
           title="Select Graph Layout"
         >
+          <option value="hops">Hop columns (flow left to right)</option>
           <option value="breadthfirst">Breadth-First (Hierarchical)</option>
           <option value="concentric">Concentric (Hops)</option>
           <option value="circle">Circular</option>
@@ -347,7 +415,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stylesheet={stylesheet as any}
         userZoomingEnabled={wheelZoomEnabled}
-        layout={{ name: layoutName, directed: true, padding: 36, spacingFactor: 1.4 }}
+        layout={resolveLayout(layoutName) as any}
         cy={(cy: Core) => {
           cyRef.current = cy
           cy.userZoomingEnabled(wheelZoomEnabled)

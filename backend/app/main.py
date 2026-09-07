@@ -11,7 +11,7 @@ from app.api.routes_trace import router as trace_router
 from app.auth.dependencies import get_current_user
 from app.config import get_settings
 from app.db.neo4j_client import load_seed_labels_into_neo4j
-from app.db.postgres import Base, SessionLocal, engine
+from app.db.postgres import Base, SessionLocal, engine, ensure_additive_schema
 
 app = FastAPI(
     title="LedgerLens — Real-Time Crypto Fraud Attribution System",
@@ -41,6 +41,7 @@ app.include_router(integrations_router)  # mixed: NCRP intake is a public-facing
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_additive_schema()
     load_seed_labels_into_neo4j()
     db = SessionLocal()
     try:

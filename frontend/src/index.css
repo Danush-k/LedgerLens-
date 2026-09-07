@@ -1,92 +1,143 @@
 @import "tailwindcss";
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   LedgerLens design system
+
+   Built for an investigator scanning two hundred cases, not for a reader.
+   Three rules hold the whole thing together:
+
+   1. Colour is semantic. Red is critical, amber needs attention, green is
+      resolved, and one accent marks what is interactive. Nothing is
+      coloured for decoration - if everything is coloured, nothing reads.
+   2. Density over whitespace. Rows, not cards with generous padding.
+   3. State is never colour alone. Every status carries a shape or a word
+      as well, because these screens are read on badly calibrated monitors
+      and by people who do not distinguish red from green.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  /* Addresses and hashes are compared character by character. A mono face
+     with disambiguated 0/O and 1/l is a correctness tool here, not a style. */
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Brand accent */
-  --color-brand-50: #ddf4ff;
-  --color-brand-100: #b6e3ff;
-  --color-brand-200: #80ccff;
-  --color-brand-300: #54aeff;
-  --color-brand-400: #2b8aef;
-  --color-brand-500: #0969da;
-  --color-brand-600: #0757ba;
-  --color-brand-700: #033d8b;
-  --color-brand-800: #04298f;
-  --color-brand-900: #0a1f44;
+  /* Interaction accent. Institutional blue, deliberately a shade deeper and
+     less saturated than the web-default link blue. */
+  --color-brand-50: #eef4fd;
+  --color-brand-100: #d8e6fa;
+  --color-brand-200: #b3ccf4;
+  --color-brand-300: #7da9e9;
+  --color-brand-400: #4a83d8;
+  --color-brand-500: #1f5eb8;
+  --color-brand-600: #1a4e9c;
+  --color-brand-700: #163f7d;
+  --color-brand-800: #143563;
+  --color-brand-900: #112a4c;
 
-  /* Neutral scale for all main-content surfaces/text */
-  --color-ink-50: #f6f8fa;
-  --color-ink-100: #eaeef2;
-  --color-ink-200: #d0d7de;
-  --color-ink-300: #afb8c1;
-  --color-ink-400: #8c959f;
-  --color-ink-500: #6e7781;
-  --color-ink-600: #57606a;
-  --color-ink-700: #424a53;
-  --color-ink-800: #32383f;
-  --color-ink-900: #24292f;
-  --color-ink-950: #1a1f24;
+  /* Neutrals, biased slightly cool toward the accent so greys read as
+     chosen rather than inherited. */
+  --color-ink-50: #f4f6f8;
+  --color-ink-100: #e8ecf1;
+  --color-ink-200: #d3dae3;
+  --color-ink-300: #b0bbc9;
+  --color-ink-400: #8593a5;
+  --color-ink-500: #647285;
+  --color-ink-600: #4d5a6b;
+  --color-ink-700: #3a4553;
+  --color-ink-800: #28313c;
+  --color-ink-900: #182029;
+  --color-ink-950: #0f151c;
 
-  /* Card/panel background */
   --color-surface: #ffffff;
-  --color-overlay: rgb(27 31 36 / 48%);
+  --color-surface-sunk: #eef1f5;
+  --color-overlay: rgb(15 21 28 / 55%);
 
-  /* Primary navigation rail. Dark by default; swaps to light alongside
-     the content palette below once the resolved theme is light. */
-  --color-chrome-bg: #0d1117;
-  --color-chrome-surface: #161b22;
-  --color-chrome-border: #30363d;
-  --color-chrome-border-subtle: #21262d;
-  --color-chrome-text-primary: #e6edf3;
-  --color-chrome-text-secondary: #8b949e;
-  --color-chrome-text-muted: #6e7681;
+  /* Navigation rail. Flips with the theme - see the blocks below. */
+  --color-chrome-bg: #131b24;
+  --color-chrome-surface: #1c262f;
+  --color-chrome-border: #2c3742;
+  --color-chrome-border-subtle: #222c36;
+  --color-chrome-text-primary: #e6ecf3;
+  --color-chrome-text-secondary: #93a2b3;
+  --color-chrome-text-muted: #6c7a8a;
 
-  --color-risk-low: #1a7f37;
-  --color-risk-medium: #9a6700;
-  --color-risk-high: #cf222e;
+  /* Semantic status. Never used decoratively. */
+  --color-critical: #b3261e;
+  --color-critical-soft: #fdecea;
+  --color-warning: #8a5a00;
+  --color-warning-soft: #fdf4e3;
+  --color-good: #116446;
+  --color-good-soft: #e6f4ee;
+  --color-info: #1f5eb8;
+  --color-info-soft: #eef4fd;
 
-  /* Chart categorical slots */
-  --chart-blue: #2a78d6;
-  --chart-orange: #eb6834;
-  --chart-aqua: #1baf7a;
-  --chart-yellow: #eda100;
-  --chart-magenta: #e87ba4;
+  /* Risk bands, matching the backend rubric: <35 low, 35-69 medium, >=70 high. */
+  --color-risk-low: #116446;
+  --color-risk-medium: #8a5a00;
+  --color-risk-high: #b3261e;
+
+  /* Taint heat. How much of a wallet is victim money - a sequential ramp,
+     deliberately distinct from the status colours so a heavily-tainted
+     wallet is never mistaken for a critical alert. */
+  --color-taint-0: #d3dae3;
+  --color-taint-25: #f0c98a;
+  --color-taint-50: #e0a154;
+  --color-taint-75: #cf7331;
+  --color-taint-100: #a83e14;
+
+  /* Categorical slots for charts. */
+  --chart-blue: #2f6fc4;
+  --chart-teal: #17796b;
+  --chart-plum: #7a4a86;
+  --chart-clay: #b06033;
+  --chart-moss: #5b7b34;
 }
 
-/* Theme resolution below: :root holds the light content palette and the
-   dark chrome palette as the fallback state. Each block that follows
-   flips one half in response to either an OS preference (when the user
-   hasn't chosen explicitly) or the explicit data-theme attribute that
-   ThemeContext sets, so content and chrome always switch together. */
-:root {
-  color-scheme: light;
-}
+:root { color-scheme: light; }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --color-ink-50: #0d1117;
-    --color-ink-100: #161b22;
-    --color-ink-200: #30363d;
-    --color-ink-300: #3d444d;
-    --color-ink-400: #545d68;
-    --color-ink-500: #8b949e;
-    --color-ink-600: #9ea7b3;
-    --color-ink-700: #b6bec7;
-    --color-ink-800: #d0d7de;
-    --color-ink-900: #e6edf3;
-    --color-ink-950: #f0f3f6;
-    --color-surface: #161b22;
-    --color-overlay: rgb(1 4 9 / 72%);
+    --color-ink-50: #0f151c;
+    --color-ink-100: #171f28;
+    --color-ink-200: #2a343f;
+    --color-ink-300: #3a4653;
+    --color-ink-400: #55636f;
+    --color-ink-500: #8593a5;
+    --color-ink-600: #9dabbb;
+    --color-ink-700: #b8c4d1;
+    --color-ink-800: #d3dae3;
+    --color-ink-900: #e6ecf3;
+    --color-ink-950: #f4f6f8;
+    --color-surface: #171f28;
+    --color-surface-sunk: #1e2831;
+    --color-overlay: rgb(4 8 12 / 72%);
+
+    --color-critical: #f2867c;
+    --color-critical-soft: #2e1614;
+    --color-warning: #dda33f;
+    --color-warning-soft: #2b2010;
+    --color-good: #52bd8f;
+    --color-good-soft: #10251c;
+    --color-info: #7da9e9;
+    --color-info-soft: #14243a;
+
+    --color-risk-low: #52bd8f;
+    --color-risk-medium: #dda33f;
+    --color-risk-high: #f2867c;
+
+    --color-taint-0: #2a343f;
+    --color-taint-25: #7a5a2c;
+    --color-taint-50: #a8763a;
+    --color-taint-75: #c98a46;
+    --color-taint-100: #e09a63;
   }
 }
 
 @media (prefers-color-scheme: light) {
-  :root:not([data-theme='dark']) {
-    --color-chrome-bg: var(--color-ink-50);
-    --color-chrome-surface: #ffffff;
+  :root:not([data-theme="dark"]) {
+    --color-chrome-bg: #ffffff;
+    --color-chrome-surface: var(--color-ink-50);
     --color-chrome-border: var(--color-ink-200);
     --color-chrome-border-subtle: var(--color-ink-100);
     --color-chrome-text-primary: var(--color-ink-900);
@@ -95,26 +146,46 @@
   }
 }
 
-:root[data-theme='dark'] {
+:root[data-theme="dark"] {
   color-scheme: dark;
-  --color-ink-50: #0d1117;
-  --color-ink-100: #161b22;
-  --color-ink-200: #30363d;
-  --color-ink-300: #3d444d;
-  --color-ink-400: #545d68;
-  --color-ink-500: #8b949e;
-  --color-ink-600: #9ea7b3;
-  --color-ink-700: #b6bec7;
-  --color-ink-800: #d0d7de;
-  --color-ink-900: #e6edf3;
-  --color-ink-950: #f0f3f6;
-  --color-surface: #161b22;
-  --color-overlay: rgb(1 4 9 / 72%);
+  --color-ink-50: #0f151c;
+  --color-ink-100: #171f28;
+  --color-ink-200: #2a343f;
+  --color-ink-300: #3a4653;
+  --color-ink-400: #55636f;
+  --color-ink-500: #8593a5;
+  --color-ink-600: #9dabbb;
+  --color-ink-700: #b8c4d1;
+  --color-ink-800: #d3dae3;
+  --color-ink-900: #e6ecf3;
+  --color-ink-950: #f4f6f8;
+  --color-surface: #171f28;
+  --color-surface-sunk: #1e2831;
+  --color-overlay: rgb(4 8 12 / 72%);
+
+  --color-critical: #f2867c;
+  --color-critical-soft: #2e1614;
+  --color-warning: #dda33f;
+  --color-warning-soft: #2b2010;
+  --color-good: #52bd8f;
+  --color-good-soft: #10251c;
+  --color-info: #7da9e9;
+  --color-info-soft: #14243a;
+
+  --color-risk-low: #52bd8f;
+  --color-risk-medium: #dda33f;
+  --color-risk-high: #f2867c;
+
+  --color-taint-0: #2a343f;
+  --color-taint-25: #7a5a2c;
+  --color-taint-50: #a8763a;
+  --color-taint-75: #c98a46;
+  --color-taint-100: #e09a63;
 }
 
-:root[data-theme='light'] {
-  --color-chrome-bg: var(--color-ink-50);
-  --color-chrome-surface: #ffffff;
+:root[data-theme="light"] {
+  --color-chrome-bg: #ffffff;
+  --color-chrome-surface: var(--color-ink-50);
   --color-chrome-border: var(--color-ink-200);
   --color-chrome-border-subtle: var(--color-ink-100);
   --color-chrome-text-primary: var(--color-ink-900);
@@ -126,19 +197,36 @@ body {
   font-family: var(--font-sans);
   background: var(--color-ink-50);
   color: var(--color-ink-900);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
 }
 
-::selection {
-  background: var(--color-brand-100);
+::selection { background: var(--color-brand-100); }
+
+/* Figures that sit in columns must line up, always. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Addresses and hashes: monospace, and never silently truncated by CSS -
+   a clipped address is a wrong address. */
+.addr {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: -0.01em;
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
+.scrollbar-thin::-webkit-scrollbar { width: 8px; height: 8px; }
 .scrollbar-thin::-webkit-scrollbar-thumb {
   background: var(--color-ink-300);
   border-radius: 999px;
+}
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+
+/* Keyboard focus is never removed, only restyled - these screens are
+   operated by keyboard as much as by mouse. */
+:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 1px;
+  border-radius: 3px;
 }
 
 @keyframes fade-in {
@@ -146,14 +234,22 @@ body {
   to { opacity: 1; }
 }
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-.animate-fade-in { animation: fade-in 120ms ease-out; }
-.animate-slide-up { animation: slide-up 140ms ease-out; }
+.animate-fade-in { animation: fade-in 110ms ease-out; }
+.animate-slide-up { animation: slide-up 130ms ease-out; }
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  50% { opacity: 0.45; }
 }
-.animate-skeleton { animation: skeleton-pulse 1.5s ease-in-out infinite; }
+.animate-skeleton { animation: skeleton-pulse 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

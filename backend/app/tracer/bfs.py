@@ -85,6 +85,11 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
         "hop": 0,
         "why_included": "Reported by the complainant as the suspect wallet.",
         "provenance": None,  # the root has no upstream edge inside this trace
+        # Taint: how much of this wallet is attributable to the victim.
+        # Everything leaving the reported wallet is victim funds by
+        # definition, so the root starts fully tainted.
+        "tainted_value": 0.0,
+        "taint_ratio": 1.0,
     }
 
     visited: set[str] = {root_uid}
@@ -113,6 +118,28 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
         fan_out = len({t.to_address for t in transfers})
         if fan_out > 10:
             result.flags.add("high_fan_out")
+
+        # Taint propagation, haircut method. A wallet that received 1 unit of
+        # victim funds and sends 10 units is sending money that is 10% the
+        # victim's, so each outgoing transfer carries that proportion. This
+        # is what lets the system say "3.4% of this wallet is victim funds"
+        # instead of the far weaker "this wallet is connected".
+        #
+        # A forward-only trace sees outflows in full but only the inflows
+        # that came from traced ancestors, so total inflow is unknown and
+        # total outflow stands in for it. The ratio is capped at 1.0: a
+        # wallet cannot forward more victim funds than reached it, and the
+        # shortfall is simply value it retained.
+        from_uid = _uid(chain_value, address)
+        from_node = result.nodes.get(from_uid, {})
+        total_out = sum(t.value for t in transfers)
+        if hop == 0:
+            taint_ratio = 1.0
+        elif total_out > 0:
+            taint_ratio = min(1.0, from_node.get("tainted_value", 0.0) / total_out)
+        else:
+            taint_ratio = 0.0
+        from_node["taint_ratio"] = taint_ratio
 
         for transfer in transfers[:MAX_BREADTH_PER_NODE]:
             if len(result.nodes) >= MAX_NODES or len(result.edges) >= MAX_EDGES:
@@ -153,15 +180,23 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
                         "timestamp": transfer.timestamp,
                         "hop": hop + 1,
                     },
+                    "tainted_value": 0.0,
+                    "taint_ratio": 0.0,
                 }
 
+            edge_taint = transfer.value * taint_ratio
+            result.nodes[to_uid]["tainted_value"] = round(
+                result.nodes[to_uid].get("tainted_value", 0.0) + edge_taint, 12)
+
             result.edges.append({
-                "source": _uid(chain_value, address),
+                "source": from_uid,
                 "target": to_uid,
                 "tx_hash": transfer.tx_hash,
                 "value": transfer.value,
                 "timestamp": transfer.timestamp,
                 "hop": hop + 1,
+                # The share of this transfer attributable to the victim.
+                "tainted_value": round(edge_taint, 12),
             })
             result.hops_reached = max(result.hops_reached, hop + 1)
 
@@ -204,4 +239,36 @@ def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
     if result.fetch_errors and not result.root_fetch_failed:
         result.flags.add("partial_data")
 
+    _finalize_taint(result)
     return result
+
+
+def _finalize_taint(result: TraceResult) -> None:
+    """Restate every node's taint as one consistent, explainable ratio.
+
+    During the walk, taint_ratio is a propagation coefficient (victim share
+    of a wallet's *outflow*) and it is only set on wallets the trace
+    actually stepped through - leaves such as exchange deposits never get
+    one. For display and reporting a single definition is needed that holds
+    for every node, so it is restated here as:
+
+        of the value that reached this wallet along traced paths,
+        this share is attributable to the victim
+
+    The reported wallet is 1.0 by definition. Absolute tainted_value is
+    unchanged - only the ratio is normalized.
+    """
+    inflow: dict[str, float] = {}
+    for edge in result.edges:
+        inflow[edge["target"]] = inflow.get(edge["target"], 0.0) + edge["value"]
+
+    for uid, node in result.nodes.items():
+        if node["hop"] == 0:
+            node["taint_ratio"] = 1.0
+            continue
+        received = inflow.get(uid, 0.0)
+        node["taint_ratio"] = (
+            round(min(1.0, node.get("tainted_value", 0.0) / received), 6)
+            if received > 0 else 0.0
+        )
+        node["tainted_value"] = round(node.get("tainted_value", 0.0), 8)

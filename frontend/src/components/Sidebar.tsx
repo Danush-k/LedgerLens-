@@ -1,13 +1,34 @@
-import { BarChart3, FolderSearch, LayoutGrid, LogOut, ShieldCheck, Upload, UserCircle2 } from 'lucide-react'
+import {
+  BarChart3, FolderSearch, LayoutGrid, LogOut, Network, ShieldCheck, Upload, UserCircle2,
+} from 'lucide-react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { ThemeToggle } from './ThemeToggle'
 
-const NAV_ITEMS = [
-  { to: '/', label: 'Overview', icon: BarChart3, end: true },
-  { to: '/cases', label: 'Cases', icon: LayoutGrid, end: false },
-  { to: '/new', label: 'New trace', icon: FolderSearch, end: false },
-  { to: '/bulk', label: 'Bulk upload', icon: Upload, end: false },
+// Grouped by what an investigator is doing, not by data model. "Intelligence"
+// is deliberately its own section: it answers questions about the whole case
+// load rather than about one complaint.
+const NAV_GROUPS = [
+  {
+    label: 'Investigate',
+    items: [
+      { to: '/', label: 'Command centre', icon: BarChart3, end: true },
+      { to: '/cases', label: 'Cases', icon: LayoutGrid, end: false },
+    ],
+  },
+  {
+    label: 'Intelligence',
+    items: [
+      { to: '/network', label: 'Network explorer', icon: Network, end: false },
+    ],
+  },
+  {
+    label: 'Intake',
+    items: [
+      { to: '/new', label: 'New trace', icon: FolderSearch, end: false },
+      { to: '/bulk', label: 'Bulk upload', icon: Upload, end: false },
+    ],
+  },
 ]
 
 export function Sidebar() {
@@ -26,23 +47,32 @@ export function Sidebar() {
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              `flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
-                isActive
-                  ? 'bg-brand-500/15 text-brand-300'
-                  : 'text-chrome-text-secondary hover:bg-chrome-border-subtle hover:text-chrome-text-primary'
-              }`
-            }
-          >
-            <Icon size={17} />
-            {label}
-          </NavLink>
+      <nav className="flex-1 space-y-4 px-3">
+        {NAV_GROUPS.map(group => (
+          <div key={group.label}>
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-chrome-text-muted">
+              {group.label}
+            </p>
+            <div className="space-y-0.5">
+              {group.items.map(({ to, label, icon: Icon, end }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  end={end}
+                  className={({ isActive }) =>
+                    `flex items-center gap-2.5 rounded px-3 py-1.5 text-[13px] font-medium transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-brand-500 text-white'
+                        : 'text-chrome-text-secondary hover:bg-chrome-border-subtle hover:text-chrome-text-primary'
+                    }`
+                  }
+                >
+                  <Icon size={15} />
+                  {label}
+                </NavLink>
+              ))}
+            </div>
+          </div>
         ))}
       </nav>
 

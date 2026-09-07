@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { clearStoredAuth, getStoredToken } from '../auth/AuthContext'
 import type {
+  AddressFootprint,
   AnalyticsOverview,
   AuditEvent,
   BulkUploadResult,
@@ -8,6 +9,8 @@ import type {
   CaseFilters,
   CaseSummary,
   Chain,
+  ConvergenceResult,
+  EntityResult,
   HashVerificationResult,
   LegalNoticeParams,
   MlStatus,
@@ -131,3 +134,22 @@ export async function verifyEvidenceHash(hash: string, caseId?: string) {
   return data
 }
 
+
+// ── Cross-case intelligence ───────────────────────────────────────────────
+
+export async function getConvergence(minCases = 2, chain?: string) {
+  const { data } = await api.get<ConvergenceResult>('/intel/convergence', {
+    params: { min_cases: minCases, chain },
+  })
+  return data
+}
+
+export async function getEntities(chain?: string) {
+  const { data } = await api.get<EntityResult>('/intel/entities', { params: { chain } })
+  return data
+}
+
+export async function getAddressFootprint(chain: string, address: string) {
+  const { data } = await api.get<AddressFootprint>(`/intel/address/${chain}/${address}`)
+  return data
+}

@@ -119,5 +119,10 @@ class CaseAddress(Base):
     # unrelated people by design; they are noise here, not signal.
     node_type: Mapped[str | None] = mapped_column(String, nullable=True)
     label_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    # Share of the value reaching this address attributable to the victim,
+    # from the haircut computation in tracer/bfs.py. "Connected to the
+    # victim" is weak; "holds 3.4% victim funds" is actionable.
+    tainted_value: Mapped[float] = mapped_column(Float, default=0.0)
+    taint_ratio: Mapped[float] = mapped_column(Float, default=0.0)
 
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

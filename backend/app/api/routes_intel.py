@@ -16,6 +16,7 @@ from app.intel.convergence import (
     address_footprint,
     find_convergence_points,
 )
+from app.intel.entities import entity_for_address, resolve_entities
 
 router = APIRouter(prefix="/intel", tags=["intelligence"])
 
@@ -86,3 +87,41 @@ def address_intel(chain: str, address: str, db: Session = Depends(get_db)):
             f"not about the address.",
         )
     return footprint
+
+
+@router.get("/entities")
+def entities(
+    db: Session = Depends(get_db),
+    chain: str | None = Query(None),
+    min_addresses: int = Query(2, ge=2, le=100),
+):
+    """Addresses grouped into the actors that control them.
+
+    Merging is on common-input-ownership only - a fact about which key
+    signed a transaction. Weaker association signals are reported per entity
+    as possible associates but never merged, because wrongly fusing two
+    entities manufactures a criminal organisation out of unrelated people.
+    """
+    resolved = resolve_entities(db, chain=chain, min_addresses=min_addresses)
+    return {
+        "count": len(resolved),
+        "entities": [e.as_dict() for e in resolved],
+        "note": (
+            "Entities are derived from common-input-ownership, which establishes "
+            "shared control of the addresses but not the controller's identity."
+        ),
+    }
+
+
+@router.get("/entities/address/{address}")
+def entity_of_address(address: str, db: Session = Depends(get_db)):
+    """The entity a specific address belongs to."""
+    entity = entity_for_address(db, normalize_address(address))
+    if not entity:
+        raise HTTPException(
+            404,
+            f"{address} is not part of any resolved entity. It may simply never "
+            f"have been co-spent with another address - absence of a cluster is "
+            f"not evidence the wallet stands alone.",
+        )
+    return entity.as_dict()
