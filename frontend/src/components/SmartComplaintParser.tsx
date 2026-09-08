@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { ArrowRight, FileSearch, Loader2 } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { ArrowRight, FileSearch, Loader2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
-import { parseComplaintText } from '../api/client'
+import { parseComplaintDocument, parseComplaintText } from '../api/client'
 import type { Chain, ParsedComplaintResult, ParsedWallet } from '../types'
 
 interface Props {
@@ -12,6 +12,8 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
   const [rawText, setRawText] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ParsedComplaintResult | null>(null)
+  const [sourceFile, setSourceFile] = useState<string | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
 
   const handleParse = async () => {
     if (!rawText.trim()) {
@@ -34,8 +36,42 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
     }
   }
 
+  /**
+   * Read an uploaded FIR instead of asking for it to be retyped.
+   *
+   * The extracted text is put in the textarea rather than hidden, so the
+   * investigator can see exactly what the system read before acting on it.
+   * A wallet address transcribed by hand and mistyped traces a stranger's
+   * wallet with full confidence, which is the failure this avoids - but
+   * only if what was read stays visible for checking.
+   */
+  const handleFile = async (file: File) => {
+    setLoading(true)
+    setResult(null)
+    try {
+      const data = await parseComplaintDocument(file)
+      setSourceFile(data.source_filename ?? file.name)
+      if (data.extracted_text) setRawText(data.extracted_text)
+      setResult(data)
+      if (data.extracted_count === 0) {
+        toast.info(`Read ${file.name}, but found no wallet addresses in it.`)
+      } else {
+        toast.success(`Found ${data.extracted_count} wallet address(es) in ${file.name}`)
+      }
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })
+        .response?.data?.detail
+      // The server distinguishes "could not read this" from "read it and
+      // found nothing" - passing that through is the whole point.
+      toast.error(detail ?? 'Could not read that document.')
+    } finally {
+      setLoading(false)
+      if (fileInput.current) fileInput.current.value = ''
+    }
+  }
+
   const handleUseWallet = (wallet: ParsedWallet) => {
-    const chain = (wallet.chain === 'tron' ? 'ethereum' : wallet.chain) as Chain
+    const chain = wallet.chain as Chain
     onSelectWallet({
       address: wallet.address,
       chain,
@@ -49,7 +85,34 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
     <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-xs">
       <div className="pb-3">
         <h3 className="text-sm font-semibold text-ink-900">Smart Intake — Extract from FIR / Complaint Narrative</h3>
-        <p className="text-xs text-ink-500">Paste unformatted victim emails, NCRP reports, or FIR transcripts to auto-detect wallets &amp; entities.</p>
+        <p className="text-xs text-ink-500">Upload an FIR as PDF or Word, or paste the text, to auto-detect wallets &amp; entities.</p>
+      </div>
+
+      {/* Upload first: a complaint arrives as a document, and retyping a
+          wallet address out of one is where transcription errors enter. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-ink-300 bg-ink-50/50 px-3 py-2.5">
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".pdf,.docx,.doc,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) handleFile(f)
+          }}
+          className="hidden"
+          id="fir-upload"
+        />
+        <button
+          type="button"
+          onClick={() => fileInput.current?.click()}
+          disabled={loading}
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-300 bg-surface px-3 py-1.5 text-xs font-medium text-ink-800 transition-colors hover:border-brand-500 hover:text-brand-600 disabled:opacity-50"
+        >
+          <Upload size={13} /> Upload FIR document
+        </button>
+        <span className="text-[11px] text-ink-500">
+          {sourceFile ? `Read from ${sourceFile}` : 'PDF or Word (.docx). Scanned images need OCR first.'}
+        </span>
       </div>
 
       <div className="space-y-3">
