@@ -35,3 +35,4 @@ backend/reports_output/
 # Local runtime logs
 .run-logs/
 
+.backups/

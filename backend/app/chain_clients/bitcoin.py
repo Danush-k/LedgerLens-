@@ -28,7 +28,7 @@ MAX_COSPEND_INPUTS = 50
 
 def _read_esplora(session: requests.Session, base_url: str, address: str) -> list[dict]:
     """Blockstream and other Esplora hosts, which need no translation."""
-    response = get_with_retry(session, f"{base_url}/address/{address}/txs", attempts=2)
+    response = get_with_retry(session, f"{base_url}/address/{address}/txs", attempts=4)
     return response.json()
 
 
@@ -41,7 +41,7 @@ def _read_blockchain_info(session: requests.Session, base_url: str,
     """
     response = get_with_retry(
         session, f"{base_url}/rawaddr/{address}",
-        params={"limit": 50}, attempts=2)
+        params={"limit": 50}, attempts=4)
     payload = response.json()
 
     normalised: list[dict] = []
@@ -67,7 +67,13 @@ def _read_blockchain_info(session: requests.Session, base_url: str,
 _PROVIDERS = [
     ("blockstream.info", "https://blockstream.info/api", _read_esplora),
     ("blockchain.info", "https://blockchain.info", _read_blockchain_info),
-    ("mempool.space", "https://mempool.space/api", _read_esplora),
+    # mempool.space is deliberately absent. It serves the same Esplora API
+    # and would be a natural third option, but it is unreachable from both
+    # the host and the container here, and its failure mode is the expensive
+    # kind: DNS resolution hangs, which no request timeout covers, so each
+    # address paid roughly 84 seconds before falling through. A fallback
+    # that cannot be reached is not redundancy, it is a tax on every fetch.
+    # Restore it only alongside a resolver-level timeout.
 ]
 
 

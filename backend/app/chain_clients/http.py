@@ -101,8 +101,9 @@ def get_with_retry(session: requests.Session, url: str, params: dict | None = No
             response.raise_for_status()
             return response
         except requests.RequestException as exc:
-            # A reset connection is the same message as a 429, delivered at
-            # the socket instead of in a status line.
+            # A reset connection, or an SSL EOF mid-handshake, is the same
+            # message as a 429 delivered at a lower layer. Both clear on a
+            # retry, so both are treated as throttling rather than failure.
             last_exc = exc
             if attempt < attempts - 1:
                 time.sleep(_backoff(attempt))
