@@ -1,7 +1,7 @@
 import csv
 import io
 
-from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import CurrentUser, get_current_user
@@ -28,6 +28,7 @@ def dispatch_trace_task(case_id: str) -> None:
 
 from pydantic import BaseModel
 from app.risk.complaint_parser import parse_complaint_text
+from app.risk.document_text import UnreadableDocument, extract_text
 
 
 class ParseComplaintRequest(BaseModel):
@@ -38,6 +39,29 @@ class ParseComplaintRequest(BaseModel):
 def parse_complaint(request: ParseComplaintRequest, user: CurrentUser = Depends(get_current_user)):
     """Extract candidate wallets, chains, tx hashes, and UPI identifiers from raw complaint text."""
     return parse_complaint_text(request.text)
+
+
+@router.post("/trace/parse-document")
+async def parse_document(file: UploadFile = File(...),
+                          user: CurrentUser = Depends(get_current_user)):
+    """Read an uploaded FIR and extract the same fields as pasted text.
+
+    Complaints arrive as documents, and retyping a wallet address out of one
+    is the likeliest place for a transcription error to enter a case - a
+    mistyped address traces a stranger's wallet with full confidence. The
+    extracted text is returned alongside the parse so the investigator can
+    see what the system actually read before acting on it.
+    """
+    data = await file.read()
+    try:
+        text = extract_text(file.filename or "", data)
+    except UnreadableDocument as exc:
+        # A document we could not read is not a complaint with no wallets in
+        # it. Saying which it is points at the fix.
+        raise HTTPException(422, str(exc))
+
+    parsed = parse_complaint_text(text)
+    return {**parsed, "source_filename": file.filename, "extracted_text": text[:20000]}
 
 
 from app.chain_clients.base import Chain, is_valid_address, normalize_address
