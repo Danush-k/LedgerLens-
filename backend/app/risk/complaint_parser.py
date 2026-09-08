@@ -22,8 +22,14 @@ _COMPLAINT_REF_REGEX = re.compile(
     re.IGNORECASE)
 
 # Amounts & Currencies
+# The separator excludes newlines and the figure needs more than one digit.
+# With "\s*" a currency symbol at the end of one line bound to the first
+# digit of the next, so a Word FIR yielded the amount "RS\n2" - which is
+# not wrong so much as meaningless, and it renders as broken text wherever
+# the extracted figure is shown back to the investigator.
 _AMOUNT_REGEX = re.compile(
-    r"(?:(?:Rs\.?|INR|₹|\$|USD)\s*([0-9,]+(?:\.[0-9]+)?)|([0-9,]+(?:\.[0-9]+)?)\s*(?:ETH|BTC|USDT|BNB|MATIC|TRX|SOL|INR|USD|Rupees))",
+    r"(?:(?:Rs\.?|INR|₹|\$|USD)[^\S\n]*([0-9][0-9,]{1,}(?:\.[0-9]+)?)"
+    r"|([0-9][0-9,]*(?:\.[0-9]+)?)[^\S\n]*(?:ETH|BTC|USDT|BNB|MATIC|TRX|SOL|INR|USD|Rupees))",
     re.IGNORECASE,
 )
 
@@ -127,7 +133,7 @@ def parse_complaint_text(text: str) -> dict[str, Any]:
     # 7. Amounts
     amounts = []
     for match in _AMOUNT_REGEX.finditer(text):
-        matched_str = match.group(0).strip()
+        matched_str = re.sub(r"\s+", " ", match.group(0)).strip()
         if matched_str and matched_str not in amounts:
             amounts.append(matched_str)
 
