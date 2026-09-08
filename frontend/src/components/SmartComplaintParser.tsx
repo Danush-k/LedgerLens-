@@ -4,6 +4,26 @@ import { toast } from 'sonner'
 import { parseComplaintDocument, parseComplaintText } from '../api/client'
 import type { Chain, ParsedComplaintResult, ParsedWallet } from '../types'
 
+/**
+ * The part of an FIR worth classifying.
+ *
+ * The typology classifier reads this narrative, and an FIR opens with pages
+ * of station names, section numbers and form headings. Feeding it the first
+ * 500 characters hands it the letterhead and none of the offence. Where the
+ * document marks its facts section, that is used; otherwise the text is
+ * passed through and the classifier does what it can.
+ */
+const FACTS_HEADING =
+  /(?:brief\s+facts|facts\s+of\s+the\s+case|complaint\s+narrative|details?\s+of\s+(?:the\s+)?(?:offence|incident))[^\n]*\n/i
+
+function narrativeFrom(text: string): string {
+  const match = text.match(FACTS_HEADING)
+  const body = match
+    ? text.slice((match.index ?? 0) + match[0].length)
+    : text
+  return body.replace(/\s+/g, ' ').trim().slice(0, 2000)
+}
+
 interface Props {
   onSelectWallet: (wallet: { address: string; chain: Chain; complaintRef?: string; narrative: string }) => void
 }
@@ -53,10 +73,20 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
       setSourceFile(data.source_filename ?? file.name)
       if (data.extracted_text) setRawText(data.extracted_text)
       setResult(data)
+
       if (data.extracted_count === 0) {
         toast.info(`Read ${file.name}, but found no wallet addresses in it.`)
+        return
+      }
+
+      if (data.wallets.length === 1) {
+        // One wallet is not a choice, so make it. Asking for a confirming
+        // click after an unambiguous read is a step with no decision in it.
+        fillForm(data.wallets[0], data)
+        toast.success(`Read ${file.name} — form filled from the document.`)
       } else {
-        toast.success(`Found ${data.extracted_count} wallet address(es) in ${file.name}`)
+        toast.success(
+          `Found ${data.extracted_count} wallets in ${file.name}. Pick the suspect wallet below.`)
       }
     } catch (err) {
       const detail = (err as { response?: { data?: { detail?: string } } })
@@ -70,15 +100,32 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
     }
   }
 
-  const handleUseWallet = (wallet: ParsedWallet) => {
-    const chain = wallet.chain as Chain
+  /**
+   * Hand a parsed wallet to the trace form.
+   *
+   * The complaint reference is chosen rather than taken first: a real FIR
+   * mentions several, and the acknowledgement number is the one that
+   * identifies the complaint across systems, whereas the internal FIR
+   * serial only means something inside one station.
+   */
+  const fillForm = (wallet: ParsedWallet, source: ParsedComplaintResult) => {
+    const refs = source.complaint_refs ?? []
+    const preferred =
+      refs.find(r => /ncrp/i.test(r)) ??
+      refs.find(r => /fir/i.test(r) && /\d{3,}/.test(r)) ??
+      refs[0]
+
     onSelectWallet({
       address: wallet.address,
-      chain,
-      complaintRef: result?.complaint_refs[0] || '',
-      narrative: rawText.slice(0, 500),
+      chain: wallet.chain as Chain,
+      complaintRef: preferred,
+      narrative: narrativeFrom(rawText),
     })
-    toast.success(`Populated form with ${wallet.address.slice(0, 10)}...`)
+  }
+
+  const handleUseWallet = (wallet: ParsedWallet) => {
+    if (result) fillForm(wallet, result)
+    toast.success(`Populated form with ${wallet.address.slice(0, 10)}…`)
   }
 
   return (
@@ -154,8 +201,29 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
               <span className="text-xs font-medium text-brand-900">
                 Detected Suspect Wallets ({result.wallets.length})
               </span>
-              <span className="text-[11px] text-ink-500">Click &quot;Auto-Fill&quot; to populate form</span>
+              <span className="text-[11px] text-ink-500">
+                {result.wallets.length === 1
+                  ? 'Filled into the trace form below'
+                  : 'Choose the suspect wallet to fill the form'}
+              </span>
             </div>
+
+            {(result.complaint_refs?.length > 0 || result.amounts?.length > 0) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 border-b border-brand-100 pb-2 text-[11px] text-ink-600">
+                {result.complaint_refs?.length > 0 && (
+                  <span>
+                    <span className="text-ink-500">Reference: </span>
+                    {result.complaint_refs.slice(0, 2).join(' · ')}
+                  </span>
+                )}
+                {result.amounts?.length > 0 && (
+                  <span>
+                    <span className="text-ink-500">Amount: </span>
+                    {result.amounts[0]}
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               {result.wallets.map((w, idx) => (
