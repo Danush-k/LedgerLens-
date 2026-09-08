@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { CheckCircle2, Download, FileText, Loader2, ShieldCheck, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { downloadLegalNotice } from '../api/client'
+import { describeDownloadError, downloadLegalNotice } from '../api/client'
 import type { CaseDetail, LegalNoticeParams } from '../types'
 
 interface Props {
@@ -41,8 +41,11 @@ export function LegalNoticeModal({ caseDetail, open, onClose }: Props) {
       await downloadLegalNotice(caseDetail.id, params)
       toast.success('Legal Preservation Notice generated & downloaded!')
       onClose()
-    } catch {
-      toast.error('Failed to generate legal notice')
+    } catch (err) {
+      // Surface what actually went wrong. A bare "failed to generate" sent
+      // us hunting through a working endpoint for a fault that was really
+      // the API being down - the server states the reason, so show it.
+      toast.error(await describeDownloadError(err))
     } finally {
       setLoading(false)
     }

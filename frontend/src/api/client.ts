@@ -64,6 +64,20 @@ export async function submitBulkTrace(file: File) {
   return data
 }
 
+export async function parseComplaintDocument(file: File) {
+  const form = new FormData()
+  form.append('file', file)
+  const { data } = await api.post<ParsedComplaintResult & {
+    source_filename?: string
+    extracted_text?: string
+  }>('/trace/parse-document', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    // Reading a large PDF takes longer than a JSON round trip.
+    timeout: 60_000,
+  })
+  return data
+}
+
 export async function parseComplaintText(text: string) {
   const { data } = await api.post<ParsedComplaintResult>('/trace/parse-complaint', { text })
   return data
@@ -116,6 +130,38 @@ export async function downloadReport(caseId: string) {
   link.click()
   link.remove()
   window.URL.revokeObjectURL(url)
+}
+
+/**
+ * Turn a failed file download into a sentence worth reading.
+ *
+ * These endpoints answer with a Blob, so an error body arrives as a Blob
+ * too and never reaches the usual `error.response.data.detail` path. Left
+ * alone the caller can only say "it failed", which is what sent us auditing
+ * a perfectly healthy endpoint while the real cause was the API not running
+ * at all.
+ */
+export async function describeDownloadError(err: unknown): Promise<string> {
+  const e = err as { response?: { status?: number; data?: unknown }; code?: string }
+
+  if (e.code === 'ERR_NETWORK') {
+    return 'Cannot reach the API. Check that the backend is running.'
+  }
+  if (e.code === 'ECONNABORTED') {
+    return 'The request timed out before the document was ready.'
+  }
+
+  const data = e.response?.data
+  if (data instanceof Blob) {
+    try {
+      const parsed = JSON.parse(await data.text())
+      if (parsed?.detail) return String(parsed.detail)
+    } catch {
+      // Not JSON - fall through to the status-based message below.
+    }
+  }
+  if (e.response?.status) return `Server returned ${e.response.status}.`
+  return 'Could not generate the document.'
 }
 
 export async function downloadLegalNotice(caseId: string, params: LegalNoticeParams) {
