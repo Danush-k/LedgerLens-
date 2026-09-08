@@ -16,11 +16,25 @@ import type { Chain, ParsedComplaintResult, ParsedWallet } from '../types'
 const FACTS_HEADING =
   /(?:brief\s+facts|facts\s+of\s+the\s+case|complaint\s+narrative|details?\s+of\s+(?:the\s+)?(?:offence|incident))[^\n]*\n/i
 
+/**
+ * Where the complainant's account stops.
+ *
+ * An FIR continues past the facts into what the station did and who signed
+ * it. Reading to the end of the document swept "ACTION TAKEN" and the
+ * signature block into the narrative, so the case header quoted the
+ * investigating officer back at themselves. A numbered heading, or a
+ * signature line, marks the end of the account.
+ */
+const NEXT_SECTION =
+  /\n\s*(?:\d{1,2}\s*[.)]\s*[A-Z][A-Z\s/&-]{4,}|(?:SIGNATURE|ACTION\s+TAKEN|VERIFICATION)\b)/
+
 function narrativeFrom(text: string): string {
   const match = text.match(FACTS_HEADING)
-  const body = match
-    ? text.slice((match.index ?? 0) + match[0].length)
-    : text
+  let body = match ? text.slice((match.index ?? 0) + match[0].length) : text
+
+  const end = body.match(NEXT_SECTION)
+  if (end?.index != null) body = body.slice(0, end.index)
+
   return body.replace(/\s+/g, ' ').trim().slice(0, 2000)
 }
 
