@@ -55,6 +55,43 @@ function StalledNotice({ lastProgressAt }: { lastProgressAt?: string | null }) {
   )
 }
 
+/**
+ * The complainant's account, available but not in the way.
+ *
+ * An FIR narrative runs to several hundred words, and rendering it whole as
+ * an italic pull-quote gave the complaint more visual weight than the trace
+ * it produced - the graph and the findings, which are the reason the page
+ * exists, were pushed below the fold behind text the investigator wrote
+ * themselves and already knows.
+ *
+ * Two lines are enough to confirm this is the right case; the rest is one
+ * click away, because the full text does matter when a claim in it needs
+ * checking against the chain.
+ */
+function ComplaintNarrative({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false)
+  const isLong = text.length > 240
+
+  return (
+    <div className="mt-2 max-w-3xl border-l-2 border-ink-200 pl-3">
+      <p className={`text-[13px] leading-relaxed text-ink-600 ${
+        expanded || !isLong ? '' : 'line-clamp-2'
+      }`}>
+        {text}
+      </p>
+      {isLong && (
+        <button
+          onClick={() => setExpanded(v => !v)}
+          aria-expanded={expanded}
+          className="mt-1 cursor-pointer text-[11px] font-medium text-brand-600 hover:underline"
+        >
+          {expanded ? 'Show less' : 'Read full complaint'}
+        </button>
+      )}
+    </div>
+  )
+}
+
 export function CaseDetail() {
   const { caseId } = useParams<{ caseId: string }>()
   const [caseData, setCaseData] = useState<CaseDetailType | null>(null)
@@ -150,9 +187,7 @@ export function CaseDetail() {
               Hop {caseData.hop_progress} / {caseData.hop_limit}
             </span>
           </div>
-          {caseData.narrative && (
-            <p className="mt-2 max-w-xl text-sm italic text-ink-500">&quot;{caseData.narrative}&quot;</p>
-          )}
+          {caseData.narrative && <ComplaintNarrative text={caseData.narrative} />}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
