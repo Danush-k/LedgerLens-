@@ -50,7 +50,83 @@ class Case(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
+    # ── Live monitoring ────────────────────────────────────────────────
+    # A completed trace describes the chain as it was at one moment. The
+    # wallets in it keep spending afterwards, and a wallet that moves funds
+    # to an exchange an hour after the report is the single most actionable
+    # thing that can happen to a case - it is also the thing a static
+    # snapshot can never show. These columns record what the watcher has
+    # seen since, so the page can say "checked 20 seconds ago, two new
+    # transfers" rather than presenting stale data as current.
+    #
+    # Watching costs explorer quota, so it is on only while someone is
+    # looking at the case, unless live_watch is set - that is the explicit
+    # "keep watching this one in the background" request.
+    live_watch: Mapped[bool] = mapped_column(default=False)
+    live_checked_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+    live_event_count: Mapped[int] = mapped_column(Integer, default=0)
+    live_last_event_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True)
+
     audit_events: Mapped[list["AuditEvent"]] = relationship(back_populates="case")
+
+
+class LiveTransfer(Base):
+    """One transfer observed *after* the trace that opened the case finished.
+
+    Kept as its own append-only table rather than only inside the case's
+    graph JSON, for two reasons. It is evidence with its own timeline - when
+    the money moved and when this system first saw it move are different
+    facts, and both matter to an investigator arguing about how quickly a
+    freeze request went out. And it survives a page reload: a feed rebuilt
+    from a live stream alone would show an empty history to whoever opens
+    the case next.
+    """
+
+    __tablename__ = "live_transfers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    case_id: Mapped[str] = mapped_column(String, ForeignKey("cases.id"), index=True)
+    chain: Mapped[str] = mapped_column(String)
+    tx_hash: Mapped[str] = mapped_column(String, index=True)
+    from_address: Mapped[str] = mapped_column(String, index=True)
+    to_address: Mapped[str] = mapped_column(String, index=True)
+    value: Mapped[float] = mapped_column(Float, default=0.0)
+    # When the transfer was mined, per the explorer.
+    timestamp: Mapped[int] = mapped_column(Integer, default=0)
+    hop: Mapped[int] = mapped_column(Integer, default=0)
+    # What the receiving wallet is, where the label set knows it. Recorded at
+    # detection time so the feed can say "moved to Binance" without a join.
+    to_node_type: Mapped[str | None] = mapped_column(String, nullable=True)
+    to_label_name: Mapped[str | None] = mapped_column(String, nullable=True)
+    # When this system first saw it - distinct from `timestamp` above.
+    detected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class SuspectDecision(Base):
+    """An investigator's ruling on one wallet the system put forward as a suspect.
+
+    The ranking is the system's inference; this row is the officer's
+    judgement, and the two are kept apart on purpose. A report goes to an
+    exchange or a court under an officer's name, so only wallets a person has
+    reviewed and confirmed may appear in it - a wallet the algorithm ranked
+    highly but nobody looked at is a lead, not an accusation.
+
+    One row per (case, address), updated in place; every change is also
+    written to the audit chain, which is where the history lives.
+    """
+
+    __tablename__ = "suspect_decisions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    case_id: Mapped[str] = mapped_column(String, ForeignKey("cases.id"), index=True)
+    chain: Mapped[str] = mapped_column(String)
+    address: Mapped[str] = mapped_column(String, index=True)
+    status: Mapped[str] = mapped_column(String, default="pending")  # pending|confirmed|dismissed
+    note: Mapped[str | None] = mapped_column(String, nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String, nullable=True)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class TracedAddress(Base):

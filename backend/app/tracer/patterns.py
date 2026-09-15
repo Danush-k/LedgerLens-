@@ -524,3 +524,9 @@ def flags_from_patterns(patterns: list[dict]) -> set[str]:
     """Collapse structured evidence back into the flat flag strings the
     risk scorer and the existing UI badges consume."""
     return {p["flag"] for p in patterns if p.get("flag")}
+
+
+# Public names for the formatting helpers, for modules that describe the
+# same trace in prose (intel/suspects.py) and must say amounts the same way.
+format_amount = _fmt
+short_address = _short

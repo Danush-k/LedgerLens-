@@ -40,7 +40,8 @@ def _snapshot_hash(case: Case) -> str:
     return hashlib.sha256(payload).hexdigest()
 
 
-def build_case_report(case: Case, audit: dict | None = None) -> bytes:
+def build_case_report(case: Case, audit: dict | None = None,
+                      confirmed_suspects: list[dict] | None = None) -> bytes:
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2 * cm, bottomMargin=2 * cm)
     styles = getSampleStyleSheet()
@@ -72,6 +73,34 @@ def build_case_report(case: Case, audit: dict | None = None) -> bytes:
         ("FONTSIZE", (0, 0), (-1, -1), 9),
     ]))
     story.append(table)
+    story.append(Spacer(1, 0.5 * cm))
+
+    # Confirmed suspects only. The ranking itself is an investigative aid;
+    # what this document names is what an officer reviewed and stood behind.
+    story.append(Paragraph("Confirmed suspects", styles["Heading2"]))
+    if confirmed_suspects:
+        suspect_rows = [["#", "Wallet", "Role", "Victim funds", "Confirmed by"]]
+        for i, s in enumerate(confirmed_suspects, start=1):
+            suspect_rows.append([
+                str(i),
+                Paragraph(f"<font face='Courier' size='7'>{s['address']}</font>", styles["BodyText"]),
+                Paragraph(s["role_title"], styles["BodyText"]),
+                f"{s['victim_funds']:.6f}".rstrip("0").rstrip(".") + f" {s.get('unit') or ''}",
+                s["decision"].get("decided_by") or "—",
+            ])
+        suspect_table = Table(suspect_rows, colWidths=[0.8 * cm, 6.8 * cm, 3.4 * cm, 3 * cm, 3 * cm])
+        suspect_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e293b")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ]))
+        story.append(suspect_table)
+    else:
+        story.append(Paragraph(
+            "No suspects have been confirmed by the investigating officer at the time of export.",
+            styles["Italic"]))
     story.append(Spacer(1, 0.5 * cm))
 
     story.append(Paragraph("Recommended action", styles["Heading2"]))

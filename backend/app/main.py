@@ -11,12 +11,14 @@ from app.api.routes_auth import seed_default_users
 from app.api.routes_cases import router as cases_router
 from app.api.routes_integrations import router as integrations_router
 from app.api.routes_intel import router as intel_router
+from app.api.routes_live import router as live_router
 from app.api.routes_trace import router as trace_router
 from app.auth.dependencies import get_current_user
 from app.auth.ratelimit import limiter
 from app.config import get_settings
 from app.db.neo4j_client import load_seed_labels_into_neo4j
 from app.db.postgres import Base, SessionLocal, engine, ensure_additive_schema
+from app.live.monitor import live_monitor
 from app.worker.reaper import reap_stale_traces
 
 def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
@@ -64,6 +66,11 @@ app.include_router(cases_router, dependencies=authenticated)
 app.include_router(analytics_router, dependencies=authenticated)
 app.include_router(intel_router, dependencies=authenticated)
 app.include_router(integrations_router)  # mixed: NCRP intake is a public-facing webhook, see below
+# The live stream authenticates itself: a browser's EventSource cannot send
+# an Authorization header, so the token arrives in the query string and is
+# checked inside the route. Every other route on this router declares the
+# usual dependency.
+app.include_router(live_router)
 
 
 @app.on_event("startup")
@@ -83,6 +90,15 @@ def on_startup() -> None:
                 f"Marked {reaped} trace(s) as failed - their worker did not survive")
     finally:
         db.close()
+
+    # A finished trace is not the end of the story - the wallets in it keep
+    # moving. This watches the ones somebody is actually looking at.
+    live_monitor.start()
+
+
+@app.on_event("shutdown")
+def on_shutdown() -> None:
+    live_monitor.stop()
 
 
 @app.get("/health")

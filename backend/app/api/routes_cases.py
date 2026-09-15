@@ -5,13 +5,17 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
+from app.auth.dependencies import CurrentUser, get_current_user
 from app.db.neo4j_client import shortest_path_to_exchange
+from app.intel.suspects import DECISION_STATUSES, build_suspects, record_decision
 from app.db.postgres import get_db
+from app.live.monitor import live_monitor
 from app.models.orm import AuditEvent, Case, TracedAddress
 from app.models.schemas import CaseOut, CaseSummary
-from app.reports.audit_chain import verify_audit_chain
+from app.reports.audit_chain import append_audit_event, verify_audit_chain
 from app.reports.legal_notice import build_legal_notice
 from app.reports.pdf import _snapshot_hash, build_case_report
+from app.reports.suspect_report import build_suspect_report
 
 router = APIRouter(prefix="/cases", tags=["cases"])
 
@@ -118,6 +122,11 @@ def get_case(case_id: str, db: Session = Depends(get_db)):
     case = db.get(Case, case_id)
     if not case:
         raise HTTPException(404, "Case not found")
+    # Reading a case is what puts it on the live watch list. Tying monitoring
+    # to attention rather than to a setting means the explorer quota is spent
+    # on the case someone is working, and stops being spent when they close
+    # it - without anyone having to remember to turn it off.
+    live_monitor.mark_viewed(case_id)
     return case
 
 
@@ -323,7 +332,10 @@ def get_case_report(case_id: str, db: Session = Depends(get_db)):
     # The report carries the audit verification alongside its own snapshot
     # hash, so a reader gets the evidence and the record of how it was
     # produced in one document.
-    pdf_bytes = build_case_report(case, audit=verify_audit_chain(db, case_id).as_dict())
+    confirmed = [s for s in build_suspects(db, case)["suspects"]
+                 if s["decision"]["status"] == "confirmed"]
+    pdf_bytes = build_case_report(case, audit=verify_audit_chain(db, case_id).as_dict(),
+                                  confirmed_suspects=confirmed)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -365,3 +377,86 @@ def get_audit_chain(case_id: str, db: Session = Depends(get_db)):
             for e in entries
         ],
     }
+
+
+# ── Suspects ──────────────────────────────────────────────────────────────
+
+class SuspectDecisionRequest(BaseModel):
+    status: str
+    note: str | None = None
+
+
+@router.get("/{case_id}/suspects")
+def get_suspects(case_id: str, db: Session = Depends(get_db)):
+    """The case read for an investigator: a plain summary and ranked suspects.
+
+    Computed on request from the stored graph rather than stored itself, so
+    movement found by live monitoring, a new linked complaint, or an
+    officer's ruling all show up the next time the page asks.
+    """
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    return build_suspects(db, case)
+
+
+@router.put("/{case_id}/suspects/{address}")
+def decide_suspect(case_id: str, address: str, body: SuspectDecisionRequest,
+                   db: Session = Depends(get_db),
+                   user: CurrentUser = Depends(get_current_user)):
+    """Confirm, dismiss or reopen a suspect. Confirmed suspects go into the report."""
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    if body.status not in DECISION_STATUSES:
+        raise HTTPException(422, f"status must be one of {sorted(DECISION_STATUSES)}")
+    if case.status != "complete":
+        raise HTTPException(409, "Suspects can be reviewed once the trace has finished")
+
+    addresses = {n["address"] for n in (case.graph or {}).get("nodes") or []}
+    if address not in addresses:
+        raise HTTPException(404, "That wallet is not part of this case")
+
+    decision = record_decision(db, case, address, body.status, body.note, user.username)
+    verb = {"confirmed": "confirmed as a suspect", "dismissed": "dismissed as a suspect",
+            "pending": "returned to review"}[body.status]
+    append_audit_event(
+        db, case_id, f"suspect_{body.status}",
+        f"{address} {verb} by {user.username}"
+        + (f'. Note: "{decision.note}"' if decision.note else "."),
+    )
+    db.commit()
+
+    suspect = next((s for s in build_suspects(db, case)["suspects"] if s["address"] == address),
+                   None)
+    return {"address": address, "decision": {
+        "status": decision.status, "note": decision.note, "decided_by": decision.decided_by,
+        "decided_at": decision.decided_at}, "suspect": suspect}
+
+
+@router.get("/{case_id}/suspect-report")
+def get_suspect_report(case_id: str, db: Session = Depends(get_db),
+                       user: CurrentUser = Depends(get_current_user)):
+    """PDF of confirmed suspects only, each with the evidence behind it."""
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    result = build_suspects(db, case)
+    if not result["ready"]:
+        raise HTTPException(409, result["reason"])
+    confirmed = [s for s in result["suspects"] if s["decision"]["status"] == "confirmed"]
+    if not confirmed:
+        raise HTTPException(409, "No suspects have been confirmed yet. Confirm at least one "
+                                 "suspect to include in the report.")
+
+    pdf_bytes, report_hash = build_suspect_report(case, result["summary"], confirmed,
+                                                   user.username)
+    append_audit_event(db, case_id, "suspect_report_generated",
+                       f"Suspect report with {len(confirmed)} confirmed suspect(s) generated by "
+                       f"{user.username}. SHA-256 {report_hash}.")
+    db.commit()
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="suspect-report-{case_id}.pdf"'},
+    )

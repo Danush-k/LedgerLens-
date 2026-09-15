@@ -25,6 +25,21 @@ class Settings(BaseSettings):
     # Tracer behaviour
     hop_limit: int = 5
 
+    # Live monitoring
+    #
+    # A completed trace is a photograph of a moving target: the wallets in it
+    # keep spending after the trace ends, and the movement that happens while
+    # a case is open is the movement an investigator can still act on. These
+    # bound how hard the system looks. The binding constraint is the free
+    # explorers' rate limit, so a case is only watched while somebody is
+    # actually looking at it (or has explicitly asked for it to be watched),
+    # and only a handful of its wallets are re-checked per cycle.
+    live_monitor_enabled: bool = True
+    live_poll_seconds: int = 30       # how often a watched case is re-checked
+    live_watch_addresses: int = 8     # wallets re-checked per case per cycle
+    live_viewer_ttl_seconds: int = 90  # how long an open page keeps a case watched
+    live_max_cases_per_tick: int = 4  # ceiling on concurrent explorer pressure
+
     # Datastores
     database_url: str = "postgresql+psycopg2://fraudmap:fraudmap@localhost:5432/fraudmap"
     neo4j_uri: str = "bolt://localhost:7687"

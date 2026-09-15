@@ -15,8 +15,11 @@ import type {
   EntityResult,
   HashVerificationResult,
   LegalNoticeParams,
+  LiveTransfer,
   MlStatus,
   ParsedComplaintResult,
+  SuspectStatus,
+  SuspectsResult,
 } from '../types'
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
@@ -209,5 +212,62 @@ export async function getAddressFootprint(chain: string, address: string) {
 
 export async function getAuditChain(caseId: string) {
   const { data } = await api.get<AuditChain>(`/cases/${caseId}/audit`)
+  return data
+}
+
+
+// ── Suspects ──────────────────────────────────────────────────────────────
+
+export async function getSuspects(caseId: string) {
+  const { data } = await api.get<SuspectsResult>(`/cases/${caseId}/suspects`)
+  return data
+}
+
+export async function decideSuspect(caseId: string, address: string, status: SuspectStatus,
+                                    note?: string | null) {
+  const { data } = await api.put(`/cases/${caseId}/suspects/${encodeURIComponent(address)}`, {
+    status,
+    note: note ?? null,
+  })
+  return data
+}
+
+export async function downloadSuspectReport(caseId: string) {
+  const { data } = await api.get(`/cases/${caseId}/suspect-report`, {
+    responseType: 'blob',
+    timeout: 60_000,
+  })
+  const url = window.URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `suspect-report-${caseId}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+
+// ── Live monitoring ───────────────────────────────────────────────────────
+
+/** EventSource cannot send headers, so the stream takes the token in the URL. */
+export function liveStreamUrl(caseId: string) {
+  const token = getStoredToken()
+  return `${baseURL}/live/cases/${caseId}/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`
+}
+
+export async function getLiveTransfers(caseId: string) {
+  const { data } = await api.get<LiveTransfer[]>(`/live/cases/${caseId}/transfers`)
+  return data
+}
+
+export async function getLiveStatus(caseId: string) {
+  const { data } = await api.get(`/live/cases/${caseId}/status`)
+  return data as { live_checked_at: string | null; poll_seconds: number; live_watch: boolean }
+}
+
+export async function setLiveWatch(caseId: string, enabled: boolean) {
+  const { data } = await api.post<{ case_id: string; live_watch: boolean }>(
+    `/live/cases/${caseId}/watch`, { enabled })
   return data
 }

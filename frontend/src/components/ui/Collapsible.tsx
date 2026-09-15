@@ -13,16 +13,26 @@
 import { ChevronDown } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 
-export function Collapsible({ title, hint, children, defaultOpen = false }: {
+export function Collapsible({ title, hint, children, defaultOpen = false, open: controlledOpen, onOpenChange, id }: {
   title: string
   hint?: string
   children: ReactNode
   defaultOpen?: boolean
+  /** Pass to control the section from outside, e.g. to open it from a link elsewhere. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+  id?: string
 }) {
-  const [open, setOpen] = useState(defaultOpen)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
+  const open = controlledOpen ?? uncontrolledOpen
+  const setOpen = (update: (o: boolean) => boolean) => {
+    const next = update(open)
+    if (controlledOpen === undefined) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
 
   return (
-    <section className="rounded-md border border-ink-200 bg-surface">
+    <section id={id} className="scroll-mt-6 rounded-md border border-ink-200 bg-surface">
       <button
         onClick={() => setOpen(o => !o)}
         aria-expanded={open}
