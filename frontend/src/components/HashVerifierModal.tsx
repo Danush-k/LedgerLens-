@@ -42,11 +42,11 @@ export function HashVerifierModal({ open, onClose, initialHash = '', initialCase
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs">
-      <div className="w-full max-w-lg rounded-2xl border border-ink-100 bg-surface p-6 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-lg rounded-md border border-ink-100 bg-surface p-6 shadow-md">
         <div className="flex items-start justify-between pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-950/40">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md bg-brand-50 text-brand-600 dark:bg-brand-950/40">
               <Fingerprint className="h-5 w-5" />
             </div>
             <div>
@@ -108,12 +108,12 @@ export function HashVerifierModal({ open, onClose, initialHash = '', initialCase
         {result && (
           <div className="mt-5 border-t border-ink-100 pt-4">
             {result.verified ? (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50/60 p-4 dark:border-emerald-900/40 dark:bg-emerald-950/20">
-                <div className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
-                  <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+              <div className="rounded-md border border-good/25 bg-good-soft p-4">
+                <div className="flex items-center gap-2 text-good">
+                  <CheckCircle2 className="h-5 w-5 text-good" />
                   <span className="text-sm font-semibold">Authentic &amp; Tamper-Evident Record</span>
                 </div>
-                <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-400">
+                <p className="mt-1 text-xs text-good">
                   The SHA-256 hash matches the exact mathematical snapshot recorded at the time of investigation.
                 </p>
 
@@ -137,12 +137,12 @@ export function HashVerifierModal({ open, onClose, initialHash = '', initialCase
                 </div>
               </div>
             ) : (
-              <div className="rounded-xl border border-red-200 bg-red-50/60 p-4 dark:border-red-900/40 dark:bg-red-950/20">
-                <div className="flex items-center gap-2 text-red-800 dark:text-red-300">
-                  <ShieldAlert className="h-5 w-5 text-red-600" />
+              <div className="rounded-md border border-critical/25 bg-critical-soft p-4">
+                <div className="flex items-center gap-2 text-critical">
+                  <ShieldAlert className="h-5 w-5 text-critical" />
                   <span className="text-sm font-semibold">Verification Failed / Unrecognized</span>
                 </div>
-                <p className="mt-1 text-xs text-red-700 dark:text-red-400">
+                <p className="mt-1 text-xs text-critical">
                   {result.message || 'The submitted SHA-256 hash does not match any authentic case snapshot in the database. The evidence may have been modified or originates from an external system.'}
                 </p>
               </div>

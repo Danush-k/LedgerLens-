@@ -10,11 +10,13 @@ import {
   ZoomIn,
   ZoomOut,
 } from 'lucide-react'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import CytoscapeComponent from 'react-cytoscapejs'
 import { toast } from 'sonner'
-import type { GraphEdge, GraphNode } from '../types'
+import type { GraphEdge, GraphNode, WalletCluster } from '../types'
 import { formatAmount } from '../utils/format'
+import { NodeInspector } from './NodeInspector'
+import { EdgeInspector } from './EdgeInspector'
 
 const NODE_COLORS: Record<string, string> = {
   reported: '#3b82f6',
@@ -32,18 +34,107 @@ interface Props {
   edges: GraphEdge[]
   highlightPath?: string[] // node ids on the path to the nearest exchange
   onNodeClick?: (node: GraphNode) => void
+  clusters?: WalletCluster[]
+  selectedNode?: GraphNode | null
+  onCloseNode?: () => void
+  selectedEdge?: GraphEdge | null
+  onEdgeClick?: (edge: GraphEdge) => void
+  onCloseEdge?: () => void
 }
 
-type LayoutType = 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
+type LayoutType = 'hops' | 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
 
-export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Props) {
+export function GraphView({
+  nodes,
+  edges,
+  highlightPath = [],
+  onNodeClick,
+  clusters = [],
+  selectedNode = null,
+  onCloseNode,
+  selectedEdge = null,
+  onEdgeClick,
+  onCloseEdge,
+}: Props) {
   const cyRef = useRef<Core | null>(null)
 
-  const [layoutName, setLayoutName] = useState<LayoutType>('breadthfirst')
+  // Money flows left to right by hop. A reader should never have to work
+  // out which direction the funds moved.
+  const [layoutName, setLayoutName] = useState<LayoutType>('hops')
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [pathOnly, setPathOnly] = useState(false)
   const [showValues, setShowValues] = useState(true)
   const [wheelZoomEnabled, setWheelZoomEnabled] = useState(false)
+
+  // Dynamically toggle prominent highlight classes on the selected node/edge
+  useEffect(() => {
+    if (!cyRef.current) return
+    const cy = cyRef.current
+    cy.batch(() => {
+      cy.nodes().removeClass('selected-node')
+      cy.edges().removeClass('connected-to-selected selected-edge')
+      if (selectedNode) {
+        const ele = cy.getElementById(selectedNode.id)
+        if (ele.length > 0) {
+          ele.addClass('selected-node')
+          ele.connectedEdges().addClass('connected-to-selected')
+        }
+      }
+      if (selectedEdge) {
+        const matching = cy.edges().filter((ele: any) => {
+          const d = ele.data()
+          return (
+            d.tx_hash === selectedEdge.tx_hash &&
+            d.source === selectedEdge.source &&
+            d.target === selectedEdge.target
+          )
+        })
+        matching.addClass('selected-edge')
+      }
+    })
+  }, [selectedNode, selectedEdge])
+
+  /**
+   * Addresses proven to share a key holder are drawn inside one box.
+   *
+   * Only common-input-ownership is grouped. Shared-funder is a much weaker
+   * signal - an exchange paying out to a thousand customers "shares a
+   * funder" with all of them - and drawing a box around that would assert
+   * on the canvas exactly the thing the backend refuses to merge.
+   *
+   * Cytoscape allows a node one parent, so an address appearing in several
+   * clusters is placed in the first, and the panel below the graph remains
+   * the complete account.
+   */
+  const clusterParents = useMemo(() => {
+    const parentOf = new Map<string, string>()
+    const parents: { id: string; label: string }[] = []
+
+    clusters
+      .filter((c) => c.type === 'common_input' && c.addresses.length > 1)
+      .forEach((cluster, index) => {
+        const parentId = `cluster-${index}`
+        let claimed = 0
+        cluster.addresses.forEach((address) => {
+          const node = nodes.find((n) => n.address === address)
+          if (node && !parentOf.has(node.id)) {
+            parentOf.set(node.id, parentId)
+            claimed += 1
+          }
+        })
+        // A box around a single visible wallet says nothing.
+        if (claimed > 1) {
+          parents.push({ id: parentId, label: `Same owner · ${claimed} wallets` })
+        } else {
+          cluster.addresses.forEach((address) => {
+            const node = nodes.find((n) => n.address === address)
+            if (node && parentOf.get(node.id) === parentId) parentOf.delete(node.id)
+          })
+        }
+      })
+
+    return { parentOf, parents }
+  }, [clusters, nodes])
 
   const elements = useMemo(() => {
     const pathSet = new Set(highlightPath)
@@ -55,32 +146,62 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           label: n.label_name ?? `${n.address.slice(0, 6)}…${n.address.slice(-4)}`,
           type: n.node_type,
           fullAddress: n.address,
+          hop: n.hop ?? 0,
+          taint: n.taint_ratio ?? 0,
+          parent: clusterParents.parentOf.get(n.id),
         },
         classes: [
           onPath ? 'on-path' : '',
           pathOnly && !onPath ? 'dimmed' : '',
+          selectedNode?.id === n.id ? 'selected-node' : '',
         ].filter(Boolean).join(' '),
       }
     })
 
     const edgeEls = edges.map((e, i) => {
       const onPath = pathSet.has(e.source) && pathSet.has(e.target)
+      const isSelected =
+        selectedEdge &&
+        selectedEdge.tx_hash === e.tx_hash &&
+        selectedEdge.source === e.source &&
+        selectedEdge.target === e.target
       return {
         data: {
           id: `${e.tx_hash}-${i}`,
           source: e.source,
           target: e.target,
           value: showValues ? formatAmount(e.value) : '',
+          amount: e.value,
+          tx_hash: e.tx_hash,
+          hop: e.hop,
+          timestamp: e.timestamp,
+          tainted_value: e.tainted_value,
         },
         classes: [
           onPath ? 'on-path' : '',
           pathOnly && !onPath ? 'dimmed' : '',
+          isSelected ? 'selected-edge' : '',
         ].filter(Boolean).join(' '),
       }
     })
 
-    return [...nodeEls, ...edgeEls]
-  }, [nodes, edges, highlightPath, pathOnly, showValues])
+    const parentEls = clusterParents.parents.map((p) => ({
+      data: { id: p.id, label: p.label, type: 'cluster' },
+      classes: 'cluster-parent',
+    }))
+
+    // Parents must precede their children or Cytoscape drops the parent.
+    return [...parentEls, ...nodeEls, ...edgeEls]
+  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents, selectedNode, selectedEdge])
+
+  // Edge thickness is proportional to amount, so the main flow is visually
+  // obvious and dust transactions recede instead of competing with it.
+  // Scaled against the largest transfer in this graph rather than an
+  // absolute scale, since a graph may span eight orders of magnitude.
+  const maxAmount = useMemo(
+    () => Math.max(...edges.map((e) => e.value), Number.EPSILON),
+    [edges],
+  )
 
   const surface = '#ffffff'
   const labelColor = '#1f2328'
@@ -94,7 +215,21 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
     {
       selector: 'node',
       style: {
-        'background-color': (ele: any) => NODE_COLORS[ele.data('type')] ?? '#64748b',
+        // Known services keep their categorical colour; unlabeled wallets are
+        // shaded by taint, turning the graph into a heat map of where the
+        // victim's money actually went rather than a uniform blob of grey.
+        'background-color': (ele: any) => {
+          const type = ele.data('type')
+          if (type !== 'unresolved' && type !== 'intermediate') {
+            return NODE_COLORS[type] ?? '#64748b'
+          }
+          const t = ele.data('taint') ?? 0
+          if (t >= 0.75) return '#a83e14'
+          if (t >= 0.5) return '#cf7331'
+          if (t >= 0.25) return '#e0a154'
+          if (t > 0) return '#f0c98a'
+          return '#94a3b8'
+        },
         label: 'data(label)',
         color: labelColor,
         'font-size': 10,
@@ -108,12 +243,74 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       },
     },
     {
+      selector: 'node.cluster-parent',
+      style: {
+        'background-color': brandLine,
+        'background-opacity': 0.06,
+        'border-width': 1.5,
+        'border-style': 'dashed',
+        'border-color': brandLine,
+        'border-opacity': 0.6,
+        label: 'data(label)',
+        color: edgeLabelColor,
+        'font-size': 9,
+        'text-valign': 'top',
+        'text-halign': 'center',
+        'text-margin-y': -4,
+        padding: 14,
+        'corner-radius': 6,
+        shape: 'round-rectangle',
+      },
+    },
+    {
       selector: 'node.on-path',
       style: {
         'border-width': 3.5,
         'border-color': onPathRing,
         width: 34,
         height: 34,
+      },
+    },
+    {
+      selector: 'node.selected-node',
+      style: {
+        'border-width': 4.5,
+        'border-color': '#0284c7',
+        'border-opacity': 1,
+        width: 38,
+        height: 38,
+        'underlay-color': '#38bdf8',
+        'underlay-padding': 10,
+        'underlay-opacity': 0.45,
+        'underlay-shape': 'ellipse',
+        'font-weight': 'bold',
+        'font-size': 11,
+        'z-index': 999,
+      },
+    },
+    {
+      selector: 'edge.connected-to-selected',
+      style: {
+        'line-color': '#0284c7',
+        'target-arrow-color': '#0284c7',
+        width: 2.5,
+        opacity: 0.95,
+        'z-index': 998,
+      },
+    },
+    {
+      selector: 'edge.selected-edge',
+      style: {
+        width: 4.5,
+        'line-color': '#0284c7',
+        'target-arrow-color': '#0284c7',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1.35,
+        opacity: 1,
+        'z-index': 999,
+        color: '#0284c7',
+        'font-weight': 'bold',
+        'font-size': 9.5,
       },
     },
     {
@@ -125,7 +322,12 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
     {
       selector: 'edge',
       style: {
-        width: 1.5,
+        width: (ele: any) => {
+          const amount = ele.data('amount') ?? 0
+          // Square root keeps a 1000x value difference from becoming a 1000x
+          // stroke; the thinnest edge stays visible at 1px.
+          return 1 + 4 * Math.sqrt(Math.min(1, amount / maxAmount))
+        },
         'line-color': edgeLine,
         'target-arrow-color': edgeLine,
         'target-arrow-shape': 'triangle',
@@ -182,14 +384,48 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
     }
   }
 
+  /**
+   * Cytoscape has no hop-column layout, so 'hops' is resolved here into a
+   * preset with computed positions: x by hop distance, y stacked within the
+   * hop. Money then always reads left to right, which no force-directed
+   * layout guarantees - and on a 70-node graph that difference is the
+   * difference between a diagram and a hairball.
+   */
+  const resolveLayout = (name: LayoutType) => {
+    if (name !== 'hops') {
+      return { name, directed: true, padding: 36, spacingFactor: 1.4 }
+    }
+    const COLUMN = 190
+    const ROW = 74
+    const byHop = new Map<number, GraphNode[]>()
+    for (const n of nodes) {
+      const hop = n.hop ?? 0
+      byHop.set(hop, [...(byHop.get(hop) ?? []), n])
+    }
+    const positions: Record<string, { x: number; y: number }> = {}
+    for (const [hop, group] of byHop) {
+      group.forEach((n, i) => {
+        positions[n.id] = {
+          x: hop * COLUMN,
+          // Centre each column vertically so the trunk of the flow stays
+          // near the middle instead of hanging off the top edge.
+          y: (i - (group.length - 1) / 2) * ROW,
+        }
+      })
+    }
+    return {
+      name: 'preset',
+      positions: (node: any) => positions[node.id()] ?? { x: 0, y: 0 },
+      padding: 40,
+      fit: true,
+    }
+  }
+
   const handleLayoutChange = (newLayout: LayoutType) => {
     setLayoutName(newLayout)
     if (cyRef.current) {
       const layout = cyRef.current.layout({
-        name: newLayout,
-        directed: true,
-        padding: 30,
-        spacingFactor: 1.4,
+        ...resolveLayout(newLayout),
         animate: true,
         animationDuration: 400,
       } as any)
@@ -212,12 +448,12 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
 
   return (
     <div
-      className={`relative overflow-hidden rounded-xl border border-ink-100 bg-surface shadow-xs transition-all ${
-        isFullscreen ? 'fixed inset-4 z-50 shadow-2xl ring-1 ring-ink-200' : 'h-full w-full'
+      className={`relative overflow-hidden rounded-md border border-ink-100 bg-surface shadow-xs transition-all ${
+        isFullscreen ? 'fixed inset-4 z-50 shadow-md ring-1 ring-ink-200' : 'h-full w-full'
       }`}
     >
       {/* Floating Graph Controls Toolbar */}
-      <div className="absolute top-3 right-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink-200/80 bg-surface/95 p-1.5 shadow-md backdrop-blur-xs">
+      <div className="absolute top-3 right-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink-200/80 bg-surface/95 p-1.5 shadow-md">
         {/* Zoom Controls */}
         <button
           type="button"
@@ -260,7 +496,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           title={wheelZoomEnabled ? 'Disable Mouse Wheel Canvas Zoom' : 'Enable Mouse Wheel Canvas Zoom'}
           className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
             wheelZoomEnabled
-              ? 'bg-brand-50 text-brand-600 font-bold border border-brand-200'
+              ? 'bg-brand-50 text-brand-600 font-semibold border border-brand-200'
               : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900'
           }`}
         >
@@ -277,6 +513,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
           className="rounded border-none bg-transparent px-2 py-1 text-xs font-medium text-ink-700 outline-hidden hover:bg-ink-100"
           title="Select Graph Layout"
         >
+          <option value="hops">Hop columns (flow left to right)</option>
           <option value="breadthfirst">Breadth-First (Hierarchical)</option>
           <option value="concentric">Concentric (Hops)</option>
           <option value="circle">Circular</option>
@@ -336,10 +573,10 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
       </div>
 
       {/* Floating Status & Interaction Hint */}
-      <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 rounded-md bg-surface/90 px-2.5 py-1 text-[11px] text-ink-500 shadow-xs backdrop-blur-xs">
+      <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2 rounded-md bg-surface/90 px-2.5 py-1 text-[11px] text-ink-500 shadow-xs">
         <span className="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse" />
         <span>{nodes.length} Wallets • {edges.length} Transfers</span>
-        {edges.length === 0 && <span className="text-amber-600 font-medium">(Single wallet / Target deposit address)</span>}
+        {edges.length === 0 && <span className="text-warning font-medium">(Single wallet / Target deposit address)</span>}
       </div>
 
       {/* Canvas - userZoomingEnabled is false by default so page scrolling works smoothly */}
@@ -349,7 +586,7 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         stylesheet={stylesheet as any}
         userZoomingEnabled={wheelZoomEnabled}
-        layout={{ name: layoutName, directed: true, padding: 36, spacingFactor: 1.4 }}
+        layout={resolveLayout(layoutName) as any}
         cy={(cy: Core) => {
           cyRef.current = cy
           cy.userZoomingEnabled(wheelZoomEnabled)
@@ -358,6 +595,13 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
             cy.fit(undefined, 36)
             if (cy.zoom() > 1.8) cy.zoom(1.8)
             cy.center()
+            if (selectedNode) {
+              const ele = cy.getElementById(selectedNode.id)
+              if (ele.length > 0) {
+                ele.addClass('selected-node')
+                ele.connectedEdges().addClass('connected-to-selected')
+              }
+            }
           })
           if (onNodeClick) {
             cy.on('tap', 'node', (evt) => {
@@ -366,8 +610,48 @@ export function GraphView({ nodes, edges, highlightPath = [], onNodeClick }: Pro
               if (node) onNodeClick(node)
             })
           }
+          if (onEdgeClick) {
+            cy.on('tap', 'edge', (evt) => {
+              const data = evt.target.data()
+              const edge = edges.find(
+                (e) =>
+                  e.tx_hash === data.tx_hash &&
+                  e.source === data.source &&
+                  e.target === data.target
+              ) || {
+                source: data.source,
+                target: data.target,
+                tx_hash: data.tx_hash,
+                value: data.amount ?? 0,
+                hop: data.hop ?? 1,
+                timestamp: data.timestamp,
+                tainted_value: data.tainted_value,
+              }
+              onEdgeClick(edge)
+            })
+          }
+          cy.on('tap', (evt) => {
+            if (evt.target === cy) {
+              if (onCloseNode) onCloseNode()
+              if (onCloseEdge) onCloseEdge()
+            }
+          })
         }}
       />
+
+      {/* Floating Right-Side Node Inspector */}
+      {selectedNode && (
+        <NodeInspector node={selectedNode} onClose={onCloseNode ?? (() => {})} />
+      )}
+
+      {/* Floating Right-Side Edge / Transfer Inspector */}
+      {selectedEdge && (
+        <EdgeInspector
+          edge={selectedEdge}
+          chain={nodes[0]?.chain || 'bitcoin'}
+          onClose={onCloseEdge ?? (() => {})}
+        />
+      )}
     </div>
   )
 }

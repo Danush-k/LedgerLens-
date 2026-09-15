@@ -49,7 +49,7 @@ export function CommandPalette({ open, onClose }: Props) {
       onClick={onClose}
     >
       <div
-        className="animate-slide-up w-full max-w-lg overflow-hidden rounded-xl border border-ink-200 bg-surface shadow-2xl"
+        className="animate-slide-up w-full max-w-lg overflow-hidden rounded-md border border-ink-200 bg-surface shadow-md"
         onClick={(e) => e.stopPropagation()}
       >
         <Command loop shouldFilter>

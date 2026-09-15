@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import CurrentUser, get_current_user
+from app.auth.ratelimit import LOGIN_LIMIT, limiter
 from app.auth.security import create_access_token, hash_password, verify_password
 from app.config import get_settings
 from app.db.postgres import get_db
@@ -12,7 +13,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login")
-def login(form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit(LOGIN_LIMIT)
+def login(request: Request, form: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == form.username).first()
     if not user or not verify_password(form.password, user.hashed_password):
         raise HTTPException(401, "Incorrect username or password")

@@ -10,6 +10,7 @@ these events verbatim.
 from sqlalchemy.orm import Session
 
 from app.models.orm import AuditEvent, Case
+from app.reports.audit_chain import append_audit_event
 
 
 def send_alert(db: Session, case: Case) -> None:
@@ -24,7 +25,7 @@ def send_alert(db: Session, case: Case) -> None:
             f"[SIMULATED] High-risk case {case.id} escalated to investigator "
             f"queue - no exchange identified within hop limit."
         )
-    db.add(AuditEvent(case_id=case.id, event="alert_sent", detail=detail, simulated=True))
+    append_audit_event(db, case.id, "alert_sent", detail, simulated=True)
 
 
 def receive_ncrp_intake(payload: dict) -> dict:

@@ -10,6 +10,14 @@ class TraceRequest(BaseModel):
     chain: Chain
     complaint_ref: str | None = Field(None, description="NCRP/complaint reference number, if any")
     narrative: str | None = Field(None, description="Free-text complaint description, used for typology tagging")
+    hop_limit: int | None = Field(
+        None, ge=1, le=8,
+        description="How many hops to follow before stopping. Depth is a "
+                    "judgement call per case - a direct cash-out resolves at 1-2 "
+                    "hops, while a layered trail needs more - so it belongs to "
+                    "the investigator, not to global configuration. Defaults to "
+                    "the HOP_LIMIT setting when omitted.",
+    )
 
 
 class TraceAccepted(BaseModel):
@@ -61,12 +69,20 @@ class CaseOut(BaseModel):
     status: str
     hop_progress: int
     hop_limit: int
+    status_message: str | None = None
+    last_progress_at: datetime | None = None
+    # Why a trace failed. Omitting this left the interface showing generic
+    # fallback text while the backend held a specific, honest explanation -
+    # losing exactly the "could not look" / "looked and found nothing"
+    # distinction the rest of the system works to preserve.
+    error: str | None = None
     risk_score: float | None
     risk_score_ml: float | None
     risk_breakdown: dict | None
     flags: list | None
     nearest_exchange: dict | None
     clusters: list | None
+    patterns: list | None
     fraud_typology: str | None
     typology_confidence: float | None
     recommended_action: str | None
@@ -83,6 +99,11 @@ class CaseSummary(BaseModel):
     reported_address: str
     chain: str
     status: str
+    # Carried in the summary so the case list can show live progress rather
+    # than an unexplained "Tracing" that looks identical to a stuck one.
+    hop_progress: int = 0
+    hop_limit: int = 5
+    status_message: str | None = None
     risk_score: float | None
     nearest_exchange: dict | None
     fraud_typology: str | None

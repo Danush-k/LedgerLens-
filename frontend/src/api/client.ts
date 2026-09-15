@@ -1,6 +1,9 @@
 import axios from 'axios'
 import { clearStoredAuth, getStoredToken } from '../auth/AuthContext'
 import type {
+  AddressFootprint,
+  CaseLink,
+  AuditChain,
   AnalyticsOverview,
   AuditEvent,
   BulkUploadResult,
@@ -8,6 +11,8 @@ import type {
   CaseFilters,
   CaseSummary,
   Chain,
+  ConvergenceResult,
+  EntityResult,
   HashVerificationResult,
   LegalNoticeParams,
   MlStatus,
@@ -16,7 +21,9 @@ import type {
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
-export const api = axios.create({ baseURL })
+// Bound every request so an unreachable/hung API fails predictably instead of
+// spinning for however long the OS takes to give up on the TCP connection.
+export const api = axios.create({ baseURL, timeout: 15_000 })
 
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
@@ -57,6 +64,20 @@ export async function submitBulkTrace(file: File) {
   return data
 }
 
+export async function parseComplaintDocument(file: File) {
+  const form = new FormData()
+  form.append('file', file)
+  const { data } = await api.post<ParsedComplaintResult & {
+    source_filename?: string
+    extracted_text?: string
+  }>('/trace/parse-document', form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    // Reading a large PDF takes longer than a JSON round trip.
+    timeout: 60_000,
+  })
+  return data
+}
+
 export async function parseComplaintText(text: string) {
   const { data } = await api.post<ParsedComplaintResult>('/trace/parse-complaint', { text })
   return data
@@ -64,6 +85,11 @@ export async function parseComplaintText(text: string) {
 
 export async function listCases(filters: CaseFilters = {}) {
   const { data } = await api.get<CaseSummary[]>('/cases', { params: filters })
+  return data
+}
+
+export async function getCaseLinks(caseId: string) {
+  const { data } = await api.get<CaseLink[]>(`/cases/${caseId}/links`)
   return data
 }
 
@@ -106,6 +132,38 @@ export async function downloadReport(caseId: string) {
   window.URL.revokeObjectURL(url)
 }
 
+/**
+ * Turn a failed file download into a sentence worth reading.
+ *
+ * These endpoints answer with a Blob, so an error body arrives as a Blob
+ * too and never reaches the usual `error.response.data.detail` path. Left
+ * alone the caller can only say "it failed", which is what sent us auditing
+ * a perfectly healthy endpoint while the real cause was the API not running
+ * at all.
+ */
+export async function describeDownloadError(err: unknown): Promise<string> {
+  const e = err as { response?: { status?: number; data?: unknown }; code?: string }
+
+  if (e.code === 'ERR_NETWORK') {
+    return 'Cannot reach the API. Check that the backend is running.'
+  }
+  if (e.code === 'ECONNABORTED') {
+    return 'The request timed out before the document was ready.'
+  }
+
+  const data = e.response?.data
+  if (data instanceof Blob) {
+    try {
+      const parsed = JSON.parse(await data.text())
+      if (parsed?.detail) return String(parsed.detail)
+    } catch {
+      // Not JSON - fall through to the status-based message below.
+    }
+  }
+  if (e.response?.status) return `Server returned ${e.response.status}.`
+  return 'Could not generate the document.'
+}
+
 export async function downloadLegalNotice(caseId: string, params: LegalNoticeParams) {
   const { data } = await api.get(`/cases/${caseId}/legal-notice`, {
     params,
@@ -129,34 +187,27 @@ export async function verifyEvidenceHash(hash: string, caseId?: string) {
   return data
 }
 
-export async function downloadEvidencePackage(caseId: string, params: LegalNoticeParams) {
-  const { data } = await api.get(`/cases/${caseId}/evidence-package`, {
-    params,
-    responseType: 'blob',
+
+// ── Cross-case intelligence ───────────────────────────────────────────────
+
+export async function getConvergence(minCases = 2, chain?: string) {
+  const { data } = await api.get<ConvergenceResult>('/intel/convergence', {
+    params: { min_cases: minCases, chain },
   })
-  const url = window.URL.createObjectURL(data)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `evidence-package-${caseId.slice(0, 8)}.zip`
-  document.body.appendChild(link)
-  link.click()
-  link.remove()
-  window.URL.revokeObjectURL(url)
-}
-
-export async function getSyndicates() {
-  const { data } = await api.get<{ syndicate_count: number; total_linked_cases: number; syndicates: any[] }>('/analytics/syndicates')
   return data
 }
 
-export async function getCaseSwaps(caseId: string) {
-  const { data } = await api.get<{ case_id: string; swaps_count: number; swaps: any[] }>(`/cases/${caseId}/swaps`)
+export async function getEntities(chain?: string) {
+  const { data } = await api.get<EntityResult>('/intel/entities', { params: { chain } })
   return data
 }
 
-export async function aggregateCases(caseIds: string[]) {
-  const { data } = await api.post<{ nodes: any[]; edges: any[]; case_count: number; shared_nodes_count: number }>('/cases/aggregate-graph', { case_ids: caseIds })
+export async function getAddressFootprint(chain: string, address: string) {
+  const { data } = await api.get<AddressFootprint>(`/intel/address/${chain}/${address}`)
   return data
 }
 
-
+export async function getAuditChain(caseId: string) {
+  const { data } = await api.get<AuditChain>(`/cases/${caseId}/audit`)
+  return data
+}

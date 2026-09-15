@@ -1,3 +1,6 @@
+import threading
+import time
+
 import requests
 
 from app.chain_clients.base import Chain, ChainClient, Transfer
@@ -5,6 +8,114 @@ from app.chain_clients.http import get_with_retry
 from app.config import get_settings
 
 _SATOSHIS_PER_BTC = 100_000_000
+
+# Above this many inputs a transaction is a service consolidating deposits,
+# not one person spending from their own wallets. The threshold is generous:
+# a personal wallet rarely spends more than a handful of UTXOs at once, while
+# exchange sweeps run to hundreds or thousands.
+MAX_COSPEND_INPUTS = 50
+
+
+# Bitcoin data providers, in preference order.
+#
+# Every one of these is free and shared, so any of them can refuse at any
+# time - and being refused by one says nothing about the others. Keeping
+# several, behind a common shape, is what turns "the provider is busy" from
+# a failed trace into a slightly slower one. They do not share an API, so
+# each has a reader that normalises its response into the Esplora shape the
+# rest of this client already speaks.
+
+
+def _read_esplora(session: requests.Session, base_url: str, address: str) -> list[dict]:
+    """Blockstream and other Esplora hosts, which need no translation."""
+    response = get_with_retry(session, f"{base_url}/address/{address}/txs", attempts=4)
+    return response.json()
+
+
+def _read_blockchain_info(session: requests.Session, base_url: str,
+                           address: str) -> list[dict]:
+    """blockchain.info's rawaddr, mapped onto the Esplora shape.
+
+    Values are already in satoshis in both, so only the field names and the
+    nesting differ.
+    """
+    response = get_with_retry(
+        session, f"{base_url}/rawaddr/{address}",
+        params={"limit": 50}, attempts=4)
+    payload = response.json()
+
+    normalised: list[dict] = []
+    for tx in payload.get("txs", []):
+        normalised.append({
+            "txid": tx.get("hash", ""),
+            "status": {"block_time": int(tx.get("time", 0))},
+            "vin": [
+                {"prevout": {
+                    "scriptpubkey_address": (vin.get("prev_out") or {}).get("addr"),
+                    "value": (vin.get("prev_out") or {}).get("value", 0),
+                }}
+                for vin in tx.get("inputs", [])
+            ],
+            "vout": [
+                {"scriptpubkey_address": out.get("addr"), "value": out.get("value", 0)}
+                for out in tx.get("out", [])
+            ],
+        })
+    return normalised
+
+
+_PROVIDERS = [
+    ("blockstream.info", "https://blockstream.info/api", _read_esplora),
+    ("blockchain.info", "https://blockchain.info", _read_blockchain_info),
+    # mempool.space is deliberately absent. It serves the same Esplora API
+    # and would be a natural third option, but it is unreachable from both
+    # the host and the container here, and its failure mode is the expensive
+    # kind: DNS resolution hangs, which no request timeout covers, so each
+    # address paid roughly 84 seconds before falling through. A fallback
+    # that cannot be reached is not redundancy, it is a tax on every fetch.
+    # Restore it only alongside a resolver-level timeout.
+]
+
+
+def _providers() -> list[tuple[str, str, object]]:
+    """The configured host first, then the public fallbacks behind it.
+
+    A deployment pointing at its own Esplora node should have it tried
+    first, but it replaces nothing - the fallbacks are the whole point.
+    """
+    configured = (get_settings().bitcoin_api_base_url or "").rstrip("/")
+    providers = list(_PROVIDERS)
+    if configured:
+        known = {url for _, url, _ in providers}
+        if configured not in known:
+            providers.insert(0, (_host_label(configured), configured, _read_esplora))
+        else:
+            providers.sort(key=lambda p: p[1] != configured)
+    return providers
+
+
+def _host_label(url: str) -> str:
+    return url.split("://", 1)[-1].split("/", 1)[0]
+
+
+# A provider that just refused will almost certainly refuse the next address
+# too - throttling is applied to the caller, not the query. Benching it
+# process-wide means one address pays the timeout instead of every address
+# paying it, which is the difference between a trace that is slightly slower
+# under throttling and one that crawls.
+_benched: dict[str, float] = {}
+_bench_lock = threading.Lock()
+BENCH_SECONDS = 120.0
+
+
+def _bench(label: str) -> None:
+    with _bench_lock:
+        _benched[label] = time.monotonic() + BENCH_SECONDS
+
+
+def _is_benched(label: str) -> bool:
+    with _bench_lock:
+        return _benched.get(label, 0.0) > time.monotonic()
 
 
 class BitcoinClient(ChainClient):
@@ -21,13 +132,42 @@ class BitcoinClient(ChainClient):
     def __init__(self, session: requests.Session | None = None):
         self._session = session or requests.Session()
         self._tx_cache: dict[str, list[dict]] = {}
+        self._providers = _providers()
+        self._preferred = 0
 
     def _get_txs(self, address: str) -> list[dict]:
-        if address not in self._tx_cache:
-            base_url = get_settings().bitcoin_api_base_url
-            response = get_with_retry(self._session, f"{base_url}/address/{address}/txs")
-            self._tx_cache[address] = response.json()
-        return self._tx_cache[address]
+        """This address's transactions, from whichever provider answers.
+
+        A provider refusing is a reason to ask elsewhere, not to give up.
+        Only when every one of them refuses is this genuinely a data
+        availability problem - and the error then names each so the failure
+        can be told apart from a wallet that has no history.
+        """
+        if address in self._tx_cache:
+            return self._tx_cache[address]
+
+        providers = self._providers
+        order = providers[self._preferred:] + providers[:self._preferred]
+        # Providers known to be refusing go last rather than being dropped:
+        # if every one is benched we still have to ask somebody.
+        order.sort(key=lambda p: _is_benched(p[0]))
+        errors: list[str] = []
+
+        for offset, (label, base_url, read) in enumerate(order):
+            try:
+                txs = read(self._session, base_url, address)
+                self._tx_cache[address] = txs
+                # Stay on whichever answered: a provider throttling us tends
+                # to keep throttling us, and starting each fetch back at the
+                # failing one pays its timeout every single time.
+                self._preferred = (self._preferred + offset) % len(providers)
+                return txs
+            except Exception as exc:  # noqa: BLE001 - try the next provider
+                _bench(label)
+                errors.append(f"{label}: {type(exc).__name__}")
+
+        raise RuntimeError(
+            "no Bitcoin data provider could be reached (" + "; ".join(errors) + ")")
 
     def get_outgoing_transfers(self, address: str, limit: int = 50) -> list[Transfer]:
         transfers: list[Transfer] = []
@@ -71,6 +211,15 @@ class BitcoinClient(ChainClient):
         controls `address` too - a wallet can't spend a UTXO it doesn't
         hold the key for. That's a strong same-owner signal, not a guess.
         Reuses the same tx list `get_outgoing_transfers` already fetched.
+
+        Consolidation sweeps are excluded. An exchange periodically gathers
+        thousands of customer deposit addresses into one transaction, and
+        while the heuristic is still technically true there - the exchange
+        does hold all those keys - the "owner" it identifies is the exchange,
+        not a suspect. Merging on those transactions chains unrelated
+        customers into one entity of several thousand addresses, which is
+        how this heuristic produces a criminal organisation out of an
+        exchange's cold-storage routine.
         """
         co_spent: set[str] = set()
         for tx in self._get_txs(address):
@@ -79,6 +228,8 @@ class BitcoinClient(ChainClient):
                 for vin in tx.get("vin", [])
             }
             input_addrs.discard(None)
+            if len(input_addrs) > MAX_COSPEND_INPUTS:
+                continue  # consolidation sweep, not a personal wallet set
             if address in input_addrs and len(input_addrs) > 1:
                 co_spent |= input_addrs - {address}
         return co_spent

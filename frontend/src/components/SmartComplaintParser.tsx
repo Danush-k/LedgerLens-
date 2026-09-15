@@ -1,8 +1,42 @@
-import { useState } from 'react'
-import { ArrowRight, FileSearch, Loader2 } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { ArrowRight, FileSearch, Loader2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
-import { parseComplaintText } from '../api/client'
+import { parseComplaintDocument, parseComplaintText } from '../api/client'
 import type { Chain, ParsedComplaintResult, ParsedWallet } from '../types'
+
+/**
+ * The part of an FIR worth classifying.
+ *
+ * The typology classifier reads this narrative, and an FIR opens with pages
+ * of station names, section numbers and form headings. Feeding it the first
+ * 500 characters hands it the letterhead and none of the offence. Where the
+ * document marks its facts section, that is used; otherwise the text is
+ * passed through and the classifier does what it can.
+ */
+const FACTS_HEADING =
+  /(?:brief\s+facts|facts\s+of\s+the\s+case|complaint\s+narrative|details?\s+of\s+(?:the\s+)?(?:offence|incident))[^\n]*\n/i
+
+/**
+ * Where the complainant's account stops.
+ *
+ * An FIR continues past the facts into what the station did and who signed
+ * it. Reading to the end of the document swept "ACTION TAKEN" and the
+ * signature block into the narrative, so the case header quoted the
+ * investigating officer back at themselves. A numbered heading, or a
+ * signature line, marks the end of the account.
+ */
+const NEXT_SECTION =
+  /\n\s*(?:\d{1,2}\s*[.)]\s*[A-Z][A-Z\s/&-]{4,}|(?:SIGNATURE|ACTION\s+TAKEN|VERIFICATION)\b)/
+
+function narrativeFrom(text: string): string {
+  const match = text.match(FACTS_HEADING)
+  let body = match ? text.slice((match.index ?? 0) + match[0].length) : text
+
+  const end = body.match(NEXT_SECTION)
+  if (end?.index != null) body = body.slice(0, end.index)
+
+  return body.replace(/\s+/g, ' ').trim().slice(0, 2000)
+}
 
 interface Props {
   onSelectWallet: (wallet: { address: string; chain: Chain; complaintRef?: string; narrative: string }) => void
@@ -12,6 +46,8 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
   const [rawText, setRawText] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState<ParsedComplaintResult | null>(null)
+  const [sourceFile, setSourceFile] = useState<string | null>(null)
+  const fileInput = useRef<HTMLInputElement>(null)
 
   const handleParse = async () => {
     if (!rawText.trim()) {
@@ -34,22 +70,110 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
     }
   }
 
-  const handleUseWallet = (wallet: ParsedWallet) => {
-    const chain = (wallet.chain === 'tron' ? 'ethereum' : wallet.chain) as Chain
+  /**
+   * Read an uploaded FIR instead of asking for it to be retyped.
+   *
+   * The extracted text is put in the textarea rather than hidden, so the
+   * investigator can see exactly what the system read before acting on it.
+   * A wallet address transcribed by hand and mistyped traces a stranger's
+   * wallet with full confidence, which is the failure this avoids - but
+   * only if what was read stays visible for checking.
+   */
+  const handleFile = async (file: File) => {
+    setLoading(true)
+    setResult(null)
+    try {
+      const data = await parseComplaintDocument(file)
+      setSourceFile(data.source_filename ?? file.name)
+      if (data.extracted_text) setRawText(data.extracted_text)
+      setResult(data)
+
+      if (data.extracted_count === 0) {
+        toast.info(`Read ${file.name}, but found no wallet addresses in it.`)
+        return
+      }
+
+      if (data.wallets.length === 1) {
+        // One wallet is not a choice, so make it. Asking for a confirming
+        // click after an unambiguous read is a step with no decision in it.
+        fillForm(data.wallets[0], data)
+        toast.success(`Read ${file.name} — form filled from the document.`)
+      } else {
+        toast.success(
+          `Found ${data.extracted_count} wallets in ${file.name}. Pick the suspect wallet below.`)
+      }
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: string } } })
+        .response?.data?.detail
+      // The server distinguishes "could not read this" from "read it and
+      // found nothing" - passing that through is the whole point.
+      toast.error(detail ?? 'Could not read that document.')
+    } finally {
+      setLoading(false)
+      if (fileInput.current) fileInput.current.value = ''
+    }
+  }
+
+  /**
+   * Hand a parsed wallet to the trace form.
+   *
+   * The complaint reference is chosen rather than taken first: a real FIR
+   * mentions several, and the acknowledgement number is the one that
+   * identifies the complaint across systems, whereas the internal FIR
+   * serial only means something inside one station.
+   */
+  const fillForm = (wallet: ParsedWallet, source: ParsedComplaintResult) => {
+    const refs = source.complaint_refs ?? []
+    const preferred =
+      refs.find(r => /ncrp/i.test(r)) ??
+      refs.find(r => /fir/i.test(r) && /\d{3,}/.test(r)) ??
+      refs[0]
+
     onSelectWallet({
       address: wallet.address,
-      chain,
-      complaintRef: result?.complaint_refs[0] || '',
-      narrative: rawText.slice(0, 500),
+      chain: wallet.chain as Chain,
+      complaintRef: preferred,
+      narrative: narrativeFrom(rawText),
     })
-    toast.success(`Populated form with ${wallet.address.slice(0, 10)}...`)
+  }
+
+  const handleUseWallet = (wallet: ParsedWallet) => {
+    if (result) fillForm(wallet, result)
+    toast.success(`Populated form with ${wallet.address.slice(0, 10)}…`)
   }
 
   return (
-    <div className="rounded-xl border border-ink-100 bg-surface p-5 shadow-xs">
+    <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-xs">
       <div className="pb-3">
         <h3 className="text-sm font-semibold text-ink-900">Smart Intake — Extract from FIR / Complaint Narrative</h3>
-        <p className="text-xs text-ink-500">Paste unformatted victim emails, NCRP reports, or FIR transcripts to auto-detect wallets &amp; entities.</p>
+        <p className="text-xs text-ink-500">Upload an FIR as PDF or Word, or paste the text, to auto-detect wallets &amp; entities.</p>
+      </div>
+
+      {/* Upload first: a complaint arrives as a document, and retyping a
+          wallet address out of one is where transcription errors enter. */}
+      <div className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-ink-300 bg-ink-50/50 px-3 py-2.5">
+        <input
+          ref={fileInput}
+          type="file"
+          accept=".pdf,.docx,.doc,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) handleFile(f)
+          }}
+          className="hidden"
+          id="fir-upload"
+        />
+        <button
+          type="button"
+          onClick={() => fileInput.current?.click()}
+          disabled={loading}
+          className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-ink-300 bg-surface px-3 py-1.5 text-xs font-medium text-ink-800 transition-colors hover:border-brand-500 hover:text-brand-600 disabled:opacity-50"
+        >
+          <Upload size={13} /> Upload FIR document
+        </button>
+        <span className="text-[11px] text-ink-500">
+          {sourceFile ? `Read from ${sourceFile}` : 'PDF or Word (.docx). Scanned images need OCR first.'}
+        </span>
       </div>
 
       <div className="space-y-3">
@@ -91,8 +215,29 @@ export function SmartComplaintParser({ onSelectWallet }: Props) {
               <span className="text-xs font-medium text-brand-900">
                 Detected Suspect Wallets ({result.wallets.length})
               </span>
-              <span className="text-[11px] text-ink-500">Click &quot;Auto-Fill&quot; to populate form</span>
+              <span className="text-[11px] text-ink-500">
+                {result.wallets.length === 1
+                  ? 'Filled into the trace form below'
+                  : 'Choose the suspect wallet to fill the form'}
+              </span>
             </div>
+
+            {(result.complaint_refs?.length > 0 || result.amounts?.length > 0) && (
+              <div className="flex flex-wrap gap-x-4 gap-y-1 border-b border-brand-100 pb-2 text-[11px] text-ink-600">
+                {result.complaint_refs?.length > 0 && (
+                  <span>
+                    <span className="text-ink-500">Reference: </span>
+                    {result.complaint_refs.slice(0, 2).join(' · ')}
+                  </span>
+                )}
+                {result.amounts?.length > 0 && (
+                  <span>
+                    <span className="text-ink-500">Amount: </span>
+                    {result.amounts[0]}
+                  </span>
+                )}
+              </div>
+            )}
 
             <div className="space-y-2">
               {result.wallets.map((w, idx) => (

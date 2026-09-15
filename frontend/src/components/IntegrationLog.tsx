@@ -21,7 +21,7 @@ export function IntegrationLog({ events }: { events: AuditEvent[] }) {
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <span className="font-medium text-ink-800">{e.event.replace(/_/g, ' ')}</span>
               {e.simulated && (
-                <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-600">
+                <span className="rounded bg-warning-soft px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-warning">
                   Simulated
                 </span>
               )}

@@ -18,6 +18,21 @@ export interface GraphNode {
   chain: string
   node_type: NodeType
   label_name: string | null
+  label_source?: string | null
+  hop: number
+  /** The specific transfer that pulled this wallet into the investigation. */
+  why_included?: string
+  provenance?: {
+    from_address: string
+    tx_hash: string
+    value: number
+    timestamp: number
+    hop: number
+  } | null
+  /** Victim funds attributable to this wallet (haircut method). */
+  tainted_value?: number
+  /** Share of value arriving here that is the victim's, 0-1. */
+  taint_ratio?: number
 }
 
 export interface GraphEdge {
@@ -27,6 +42,18 @@ export interface GraphEdge {
   value: number
   timestamp: number
   hop: number
+  tainted_value?: number
+}
+
+/** Evidence-backed finding from the pattern detectors. */
+export interface Pattern {
+  pattern: string
+  severity: 'high' | 'medium' | 'low'
+  title: string
+  evidence: string
+  transactions: string[]
+  addresses: string[]
+  flag: string | null
 }
 
 export interface NearestExchange {
@@ -34,6 +61,8 @@ export interface NearestExchange {
   address: string
   chain: string
   hops: number
+  /** Where the attribution comes from, so it can be challenged. */
+  source?: string | null
 }
 
 export interface WalletCluster {
@@ -47,6 +76,8 @@ export interface CaseSummary {
   reported_address: string
   chain: Chain
   status: CaseStatus
+  hop_progress?: number
+  hop_limit?: number
   risk_score: number | null
   nearest_exchange: NearestExchange | null
   fraud_typology: string | null
@@ -59,10 +90,16 @@ export interface CaseDetail extends CaseSummary {
   created_by: string | null
   hop_progress: number
   hop_limit: number
+  /** The worker's own description of the current step, e.g. "Reading hop 2 of 5". */
+  status_message?: string | null
+  /** Heartbeat: when the worker last reported. Absent means it never did. */
+  last_progress_at?: string | null
   risk_score_ml: number | null
   risk_breakdown: Record<string, number> | null
   flags: string[] | null
   clusters: WalletCluster[] | null
+  patterns: Pattern[] | null
+  error: string | null
   typology_confidence: number | null
   recommended_action: string | null
   graph: { nodes: GraphNode[]; edges: GraphEdge[] } | null
@@ -149,3 +186,118 @@ export interface HashVerificationResult {
   message?: string
 }
 
+
+
+// ── Cross-case intelligence ───────────────────────────────────────────────
+
+export interface ConvergenceCase {
+  case_id: string
+  complaint_ref: string | null
+  reported_address: string
+  fraud_typology: string | null
+  risk_score: number | null
+  status: CaseStatus
+  created_at: string
+  hop: number
+  value_in: number
+}
+
+export interface ConvergencePoint {
+  chain: string
+  address: string
+  case_count: number
+  total_value: number
+  min_hop: number
+  node_type: string | null
+  label_name: string | null
+  cases: ConvergenceCase[]
+  evidence: string
+}
+
+export interface ConvergenceResult {
+  min_cases: number
+  count: number
+  convergence_points: ConvergencePoint[]
+  note: string
+}
+
+export interface Entity {
+  entity_id: string
+  chain: string
+  address_count: number
+  addresses: string[]
+  case_count: number
+  case_ids: string[]
+  complaint_refs: string[]
+  tainted_value: number
+  labels: string[]
+  possible_associates: string[]
+  evidence: string
+  /** Clusters too large to be one person - almost always an exchange. */
+  likely_service: boolean
+}
+
+export interface EntityResult {
+  count: number
+  entities: Entity[]
+  note: string
+}
+
+export interface AddressFootprint {
+  chain: string
+  address: string
+  case_count: number
+  total_value: number
+  min_hop: number
+  node_type: string | null
+  label_name: string | null
+  reported_directly: boolean
+  cases: ConvergenceCase[]
+}
+
+
+// ── Tamper-evident audit chain ────────────────────────────────────────────
+
+export interface AuditChainEntry {
+  sequence: number
+  event: string
+  detail: string | null
+  simulated: boolean
+  created_at: string
+  entry_hash: string | null
+  prev_hash: string | null
+}
+
+export interface AuditChainVerification {
+  case_id: string
+  intact: boolean
+  entry_count: number
+  chain_head: string | null
+  first_broken_sequence: number | null
+  reason: string | null
+}
+
+export interface AuditChain {
+  verification: AuditChainVerification
+  entries: AuditChainEntry[]
+}
+
+
+/**
+ * One other case connected to this one, and the wallet that connects them.
+ *
+ * `same_wallet` means the identical address was reported again - the
+ * strongest link available. `shared_wallet` means the two traces pass
+ * through a wallet in common: corroboration from a separate victim, but not
+ * proof that one person controls both.
+ */
+export interface CaseLink {
+  case_id: string
+  complaint_ref: string | null
+  reported_address: string
+  risk_score: number | null
+  status: CaseStatus
+  created_at: string
+  relationship: 'same_wallet' | 'shared_wallet'
+  shared_addresses: string[]
+}

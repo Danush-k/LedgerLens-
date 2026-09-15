@@ -1,4 +1,8 @@
-from fastapi import Depends, FastAPI
+import logging
+
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes_analytics import router as analytics_router
@@ -6,17 +10,42 @@ from app.api.routes_auth import router as auth_router
 from app.api.routes_auth import seed_default_users
 from app.api.routes_cases import router as cases_router
 from app.api.routes_integrations import router as integrations_router
+from app.api.routes_intel import router as intel_router
 from app.api.routes_trace import router as trace_router
 from app.auth.dependencies import get_current_user
+from app.auth.ratelimit import limiter
 from app.config import get_settings
 from app.db.neo4j_client import load_seed_labels_into_neo4j
-from app.db.postgres import Base, SessionLocal, engine
+from app.db.postgres import Base, SessionLocal, engine, ensure_additive_schema
+from app.worker.reaper import reap_stale_traces
+
+def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
+    """Say plainly what happened and when to retry.
+
+    A bare 429 reads like a fault in the system. Naming the limit tells an
+    investigator this is a deliberate cap, not the trace failing.
+    """
+    return JSONResponse(
+        status_code=429,
+        content={
+            "detail": (
+                f"Rate limit reached ({exc.detail}). This is a deliberate cap to protect "
+                f"the shared block-explorer quota, not a failure - wait a moment and retry."
+            )
+        },
+    )
+
 
 app = FastAPI(
     title="LedgerLens — Real-Time Crypto Fraud Attribution System",
     description="Traces victim-reported wallet addresses to the nearest known exchange/VASP.",
     version="0.1.0",
 )
+
+# Rate limiting is registered before the routers so the handler is in place
+# for every route that declares a limit.
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
 settings = get_settings()
 app.add_middleware(
@@ -33,16 +62,25 @@ app.include_router(auth_router)  # login is necessarily public
 app.include_router(trace_router, dependencies=authenticated)
 app.include_router(cases_router, dependencies=authenticated)
 app.include_router(analytics_router, dependencies=authenticated)
+app.include_router(intel_router, dependencies=authenticated)
 app.include_router(integrations_router)  # mixed: NCRP intake is a public-facing webhook, see below
 
 
 @app.on_event("startup")
 def on_startup() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_additive_schema()
     load_seed_labels_into_neo4j()
     db = SessionLocal()
     try:
         seed_default_users(db)
+        # A restart is the clearest evidence that whatever was mid-trace is
+        # not running any more. Clearing those rows here stops the interface
+        # showing a spinner for work that stopped before the process began.
+        reaped = reap_stale_traces(db)
+        if reaped:
+            logging.getLogger(__name__).info(
+                f"Marked {reaped} trace(s) as failed - their worker did not survive")
     finally:
         db.close()
 

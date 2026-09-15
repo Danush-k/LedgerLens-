@@ -11,11 +11,25 @@ _TRON_REGEX = re.compile(r"\b(T[a-zA-HJ-NP-Z0-9]{33})\b")
 _EVM_TX_REGEX = re.compile(r"\b(0x[a-fA-F0-9]{64})\b")
 _GENERIC_TX_REGEX = re.compile(r"\b([a-fA-F0-9]{64})\b")
 _UPI_REGEX = re.compile(r"\b([a-zA-Z0-9.\-_]{2,256}@(okhdfcbank|okaxis|okicici|oksbi|paytm|ybl|ibl|axl|apl|upi))\b", re.IGNORECASE)
-_COMPLAINT_REF_REGEX = re.compile(r"\b((?:NCRP|FIR|ACK|COMPLAINT|REF)[\/\-_:\s#]*[0-9A-Za-z\-_/]+)\b", re.IGNORECASE)
+# A complaint reference always carries a number. Requiring one is what
+# separates "FIR No. 0147/2026" from the words "FIRST" and "FIR PARTICULARS",
+# both of which the previous pattern returned as references from a real FIR -
+# and a reference auto-filled with the word "FIRST" is worse than a blank
+# field, because it looks filled in.
+_COMPLAINT_REF_REGEX = re.compile(
+    r"\b((?:NCRP|FIR|ACK|COMPLAINT|REF)\b[\s.:#/-]{0,4}(?:No\.?)?[\s.:#/-]{0,4}"
+    r"(?:[A-Z]{2,}[/-])?[0-9][0-9A-Za-z/-]{2,})",
+    re.IGNORECASE)
 
 # Amounts & Currencies
+# The separator excludes newlines and the figure needs more than one digit.
+# With "\s*" a currency symbol at the end of one line bound to the first
+# digit of the next, so a Word FIR yielded the amount "RS\n2" - which is
+# not wrong so much as meaningless, and it renders as broken text wherever
+# the extracted figure is shown back to the investigator.
 _AMOUNT_REGEX = re.compile(
-    r"(?:(?:Rs\.?|INR|₹|\$|USD)\s*([0-9,]+(?:\.[0-9]+)?)|([0-9,]+(?:\.[0-9]+)?)\s*(?:ETH|BTC|USDT|BNB|MATIC|TRX|SOL|INR|USD|Rupees))",
+    r"(?:(?:Rs\.?|INR|₹|\$|USD)[^\S\n]*([0-9][0-9,]{1,}(?:\.[0-9]+)?)"
+    r"|([0-9][0-9,]*(?:\.[0-9]+)?)[^\S\n]*(?:ETH|BTC|USDT|BNB|MATIC|TRX|SOL|INR|USD|Rupees))",
     re.IGNORECASE,
 )
 
@@ -112,14 +126,14 @@ def parse_complaint_text(text: str) -> dict[str, Any]:
     # 6. Complaint references
     complaint_refs = []
     for match in _COMPLAINT_REF_REGEX.finditer(text):
-        ref = match.group(1).strip(" :-,")
+        ref = re.sub(r"\s+", " ", match.group(1)).strip(" :-,")
         if len(ref) > 4 and ref not in complaint_refs:
             complaint_refs.append(ref)
 
     # 7. Amounts
     amounts = []
     for match in _AMOUNT_REGEX.finditer(text):
-        matched_str = match.group(0).strip()
+        matched_str = re.sub(r"\s+", " ", match.group(0)).strip()
         if matched_str and matched_str not in amounts:
             amounts.append(matched_str)
 

@@ -9,11 +9,14 @@ import { BulkUpload } from './pages/BulkUpload'
 import { CaseDetail } from './pages/CaseDetail'
 import { CaseList } from './pages/CaseList'
 import { Login } from './pages/Login'
+import { NetworkExplorer } from './pages/NetworkExplorer'
 import { NewCase } from './pages/NewCase'
 import { Overview } from './pages/Overview'
-import { Syndicates } from './pages/Syndicates'
+import { useTheme } from './theme/ThemeContext'
+
 function AppShell() {
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const { resolved } = useTheme()
 
   useEffect(() => {
     function handleKeydown(e: KeyboardEvent) {
@@ -36,7 +39,7 @@ function AppShell() {
             <Routes>
               <Route path="/" element={<Overview />} />
               <Route path="/cases" element={<CaseList />} />
-              <Route path="/syndicates" element={<Syndicates />} />
+              <Route path="/network" element={<NetworkExplorer />} />
               <Route path="/new" element={<NewCase />} />
               <Route path="/bulk" element={<BulkUpload />} />
               <Route path="/cases/:caseId" element={<CaseDetail />} />
@@ -45,7 +48,7 @@ function AppShell() {
         </div>
       </div>
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
-      <Toaster theme="light" position="bottom-right" richColors closeButton />
+      <Toaster theme={resolved} position="bottom-right" richColors closeButton />
     </ProtectedRoute>
   )
 }
