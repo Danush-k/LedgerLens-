@@ -36,3 +36,5 @@ backend/reports_output/
 .run-logs/
 
 .backups/
+*.db
+LedgerLens-/

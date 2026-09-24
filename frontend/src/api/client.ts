@@ -22,7 +22,7 @@ import type {
   SuspectsResult,
 } from '../types'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:8000' : '')
 
 // Bound every request so an unreachable/hung API fails predictably instead of
 // spinning for however long the OS takes to give up on the TCP connection.

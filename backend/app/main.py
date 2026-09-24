@@ -104,3 +104,39 @@ def on_shutdown() -> None:
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# ── Static Frontend Serving (Unified Deployment) ──────────────────────────────
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
+if os.path.isdir(static_dir):
+    assets_dir = os.path.join(static_dir, "assets")
+    if os.path.isdir(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.middleware("http")
+    async def spa_middleware(request: Request, call_next):
+        accept = request.headers.get("accept", "")
+        path = request.url.path
+        if (
+            request.method == "GET"
+            and "text/html" in accept
+            and not path.startswith(("/docs", "/redoc", "/openapi.json", "/health", "/auth/login"))
+            and os.path.exists(os.path.join(static_dir, "index.html"))
+        ):
+            return FileResponse(os.path.join(static_dir, "index.html"))
+        return await call_next(request)
+
+    @app.get("/{full_path:path}")
+    async def serve_static_fallback(full_path: str):
+        file_path = os.path.join(static_dir, full_path)
+        if full_path and os.path.isfile(file_path):
+            return FileResponse(file_path)
+        index_file = os.path.join(static_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        return JSONResponse(status_code=404, content={"detail": "Not found"})
+

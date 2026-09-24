@@ -7,18 +7,11 @@ import { SmartComplaintParser } from '../components/SmartComplaintParser'
 import { ChainMark, chainMeta } from '../components/ChainMark'
 import type { Chain } from '../types'
 
-// Base58 omits 0, O, I and l - the glyphs easiest to confuse by eye. This
-// was previously written inline as "[1-9A-HJ-NP-Za-k-z]", where "a-k-z"
-// parses as a-k, a literal hyphen and z, silently rejecting every letter
-// from m to y and with it most real legacy Bitcoin addresses.
-const B58 = '[1-9A-HJ-NP-Za-km-z]'
-
 const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
-  { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
-  { value: 'tron', label: 'Tron', placeholder: 'T… (USDT-TRC20)' },
   { value: 'ethereum', label: 'Ethereum', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'bsc', label: 'BSC', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'polygon', label: 'Polygon', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
+  { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
 ]
 
 function validateAddressFormat(addr: string, ch: Chain): string | null {
@@ -41,18 +34,8 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
     if (trimmed.length < 26 || trimmed.length > 62) {
       return `Invalid Bitcoin address length (${trimmed.length} chars). Must be between 26 and 62 characters.`
     }
-    if (!new RegExp(`^(1${B58}{25,34}|3${B58}{25,34}|bc1[0-9a-z]{38,59})$`).test(trimmed)) {
+    if (!/^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) {
       return `Invalid Bitcoin address format.`
-    }
-  } else if (ch === 'tron') {
-    if (!trimmed.startsWith('T')) {
-      return `Invalid Tron address prefix. Must start with 'T'.`
-    }
-    if (trimmed.length !== 34) {
-      return `Invalid Tron address length (${trimmed.length} chars). Must be exactly 34 characters.`
-    }
-    if (!new RegExp(`^T${B58}{33}$`).test(trimmed)) {
-      return `Invalid Tron address format.`
     }
   }
   return null
@@ -61,7 +44,7 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
 export function NewCase() {
   const navigate = useNavigate()
   const [address, setAddress] = useState('')
-  const [chain, setChain] = useState<Chain>('bitcoin')
+  const [chain, setChain] = useState<Chain>('ethereum')
   const [complaintRef, setComplaintRef] = useState('')
   const [narrative, setNarrative] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -137,11 +120,10 @@ export function NewCase() {
                     key={c.value}
                     onClick={() => setChain(c.value)}
                     aria-pressed={active}
-                    className={`flex cursor-pointer items-center gap-2 rounded border px-2.5 py-2 text-[13px] font-medium transition-colors ${
-                      active
+                    className={`flex cursor-pointer items-center gap-2 rounded border px-2.5 py-2 text-[13px] font-medium transition-colors ${active
                         ? 'bg-surface text-ink-900'
                         : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:text-ink-900'
-                    }`}
+                      }`}
                     style={active ? { borderColor: color } : undefined}
                   >
                     <ChainMark chain={c.value} size={17} />
@@ -165,11 +147,10 @@ export function NewCase() {
                 setError(null)
               }}
               placeholder={activeChain.placeholder}
-              className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${
-                validationError
+              className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${validationError
                   ? 'border-critical focus:border-critical'
                   : 'border-ink-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
-              }`}
+                }`}
             />
             {validationError && (
               <p className="mt-1.5 text-xs text-critical font-medium">{validationError}</p>
