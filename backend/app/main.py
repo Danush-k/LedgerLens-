@@ -20,6 +20,7 @@ from app.db.neo4j_client import load_seed_labels_into_neo4j
 from app.db.postgres import Base, SessionLocal, engine, ensure_additive_schema
 from app.live.monitor import live_monitor
 from app.worker.reaper import reap_stale_traces
+from scripts.seed_demo import seed_if_empty
 
 def _rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
     """Say plainly what happened and when to retry.
@@ -90,6 +91,19 @@ def on_startup() -> None:
                 f"Marked {reaped} trace(s) as failed - their worker did not survive")
     finally:
         db.close()
+
+    # A fresh clone should show a working, populated product on first run,
+    # not an empty shell someone has to fill in before it means anything -
+    # so an empty database is seeded with a demonstration caseload covering
+    # every feature. A database that already holds a single real case is
+    # never touched. Best-effort: a seeding failure must not stop the API
+    # from starting.
+    try:
+        if seed_if_empty():
+            logging.getLogger(__name__).info(
+                "Database was empty - seeded the demonstration caseload")
+    except Exception:  # noqa: BLE001 - startup must survive this either way
+        logging.getLogger(__name__).exception("Demo data seeding failed; continuing with an empty database")
 
     # A finished trace is not the end of the story - the wallets in it keep
     # moving. This watches the ones somebody is actually looking at.

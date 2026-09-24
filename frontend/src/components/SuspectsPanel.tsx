@@ -38,9 +38,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 import { decideSuspect, describeDownloadError, downloadSuspectReport } from '../api/client'
-import type { Suspect, SuspectRole, SuspectsResult, SuspectStatus } from '../types'
+import type { EvidenceTx, Suspect, SuspectRole, SuspectsResult, SuspectStatus } from '../types'
 import { explorerTxUrl } from '../utils/explorer'
-import { formatAmount } from '../utils/format'
+import { formatChainAmount } from '../utils/format'
 import { Address, EmptyState, Pill } from './ui/Primitives'
 
 export type SuspectFilter = 'all' | 'pending' | 'confirmed' | 'dismissed' | 'holding'
@@ -77,6 +77,10 @@ function when(ts: number | null) {
   })
 }
 
+function uniqueByHash(transactions: EvidenceTx[]): EvidenceTx[] {
+  return [...new Map(transactions.map(tx => [tx.tx_hash, tx])).values()]
+}
+
 function shortHash(hash: string) {
   return hash.length > 18 ? `${hash.slice(0, 10)}…${hash.slice(-6)}` : hash
 }
@@ -104,7 +108,7 @@ function SuspectRow({ caseId, suspect, expanded, onToggle, onChanged, onLocate }
   const [saving, setSaving] = useState<SuspectStatus | null>(null)
   const RoleIcon = ROLE_ICON[suspect.role] ?? ArrowDownToLine
   const status = suspect.decision.status
-  const unit = suspect.unit ? ` ${suspect.unit}` : ''
+  const amount = (value: number) => formatChainAmount(value, suspect.chain)
   const topReason = suspect.reasons.find(r => r.kind === 'signal')
   const signals = suspect.reasons.filter(r => r.kind === 'signal')
   const caveats = suspect.reasons.filter(r => r.kind === 'caveat')
@@ -207,7 +211,7 @@ function SuspectRow({ caseId, suspect, expanded, onToggle, onChanged, onLocate }
 
         <div className="w-[120px] shrink-0 text-right">
           <p className="tabular text-[13px] font-semibold text-ink-900">
-            {formatAmount(suspect.victim_funds)}{unit}
+            {amount(suspect.victim_funds)}
           </p>
           <p className="text-[11px] text-ink-500">{Math.round(suspect.victim_share * 100)}% of victim funds</p>
         </div>
@@ -245,7 +249,11 @@ function SuspectRow({ caseId, suspect, expanded, onToggle, onChanged, onLocate }
                     <p className="text-[13px] leading-relaxed text-ink-800">{reason.text}</p>
                     {reason.transactions.length > 0 && (
                       <div className="mt-1 flex flex-wrap gap-1.5">
-                        {reason.transactions.slice(0, 4).map(tx => {
+                        {/* One chip per transaction. A Bitcoin transaction paying
+                            several wallets arrives once per output, and listing
+                            the same hash twice says nothing while breaking the
+                            list's keys. */}
+                        {uniqueByHash(reason.transactions).slice(0, 4).map(tx => {
                           const url = explorerTxUrl(suspect.chain, tx.tx_hash)
                           return (
                             <a
@@ -257,13 +265,15 @@ function SuspectRow({ caseId, suspect, expanded, onToggle, onChanged, onLocate }
                               className="inline-flex items-center gap-1 rounded border border-ink-200 bg-surface px-1.5 py-0.5 font-mono text-[10.5px] text-ink-600 hover:border-brand-500 hover:text-brand-600"
                             >
                               {shortHash(tx.tx_hash)}
-                              <span className="font-sans text-ink-400">{formatAmount(tx.value)}{unit}</span>
+                              <span className="font-sans text-ink-400">{amount(tx.value)}</span>
                               <ExternalLink size={10} aria-hidden="true" />
                             </a>
                           )
                         })}
-                        {reason.transactions.length > 4 && (
-                          <span className="px-1 py-0.5 text-[10.5px] text-ink-400">+{reason.transactions.length - 4} more</span>
+                        {uniqueByHash(reason.transactions).length > 4 && (
+                          <span className="px-1 py-0.5 text-[10.5px] text-ink-400">
+                            +{uniqueByHash(reason.transactions).length - 4} more
+                          </span>
                         )}
                       </div>
                     )}
@@ -282,7 +292,7 @@ function SuspectRow({ caseId, suspect, expanded, onToggle, onChanged, onLocate }
 
             <div className="flex flex-wrap gap-x-6 gap-y-1 pt-1 text-[11px] text-ink-500">
               <span>{suspect.hop === 0 ? 'Reported wallet' : `${suspect.hop} hop${suspect.hop === 1 ? '' : 's'} from the reported wallet`}</span>
-              <span>Received {formatAmount(suspect.received)}{unit} · sent {formatAmount(suspect.sent)}{unit}</span>
+              <span>Received {amount(suspect.received)} · sent {amount(suspect.sent)}</span>
               <span>Active {when(suspect.first_activity)} – {when(suspect.last_activity)}</span>
             </div>
           </div>

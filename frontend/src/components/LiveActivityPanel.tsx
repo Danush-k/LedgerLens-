@@ -12,15 +12,10 @@ import { getLiveTransfers } from '../api/client'
 import type { LiveMode } from '../hooks/useLiveCase'
 import type { CaseStatus, LiveCheck, LiveTransfer } from '../types'
 import { explorerTxUrl } from '../utils/explorer'
-import { formatAmount } from '../utils/format'
-
-const UNITS: Record<string, string> = {
-  bitcoin: 'BTC', ethereum: 'ETH', bsc: 'BNB', polygon: 'MATIC', tron: 'USDT',
-}
+import { formatChainAmount } from '../utils/format'
 
 interface Props {
   caseId: string
-  chain: string
   status: CaseStatus
   mode: LiveMode
   pollSeconds: number
@@ -48,12 +43,11 @@ function short(address: string) {
 }
 
 export function LiveActivityPanel({
-  caseId, chain, status, mode, pollSeconds, lastCheck, checkedAt, liveWatch, version, arrivals,
+  caseId, status, mode, pollSeconds, lastCheck, checkedAt, liveWatch, version, arrivals,
   onToggleWatch, onLocate,
 }: Props) {
   const [transfers, setTransfers] = useState<LiveTransfer[]>([])
   const [now, setNow] = useState(() => Date.now())
-  const unit = UNITS[chain] ?? ''
 
   useEffect(() => {
     let active = true
@@ -144,7 +138,7 @@ export function LiveActivityPanel({
                   {isNew && <span className="mr-1 rounded bg-warning px-1 py-px text-[9px] font-bold text-white">NEW</span>}
                   {ago(t.detected_at, now)}
                 </span>
-                <span className="tabular w-28 shrink-0 font-semibold text-ink-900">{formatAmount(t.value)} {unit}</span>
+                <span className="tabular w-28 shrink-0 font-semibold text-ink-900">{formatChainAmount(t.value, t.chain)}</span>
                 <span className="flex min-w-0 flex-1 items-center gap-1.5 font-mono text-[11px] text-ink-700">
                   <span title={t.from_address}>{short(t.from_address)}</span>
                   <ArrowRight size={12} className="shrink-0 text-ink-400" aria-hidden="true" />

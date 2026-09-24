@@ -1,6 +1,6 @@
 import { AlertTriangle, FileText, Fingerprint, Radio, SearchX } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { describeDownloadError, downloadSuspectReport, getSuspects } from '../api/client'
 import { AuditChainPanel } from '../components/AuditChainPanel'
@@ -94,6 +94,40 @@ function ComplaintNarrative({ text }: { text: string }) {
         </button>
       )}
     </div>
+  )
+}
+
+/**
+ * Returns to wherever the investigator came from - Network Explorer with
+ * its filters intact, the Overview convergence list, a linked complaint on
+ * another case - rather than always dropping them on the unfiltered case
+ * list.
+ *
+ * `location.key === 'default'` marks a case opened with no in-app history
+ * behind it: a bookmark, a shared link, a fresh reload. Only then is there
+ * nothing to go back to, so this falls back to the case list instead of
+ * calling `navigate(-1)` and leaving the app.
+ */
+function BackLink() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  if (location.key === 'default') {
+    return (
+      <Link to="/cases" className="text-xs font-medium text-ink-500 hover:text-brand-600">
+        ← All cases
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(-1)}
+      className="cursor-pointer text-xs font-medium text-ink-500 hover:text-brand-600"
+    >
+      ← Back
+    </button>
   )
 }
 
@@ -218,9 +252,7 @@ export function CaseDetail() {
 
   return (
     <div className="mx-auto max-w-7xl px-8 py-8">
-      <Link to="/cases" className="text-xs font-medium text-ink-500 hover:text-brand-600">
-        ← All cases
-      </Link>
+      <BackLink />
 
       {/* Case Header */}
       <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
@@ -429,7 +461,6 @@ export function CaseDetail() {
 
           <LiveActivityPanel
             caseId={caseData.id}
-            chain={caseData.chain}
             status={caseData.status}
             mode={mode}
             pollSeconds={pollSeconds}

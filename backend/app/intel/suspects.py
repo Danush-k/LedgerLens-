@@ -322,7 +322,10 @@ def _score_wallet(g: _Graph, uid: str, findings: list[dict], linked: list[dict],
 
     # Who else is involved.
     if linked and node_type != "exchange":
-        refs = ", ".join((c["complaint_ref"] or "unreferenced case") for c in linked[:3])
+        # A complaint with no reference number still has to be nameable - an
+        # officer cannot follow up on "unreferenced case", but they can open
+        # the case id.
+        refs = ", ".join(c["complaint_ref"] or f"case {c['case_id'][:8]}" for c in linked[:3])
         signal("cross_case", W_CROSS_CASE,
                f"Also appears in {len(linked)} other complaint{'s' if len(linked) != 1 else ''} "
                f"({refs}{'…' if len(linked) > 3 else ''}) - separate victims' money meets here.")

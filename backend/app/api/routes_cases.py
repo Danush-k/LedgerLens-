@@ -323,7 +323,8 @@ def get_legal_notice(
 
 
 @router.get("/{case_id}/report")
-def get_case_report(case_id: str, db: Session = Depends(get_db)):
+def get_case_report(case_id: str, db: Session = Depends(get_db),
+                    user: CurrentUser = Depends(get_current_user)):
     case = db.get(Case, case_id)
     if not case:
         raise HTTPException(404, "Case not found")
@@ -335,7 +336,7 @@ def get_case_report(case_id: str, db: Session = Depends(get_db)):
     confirmed = [s for s in build_suspects(db, case)["suspects"]
                  if s["decision"]["status"] == "confirmed"]
     pdf_bytes = build_case_report(case, audit=verify_audit_chain(db, case_id).as_dict(),
-                                  confirmed_suspects=confirmed)
+                                  confirmed_suspects=confirmed, prepared_by=user.username)
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

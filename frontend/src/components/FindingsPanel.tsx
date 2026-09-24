@@ -189,10 +189,10 @@ function Finding({ finding, chain }: { finding: Pattern; chain: string }) {
             {finding.transactions.length > 0 && (
               <div>
                 <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-ink-500">
-                  Transactions ({finding.transactions.length})
+                  Transactions ({[...new Set(finding.transactions)].length})
                 </p>
                 <div className="flex flex-col gap-1">
-                  {finding.transactions.map(tx => {
+                  {[...new Set(finding.transactions)].map(tx => {
                     const url = txUrl(chain, tx)
                     return url ? (
                       <a

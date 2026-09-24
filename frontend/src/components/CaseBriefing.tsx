@@ -17,7 +17,7 @@ import {
   Wallet,
 } from 'lucide-react'
 import type { CaseBriefingSummary, NextStep, NextStepAction } from '../types'
-import { formatAmount } from '../utils/format'
+import { formatChainAmount } from '../utils/format'
 import { RiskBadge } from './ui/Primitives'
 
 interface Props {
@@ -107,8 +107,7 @@ function StepRow({ step, index, onAction }: {
 }
 
 export function CaseBriefing({ summary, riskScore, onAction }: Props) {
-  const unit = summary.unit ? ` ${summary.unit}` : ''
-  const amount = (v: number) => `${formatAmount(v)}${unit}`
+  const amount = (v: number) => formatChainAmount(v, summary.chain)
   const share = (v: number) =>
     summary.victim_total > 0 ? `${Math.round((v / summary.victim_total) * 100)}% of traced funds` : ''
   const { counts } = summary
