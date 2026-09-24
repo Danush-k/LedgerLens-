@@ -12,7 +12,7 @@ import pytest
 import requests
 
 from app.chain_clients.bitcoin import (
-    BitcoinClient, _read_blockchain_info, _providers,
+    BitcoinClient, _read_blockchain_info, _read_esplora, _providers,
 )
 
 ESPLORA_TX = {
@@ -90,6 +90,116 @@ def test_a_translated_transaction_parses_into_transfers():
     by_dest = {t.to_address: t for t in transfers}
     assert by_dest["bc1qdest"].value == pytest.approx(0.0024)
     assert by_dest["bc1qdest"].tx_hash == "b" * 64
+
+
+# ── pagination ───────────────────────────────────────────────────────────
+# Esplora's first page is only the most recent 25 transactions. An address
+# that has been sent small amounts for years after the transaction that
+# actually matters - which is exactly what happens to any well-known
+# address - would otherwise look permanently clean: page one is all recent
+# dust, and the real spend is on a page nobody asked for.
+
+def _esplora_tx(txid: str, spent: bool) -> dict:
+    return {
+        "txid": txid,
+        "status": {"block_time": 1_700_000_000, "confirmed": True},
+        "vin": [{"prevout": {"scriptpubkey_address": "bc1qsource" if spent else "bc1qother",
+                             "value": 100_000}}],
+        "vout": [{"scriptpubkey_address": "bc1qdest", "value": 90_000}],
+    }
+
+
+def test_esplora_follows_the_chain_cursor_to_the_next_page():
+    """A full first page (25) is a sign there is more, not the whole
+    history - the client has to ask for what comes after it."""
+    page1 = [_esplora_tx(f"p1-{i}", spent=False) for i in range(25)]
+    page2 = [_esplora_tx("p2-only", spent=True)]
+    responses = [_response(page1), _response(page2)]
+
+    calls = []
+
+    def fake_get_with_retry(session, url, **kwargs):
+        calls.append(url)
+        return responses.pop(0)
+
+    with patch("app.chain_clients.bitcoin.get_with_retry", side_effect=fake_get_with_retry):
+        txs = _read_esplora(requests.Session(), "https://blockstream.info/api", "bc1qsource")
+
+    assert len(txs) == 26
+    assert calls[0] == "https://blockstream.info/api/address/bc1qsource/txs"
+    assert calls[1] == "https://blockstream.info/api/address/bc1qsource/txs/chain/p1-24"
+
+
+def test_esplora_stops_at_a_short_page():
+    """A page shorter than Esplora's own page size is the last one - it is
+    the actual end of the address's history, not a full page that happens
+    to have less in it."""
+    page1 = [_esplora_tx(f"p1-{i}", spent=False) for i in range(10)]
+
+    with patch("app.chain_clients.bitcoin.get_with_retry", return_value=_response(page1)) as mocked:
+        txs = _read_esplora(requests.Session(), "https://blockstream.info/api", "bc1qsource")
+
+    assert len(txs) == 10
+    assert mocked.call_count == 1  # never asked for a page that couldn't exist
+
+
+def test_esplora_stops_at_an_empty_page():
+    with patch("app.chain_clients.bitcoin.get_with_retry", return_value=_response([])) as mocked:
+        txs = _read_esplora(requests.Session(), "https://blockstream.info/api", "bc1qsource")
+
+    assert txs == []
+    assert mocked.call_count == 1
+
+
+def test_esplora_pagination_is_capped():
+    """An unbounded address must not turn one fetch into an unbounded
+    number of requests - a long history costs a few extra pages, not a
+    fetch that never returns."""
+    full_page = [_esplora_tx(f"x-{i}", spent=False) for i in range(25)]
+
+    with patch("app.chain_clients.bitcoin.get_with_retry",
+               return_value=_response(full_page)) as mocked:
+        txs = _read_esplora(requests.Session(), "https://blockstream.info/api", "bc1qsource")
+
+    from app.chain_clients.bitcoin import _ESPLORA_MAX_PAGES
+    assert mocked.call_count == _ESPLORA_MAX_PAGES
+    assert len(txs) == 25 * _ESPLORA_MAX_PAGES
+
+
+def test_a_real_outgoing_transfer_on_a_later_page_is_not_missed():
+    """The regression this whole section guards: a wallet whose only
+    outgoing transfer is buried behind a full page of pure-receive
+    transactions must not be reported as having sent nothing."""
+    page1 = [_esplora_tx(f"recent-{i}", spent=False) for i in range(25)]  # all incoming dust
+    page2 = [_esplora_tx("the-real-spend", spent=True)]
+
+    client = BitcoinClient()
+    responses = [_response(page1), _response(page2)]
+    with patch("app.chain_clients.bitcoin.get_with_retry", side_effect=lambda *a, **k: responses.pop(0)):
+        client._providers = [("blockstream.info", "https://blockstream.info/api", _read_esplora)]
+        transfers = client.get_outgoing_transfers("bc1qsource")
+
+    assert len(transfers) == 1
+    assert transfers[0].tx_hash == "the-real-spend"
+
+
+def test_blockchain_info_pages_via_offset_until_a_short_batch():
+    full_batch = {"txs": [{"hash": f"a{i}" * 8, "time": 1_700_000_000,
+                           "inputs": [], "out": []} for i in range(50)]}
+    short_batch = {"txs": [{"hash": "final" * 12, "time": 1_700_000_100,
+                            "inputs": [], "out": []}]}
+
+    calls = []
+
+    def fake_get_with_retry(session, url, params=None, **kwargs):
+        calls.append(params)
+        return _response(full_batch if params["offset"] == 0 else short_batch)
+
+    with patch("app.chain_clients.bitcoin.get_with_retry", side_effect=fake_get_with_retry):
+        txs = _read_blockchain_info(requests.Session(), "https://blockchain.info", "bc1qsource")
+
+    assert len(txs) == 51
+    assert [c["offset"] for c in calls] == [0, 50]
 
 
 # ── failover ──────────────────────────────────────────────────────────────

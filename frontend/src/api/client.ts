@@ -58,6 +58,24 @@ export async function submitTrace(body: TraceRequestBody) {
   return data
 }
 
+export interface ExistingTrace {
+  case_id: string
+  status: string
+  risk_score: number | null
+  complaint_ref: string | null
+  created_by: string | null
+  created_at: string
+  nearest_exchange: { name: string; hops: number } | null
+}
+
+/** Other cases already open on this exact wallet - checked before
+ * submitting, so the investigator sees what's on file instead of
+ * discovering a confusing duplicate case after the fact. */
+export async function findExistingTraces(chain: Chain, address: string) {
+  const { data } = await api.get<ExistingTrace[]>('/trace/existing', { params: { chain, address } })
+  return data
+}
+
 export async function submitBulkTrace(file: File) {
   const form = new FormData()
   form.append('file', file)

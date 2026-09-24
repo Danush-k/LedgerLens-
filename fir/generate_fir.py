@@ -25,7 +25,7 @@ from reportlab.platypus import (
     Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle,
 )
 
-SUSPECT = "1MCXUCE7vpTueDFgMEJaUjd9X49q6dd5J"  # LedgerLens demo case: demo-priya-sharma
+SUSPECT = "1CRLGcaXajtWVF5EopZgQUqE12dKn8Rtuh"
 OUT_DIR = Path(__file__).resolve().parent
 
 base = getSampleStyleSheet()
