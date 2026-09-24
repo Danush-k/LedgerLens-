@@ -183,6 +183,36 @@ def test_a_real_outgoing_transfer_on_a_later_page_is_not_missed():
     assert transfers[0].tx_hash == "the-real-spend"
 
 
+def test_esplora_keeps_earlier_pages_when_a_later_page_fails():
+    """Paging costs more requests than a single fetch used to, and every
+    extra request is one more chance for a free API to refuse. A later
+    page failing after its own retries must not discard the real history
+    earlier pages already returned."""
+    page1 = [_esplora_tx(f"p1-{i}", spent=True) for i in range(25)]
+
+    calls = {"n": 0}
+
+    def flaky(session, url, **kwargs):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            return _response(page1)
+        raise requests.ConnectionError("reset by peer")
+
+    with patch("app.chain_clients.bitcoin.get_with_retry", side_effect=flaky):
+        txs = _read_esplora(requests.Session(), "https://blockstream.info/api", "bc1qsource")
+
+    assert len(txs) == 25  # page 1's real transactions, not lost
+
+
+def test_esplora_first_page_failing_still_raises():
+    """The one case that *is* a genuine data-availability problem: nothing
+    could be read for this address at all, not even the first page."""
+    with patch("app.chain_clients.bitcoin.get_with_retry",
+               side_effect=requests.ConnectionError("reset")):
+        with pytest.raises(requests.ConnectionError):
+            _read_esplora(requests.Session(), "https://blockstream.info/api", "bc1qsource")
+
+
 def test_blockchain_info_pages_via_offset_until_a_short_batch():
     full_batch = {"txs": [{"hash": f"a{i}" * 8, "time": 1_700_000_000,
                            "inputs": [], "out": []} for i in range(50)]}

@@ -39,13 +39,28 @@ _ESPLORA_MAX_PAGES = 12
 
 
 def _read_esplora(session: requests.Session, base_url: str, address: str) -> list[dict]:
-    """Blockstream and other Esplora hosts, which need no translation."""
+    """Blockstream and other Esplora hosts, which need no translation.
+
+    Paging costs more requests than a single fetch, and every extra request
+    is one more chance for a free, shared API to refuse. A later page
+    failing after its own retries is not license to discard the pages that
+    already succeeded - this address's most recent, most relevant history
+    is real data, and losing it because page 6 of 12 timed out would trade
+    the pagination bug for a reliability one. Only the *first* page failing
+    is a genuine "could not reach this address at all", and is left to
+    propagate as one.
+    """
     all_txs: list[dict] = []
     last_txid: str | None = None
-    for _ in range(_ESPLORA_MAX_PAGES):
+    for page_num in range(_ESPLORA_MAX_PAGES):
         url = (f"{base_url}/address/{address}/txs" if last_txid is None
               else f"{base_url}/address/{address}/txs/chain/{last_txid}")
-        page = get_with_retry(session, url, attempts=4).json()
+        try:
+            page = get_with_retry(session, url, attempts=4).json()
+        except Exception:
+            if page_num == 0:
+                raise
+            break  # keep what earlier pages already found
         if not page:
             break
         all_txs.extend(page)
@@ -71,11 +86,16 @@ def _read_blockchain_info(session: requests.Session, base_url: str,
     """
     raw_txs: list[dict] = []
     for page in range(_BLOCKCHAIN_INFO_MAX_PAGES):
-        response = get_with_retry(
-            session, f"{base_url}/rawaddr/{address}",
-            params={"limit": _BLOCKCHAIN_INFO_PAGE, "offset": page * _BLOCKCHAIN_INFO_PAGE},
-            attempts=4)
-        batch = response.json().get("txs", [])
+        try:
+            response = get_with_retry(
+                session, f"{base_url}/rawaddr/{address}",
+                params={"limit": _BLOCKCHAIN_INFO_PAGE, "offset": page * _BLOCKCHAIN_INFO_PAGE},
+                attempts=4)
+            batch = response.json().get("txs", [])
+        except Exception:
+            if page == 0:
+                raise
+            break  # a later page failing must not discard the ones already fetched
         if not batch:
             break
         raw_txs.extend(batch)
