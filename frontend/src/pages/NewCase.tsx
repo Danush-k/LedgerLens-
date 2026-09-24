@@ -35,7 +35,15 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
     if (trimmed.length < 26 || trimmed.length > 62) {
       return `Invalid Bitcoin address length (${trimmed.length} chars). Must be between 26 and 62 characters.`
     }
-    if (!/^(1[1-9A-HJ-NP-Za-k-z]{25,34}|3[1-9A-HJ-NP-Za-k-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) {
+    // Base58 excludes four glyphs easy to confuse by eye: 0, O, I and l.
+    // Written as [1-9A-HJ-NP-Za-km-z] - NOT "...Za-k-z", which parses as
+    // the range a-k, a literal hyphen, then z, silently rejecting every
+    // real address containing a letter from m to y. That typo lived in
+    // this file (and, until recently, in the backend's own copy of this
+    // pattern) and rejected the majority of real Bitcoin addresses before
+    // the request ever left the browser - most base58 addresses contain at
+    // least one letter in that dropped range.
+    if (!/^(1[1-9A-HJ-NP-Za-km-z]{25,34}|3[1-9A-HJ-NP-Za-km-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) {
       return `Invalid Bitcoin address format.`
     }
   }
