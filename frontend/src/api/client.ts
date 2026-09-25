@@ -15,11 +15,14 @@ import type {
   EntityResult,
   HashVerificationResult,
   LegalNoticeParams,
+  LiveTransfer,
   MlStatus,
   ParsedComplaintResult,
+  SuspectStatus,
+  SuspectsResult,
 } from '../types'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:8000' : '')
 
 // Bound every request so an unreachable/hung API fails predictably instead of
 // spinning for however long the OS takes to give up on the TCP connection.
@@ -52,6 +55,24 @@ export interface TraceRequestBody {
 
 export async function submitTrace(body: TraceRequestBody) {
   const { data } = await api.post<{ case_id: string; status: string }>('/trace', body)
+  return data
+}
+
+export interface ExistingTrace {
+  case_id: string
+  status: string
+  risk_score: number | null
+  complaint_ref: string | null
+  created_by: string | null
+  created_at: string
+  nearest_exchange: { name: string; hops: number } | null
+}
+
+/** Other cases already open on this exact wallet - checked before
+ * submitting, so the investigator sees what's on file instead of
+ * discovering a confusing duplicate case after the fact. */
+export async function findExistingTraces(chain: Chain, address: string) {
+  const { data } = await api.get<ExistingTrace[]>('/trace/existing', { params: { chain, address } })
   return data
 }
 
@@ -187,6 +208,36 @@ export async function verifyEvidenceHash(hash: string, caseId?: string) {
   return data
 }
 
+export async function downloadEvidencePackage(caseId: string, params: LegalNoticeParams) {
+  const { data } = await api.get(`/cases/${caseId}/evidence-package`, {
+    params,
+    responseType: 'blob',
+  })
+  const url = window.URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `evidence-package-${caseId.slice(0, 8)}.zip`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+export async function getSyndicates() {
+  const { data } = await api.get<{ syndicate_count: number; total_linked_cases: number; syndicates: any[] }>('/analytics/syndicates')
+  return data
+}
+
+export async function getCaseSwaps(caseId: string) {
+  const { data } = await api.get<{ case_id: string; swaps_count: number; swaps: any[] }>(`/cases/${caseId}/swaps`)
+  return data
+}
+
+export async function aggregateCases(caseIds: string[]) {
+  const { data } = await api.post<{ nodes: any[]; edges: any[]; case_count: number; shared_nodes_count: number }>('/cases/aggregate-graph', { case_ids: caseIds })
+  return data
+}
+
 
 // ── Cross-case intelligence ───────────────────────────────────────────────
 
@@ -209,5 +260,62 @@ export async function getAddressFootprint(chain: string, address: string) {
 
 export async function getAuditChain(caseId: string) {
   const { data } = await api.get<AuditChain>(`/cases/${caseId}/audit`)
+  return data
+}
+
+
+// ── Suspects ──────────────────────────────────────────────────────────────
+
+export async function getSuspects(caseId: string) {
+  const { data } = await api.get<SuspectsResult>(`/cases/${caseId}/suspects`)
+  return data
+}
+
+export async function decideSuspect(caseId: string, address: string, status: SuspectStatus,
+                                    note?: string | null) {
+  const { data } = await api.put(`/cases/${caseId}/suspects/${encodeURIComponent(address)}`, {
+    status,
+    note: note ?? null,
+  })
+  return data
+}
+
+export async function downloadSuspectReport(caseId: string) {
+  const { data } = await api.get(`/cases/${caseId}/suspect-report`, {
+    responseType: 'blob',
+    timeout: 60_000,
+  })
+  const url = window.URL.createObjectURL(data)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `suspect-report-${caseId}.pdf`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}
+
+
+// ── Live monitoring ───────────────────────────────────────────────────────
+
+/** EventSource cannot send headers, so the stream takes the token in the URL. */
+export function liveStreamUrl(caseId: string) {
+  const token = getStoredToken()
+  return `${baseURL}/live/cases/${caseId}/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`
+}
+
+export async function getLiveTransfers(caseId: string) {
+  const { data } = await api.get<LiveTransfer[]>(`/live/cases/${caseId}/transfers`)
+  return data
+}
+
+export async function getLiveStatus(caseId: string) {
+  const { data } = await api.get(`/live/cases/${caseId}/status`)
+  return data as { live_checked_at: string | null; poll_seconds: number; live_watch: boolean }
+}
+
+export async function setLiveWatch(caseId: string, enabled: boolean) {
+  const { data } = await api.post<{ case_id: string; live_watch: boolean }>(
+    `/live/cases/${caseId}/watch`, { enabled })
   return data
 }

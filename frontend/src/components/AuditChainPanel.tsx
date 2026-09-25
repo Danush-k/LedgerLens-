@@ -23,7 +23,8 @@ const EVENT_LABELS: Record<string, string> = {
   ncrp_intake_received: 'NCRP intake received',
 }
 
-export function AuditChainPanel({ caseId }: { caseId: string }) {
+/** `version` re-reads the chain when the page knows new entries were written. */
+export function AuditChainPanel({ caseId, version = 0 }: { caseId: string; version?: number }) {
   const [chain, setChain] = useState<AuditChain | null>(null)
   const [failed, setFailed] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -34,7 +35,7 @@ export function AuditChainPanel({ caseId }: { caseId: string }) {
       .then(data => !cancelled && setChain(data))
       .catch(() => !cancelled && setFailed(true))
     return () => { cancelled = true }
-  }, [caseId])
+  }, [caseId, version])
 
   if (failed) {
     return (

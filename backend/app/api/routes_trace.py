@@ -67,6 +67,43 @@ async def parse_document(file: UploadFile = File(...),
 from app.chain_clients.base import Chain, is_valid_address, normalize_address
 
 
+@router.get("/trace/existing")
+def find_existing_traces(chain: Chain, address: str, db: Session = Depends(get_db),
+                         user: CurrentUser = Depends(get_current_user)):
+    """Other cases already open on this exact wallet, newest first.
+
+    Submitting a wallet that has already been traced is not wrong - the
+    same wallet named in a second, independent complaint is exactly the
+    prior-report signal this system is built to catch. But submitting the
+    *same* complaint's wallet a second time by accident produces a
+    confusing duplicate: a second case for the same evidence, and - if the
+    wallet is one whose real on-chain activity hasn't changed - a trace
+    that finds nothing new to say. The investigator should see what is
+    already on file before choosing to trace again, not discover the
+    duplicate afterwards.
+    """
+    normalised = normalize_address(address)
+    rows = (
+        db.query(Case)
+        .filter(Case.chain == chain.value, Case.reported_address == normalised)
+        .order_by(Case.created_at.desc())
+        .limit(10)
+        .all()
+    )
+    return [
+        {
+            "case_id": c.id,
+            "status": c.status,
+            "risk_score": c.risk_score,
+            "complaint_ref": c.complaint_ref,
+            "created_by": c.created_by,
+            "created_at": c.created_at,
+            "nearest_exchange": c.nearest_exchange,
+        }
+        for c in rows
+    ]
+
+
 @router.post("/trace", response_model=TraceAccepted, status_code=202)
 @limiter.limit(TRACE_LIMIT)
 def submit_trace(request: Request, body: TraceRequest, db: Session = Depends(get_db),

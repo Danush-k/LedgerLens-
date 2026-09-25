@@ -1,8 +1,13 @@
-import { AlertTriangle, FileText, Fingerprint, SearchX } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { getCase } from '../api/client'
+import { AlertTriangle, Building2, FileText, Fingerprint, Radio, SearchX } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { toast } from 'sonner'
+import { describeDownloadError, downloadSuspectReport, getSuspects } from '../api/client'
 import { AuditChainPanel } from '../components/AuditChainPanel'
+import { CaseBriefing } from '../components/CaseBriefing'
+import { LiveActivityPanel } from '../components/LiveActivityPanel'
+import { SuspectsPanel, type SuspectFilter } from '../components/SuspectsPanel'
+import { useLiveCase } from '../hooks/useLiveCase'
 import { ChainBadge } from '../components/ChainMark'
 import { LoadingRing } from '../components/Logo'
 import { ClusterPanel } from '../components/ClusterPanel'
@@ -12,13 +17,14 @@ import { GraphLegend } from '../components/GraphLegend'
 import { GraphView } from '../components/GraphView'
 import { HashVerifierModal } from '../components/HashVerifierModal'
 import { LegalNoticeModal } from '../components/LegalNoticeModal'
+import { VaspDirectoryModal } from '../components/VaspDirectoryModal'
 import { CaseLinksPanel } from '../components/CaseLinksPanel'
 import { Collapsible } from '../components/ui/Collapsible'
 import { RiskGauge } from '../components/RiskGauge'
 import { CardSkeleton } from '../components/Skeleton'
 import { StatusBadge } from '../components/StatusBadge'
 import { TypologyBadge } from '../components/TypologyBadge'
-import type { CaseDetail as CaseDetailType, GraphEdge, GraphNode } from '../types'
+import type { GraphEdge, GraphNode, NextStepAction, SuspectsResult } from '../types'
 import { findPath } from '../utils/findPath'
 
 /**
@@ -92,50 +98,132 @@ function ComplaintNarrative({ text }: { text: string }) {
   )
 }
 
+/**
+ * Returns to wherever the investigator came from - Network Explorer with
+ * its filters intact, the Overview convergence list, a linked complaint on
+ * another case - rather than always dropping them on the unfiltered case
+ * list.
+ *
+ * `location.key === 'default'` marks a case opened with no in-app history
+ * behind it: a bookmark, a shared link, a fresh reload. Only then is there
+ * nothing to go back to, so this falls back to the case list instead of
+ * calling `navigate(-1)` and leaving the app.
+ */
+function BackLink() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  if (location.key === 'default') {
+    return (
+      <Link to="/cases" className="text-xs font-medium text-ink-500 hover:text-brand-600">
+        ← All cases
+      </Link>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => navigate(-1)}
+      className="cursor-pointer text-xs font-medium text-ink-500 hover:text-brand-600"
+    >
+      ← Back
+    </button>
+  )
+}
+
 export function CaseDetail() {
   const { caseId } = useParams<{ caseId: string }>()
-  const [caseData, setCaseData] = useState<CaseDetailType | null>(null)
+  const { caseData, mode, lastCheck, pollSeconds, arrivals, version, setWatch } = useLiveCase(caseId)
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null)
   const [selectedEdge, setSelectedEdge] = useState<GraphEdge | null>(null)
+  const [activeLegendType, setActiveLegendType] = useState<string | null>(null)
   const [noticeModalOpen, setNoticeModalOpen] = useState(false)
   const [hashModalOpen, setHashModalOpen] = useState(false)
   const [vaspModalOpen, setVaspModalOpen] = useState(false)
-  const [activeView, setActiveView] = useState<'graph' | 'timeline'>('graph')
+  const [suspects, setSuspects] = useState<SuspectsResult | null>(null)
+  const [suspectsLoading, setSuspectsLoading] = useState(false)
+  const [suspectFilter, setSuspectFilter] = useState<SuspectFilter>('all')
+  const [suspectsVersion, setSuspectsVersion] = useState(0)
+  const [linksOpen, setLinksOpen] = useState(false)
+  const [focusRequest, setFocusRequest] = useState<{ id: string; nonce: number } | null>(null)
+  const graphRef = useRef<HTMLDivElement>(null)
 
   // Clear the previous case before loading the next one.
   useEffect(() => {
-    setCaseData(null)
     setSelectedNode(null)
     setSelectedEdge(null)
+    setSuspects(null)
+    setSuspectFilter('all')
+    setLinksOpen(false)
     window.scrollTo({ top: 0 })
   }, [caseId])
 
+  // The suspect list is derived on the server from the graph, the linked
+  // complaints and the officer's rulings, so it is re-read whenever any of
+  // those change: the case reloads, live monitoring adds a transfer, or a
+  // decision is saved.
+  const status = caseData?.status
   useEffect(() => {
-    if (!caseId) return
+    if (!caseId || status !== 'complete') return
     let active = true
-    setSelectedNode(null)
+    setSuspectsLoading(true)
+    getSuspects(caseId)
+      .then(result => active && setSuspects(result))
+      .catch(() => active && toast.error('Could not load the suspect list'))
+      .finally(() => active && setSuspectsLoading(false))
+    return () => { active = false }
+  }, [caseId, status, version, suspectsVersion])
+
+  const refreshSuspects = useCallback(() => setSuspectsVersion(v => v + 1), [])
+
+  const confirmedSuspectIds = useMemo(() => new Set(
+    (suspects?.suspects ?? []).filter(s => s.decision.status === 'confirmed').map(s => s.id),
+  ), [suspects])
+
+  const locateOnGraph = useCallback((address: string) => {
+    const node = caseData?.graph?.nodes.find(n => n.address === address)
+    if (!node) {
+      toast.warning('That wallet is not on the graph')
+      return
+    }
     setSelectedEdge(null)
+    setSelectedNode(node)
+    setFocusRequest({ id: node.id, nonce: Date.now() })
+    graphRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [caseData])
 
-    const load = async () => {
-      const c = await getCase(caseId)
-      if (!active) return
-      setCaseData(c)
-      if (c.status === 'complete') {
-      }
+  const scrollTo = (id: string) =>
+    window.setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
+
+  const handleStepAction = async (action: Exclude<NextStepAction, null>) => {
+    switch (action) {
+      case 'legal_notice':
+        setNoticeModalOpen(true)
+        break
+      case 'filter_holding':
+        setSuspectFilter('holding')
+        scrollTo('suspects')
+        break
+      case 'review_suspects':
+        setSuspectFilter('pending')
+        scrollTo('suspects')
+        break
+      case 'linked_cases':
+        setLinksOpen(true)
+        scrollTo('linked-complaints')
+        break
+      case 'suspect_report':
+        try {
+          await downloadSuspectReport(caseData!.id)
+          toast.success('Suspect report downloaded')
+          refreshSuspects()
+        } catch (err) {
+          toast.error(await describeDownloadError(err))
+        }
+        break
     }
-    load()
-
-    const interval = setInterval(() => {
-      if (caseData && (caseData.status === 'complete' || caseData.status === 'failed')) return
-      load()
-    }, 2500)
-
-    return () => {
-      active = false
-      clearInterval(interval)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId, caseData?.status])
+  }
 
   const highlightPath = useMemo(() => {
     if (!caseData?.graph || !caseData.nearest_exchange) return []
@@ -162,12 +250,11 @@ export function CaseDetail() {
   }
 
   const nodeCount = caseData.graph?.nodes.length ?? 0
+  const liveEdgeCount = caseData.graph?.edges.filter(e => e.detected_live).length ?? 0
 
   return (
     <div className="mx-auto max-w-7xl px-8 py-8">
-      <Link to="/cases" className="text-xs font-medium text-ink-500 hover:text-brand-600">
-        ← All cases
-      </Link>
+      <BackLink />
 
       {/* Case Header */}
       <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
@@ -230,15 +317,42 @@ export function CaseDetail() {
       </div>
 
       {/* 1. FULL WIDTH TRANSACTION GRAPH CANVAS */}
-      <div className="mt-6 space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-ink-800">
+      <div ref={graphRef} className="mt-6 scroll-mt-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink-800">
             Transaction Graph{' '}
             <span className="font-normal text-ink-400">
               ({nodeCount} address{nodeCount === 1 ? '' : 'es'})
             </span>
+            {caseData.status === 'complete' && (
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${
+                  mode === 'live' ? 'bg-good-soft text-good' : 'bg-warning-soft text-warning'
+                }`}
+                title={mode === 'live' ? `Re-checked every ${pollSeconds}s while open` : undefined}
+              >
+                <Radio size={11} aria-hidden="true" />
+                {mode === 'live' ? 'Live' : mode === 'connecting' ? 'Reconnecting' : 'Polling'}
+              </span>
+            )}
+            {liveEdgeCount > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-normal text-ink-500">
+                <span className="inline-block h-0 w-5 border-t-2 border-dashed border-amber-500" aria-hidden="true" />
+                {liveEdgeCount} transfer{liveEdgeCount === 1 ? '' : 's'} after the trace
+              </span>
+            )}
+            {confirmedSuspectIds.size > 0 && (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-normal text-ink-500">
+                <span className="inline-block h-2.5 w-2.5 rounded-full border-[3px] border-double border-critical" aria-hidden="true" />
+                confirmed suspect
+              </span>
+            )}
           </h2>
-          <GraphLegend />
+          <GraphLegend
+            nodes={caseData.graph?.nodes ?? []}
+            activeType={activeLegendType}
+            onToggleType={(type) => setActiveLegendType((prev) => (prev === type ? null : type))}
+          />
         </div>
         <div className="relative h-[560px] w-full">
           {caseData.graph && caseData.graph.nodes && caseData.graph.nodes.length > 0 ? (
@@ -246,12 +360,13 @@ export function CaseDetail() {
               nodes={caseData.graph.nodes}
               edges={caseData.graph.edges || []}
               highlightPath={highlightPath}
+              clusters={caseData.clusters ?? []}
+              activeTypeFilter={activeLegendType}
+              selectedNode={selectedNode}
               onNodeClick={(node) => {
                 setSelectedNode(node)
                 setSelectedEdge(null)
               }}
-              clusters={caseData.clusters ?? []}
-              selectedNode={selectedNode}
               onCloseNode={() => setSelectedNode(null)}
               selectedEdge={selectedEdge}
               onEdgeClick={(edge) => {
@@ -259,6 +374,9 @@ export function CaseDetail() {
                 setSelectedNode(null)
               }}
               onCloseEdge={() => setSelectedEdge(null)}
+              liveArrivals={arrivals}
+              suspectNodeIds={confirmedSuspectIds}
+              focusRequest={focusRequest}
             />
           ) : caseData.status === 'queued' || caseData.status === 'tracing' ? (
             /* Still working. Saying "no activity found" here would assert a
@@ -326,128 +444,128 @@ export function CaseDetail() {
           )}
         </div>
 
-        {activeView === 'graph' && <GraphLegend />}
       </div>
 
-      {/* Main View Area */}
-      <div className="mt-4">
-        {activeView === 'graph' ? (
-          <div className="relative h-[520px] w-full">
-            {caseData.graph && caseData.graph.nodes && caseData.graph.nodes.length > 0 ? (
-              <>
-                <GraphView
-                  nodes={caseData.graph.nodes}
-                  edges={caseData.graph.edges || []}
-                  highlightPath={highlightPath}
-                  onNodeClick={setSelectedNode}
-                />
-                {selectedNode && <NodeInspector node={selectedNode} onClose={() => setSelectedNode(null)} />}
-              </>
-            ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-ink-200 px-8 text-center bg-surface">
-                <SearchX size={22} className="text-ink-400" />
-                <p className="text-sm font-medium text-ink-700">No outgoing on-chain activity found</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <CaseTimeline
-            nodes={caseData.graph?.nodes || []}
-            edges={caseData.graph?.edges || []}
-            chain={caseData.chain}
+
+      {/* 2. WHAT THE GRAPH MEANS
+          The graph is the evidence; this is the reading of it. An officer
+          should be able to act on the case from here without interpreting
+          a single node: what happened, who the suspects are, what is
+          still moving, and what to do next. The raw analysis stays
+          available underneath for anyone who needs to check the working. */}
+      {caseData.status === 'complete' && (
+        <div className="mt-8 space-y-6">
+          {suspects?.ready && suspects.summary && (
+            <CaseBriefing
+              summary={suspects.summary}
+              riskScore={caseData.risk_score}
+              onAction={handleStepAction}
+            />
+          )}
+
+          <SuspectsPanel
+            caseId={caseData.id}
+            result={suspects}
+            loading={suspectsLoading}
+            filter={suspectFilter}
+            onFilterChange={setSuspectFilter}
+            onChanged={refreshSuspects}
+            onLocate={locateOnGraph}
           />
-        )}
-      </div>
 
-      {/* Information Cards Section */}
-      <div className="mt-8 space-y-6">
-        {/* Row 1: Target VASP & Risk Assessment Grid */}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          {/* Target Exchange & Attribution Card */}
-          <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-2xs">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-500">Target VASP / Nearest Exchange</h2>
-            {caseData.nearest_exchange ? (
-              <div className="mt-3 space-y-2">
-                <p className="text-lg font-extrabold text-good">{caseData.nearest_exchange.name}</p>
-                <p className="break-all font-mono text-xs text-ink-600 bg-ink-50 p-2.5 rounded-lg border border-ink-100">
-                  {caseData.nearest_exchange.address}
-                </p>
-                <p className="text-xs text-ink-500 font-medium">
-                  Distance: <span className="text-ink-800 font-semibold">{caseData.nearest_exchange.hops} hop{caseData.nearest_exchange.hops === 1 ? '' : 's'}</span> away
-                </p>
-                {/* The basis for the attribution, shown with it. Naming an
-                    exchange without saying how it was identified invites the
-                    reader to treat a label lookup as established fact. */}
-                <p className="border-t border-ink-100 pt-2 text-[11px] leading-relaxed text-ink-500">
-                  <span className="font-medium text-ink-600">Attribution basis: </span>
-                  {caseData.nearest_exchange.source || 'Seed label set; source not recorded'}.
-                  Deposit-address attribution only — it does not establish who holds the
-                  account, which requires a legal request to the exchange.
-                </p>
-              </div>
-            ) : (
-              <p className="mt-2 text-xs text-ink-500">
-                {caseData.status === 'complete'
-                  ? 'No exchange identified within the hop limit.'
-                  : 'Tracing in progress...'}
+          <LiveActivityPanel
+            caseId={caseData.id}
+            status={caseData.status}
+            mode={mode}
+            pollSeconds={pollSeconds}
+            lastCheck={lastCheck}
+            checkedAt={caseData.live_checked_at}
+            liveWatch={Boolean(caseData.live_watch)}
+            version={version}
+            arrivals={arrivals}
+            onToggleWatch={setWatch}
+            onLocate={locateOnGraph}
+          />
+
+          {/* 3. SUPPORTING EVIDENCE - the working behind the conclusions above. */}
+          <div className="space-y-3 pt-2">
+            <div>
+              <h2 className="text-sm font-semibold text-ink-900">Supporting evidence</h2>
+              <p className="mt-0.5 text-xs text-ink-500">
+                The analysis behind the briefing and suspect list, for checking the working or
+                answering a challenge.
               </p>
-            )}
+            </div>
 
-            {caseData.recommended_action && (
-              <div className="mt-4 border-t border-ink-100 pt-3">
-                <span className="text-[11px] font-semibold uppercase text-brand-600">Recommended Action</span>
-                <p className="mt-1 text-xs text-ink-700 leading-relaxed">{caseData.recommended_action}</p>
-              </div>
-            )}
-          </div>
-
-          {/* Risk Assessment & Forensic Flags Card */}
-          <div className="rounded-md border border-ink-100 bg-surface p-5 shadow-2xs">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-500 mb-3">Risk Assessment &amp; Flags</h2>
-            {caseData.risk_score !== null ? (
-              <div className="flex flex-col items-center">
-                <RiskGauge score={caseData.risk_score} />
-                
-                {caseData.flags && caseData.flags.length > 0 && (
-                  <div className="mt-4 w-full border-t border-ink-100 pt-3">
-                    <span className="text-[11px] font-semibold text-ink-500 block mb-2">Detected Flags:</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {caseData.flags.map((f) => (
-                        <FlagPill key={f} flag={f} />
-                      ))}
+            <Collapsible title="Risk assessment" hint="How the case risk score was reached">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <div className="flex flex-col items-center">
+                  {caseData.risk_score !== null ? (
+                    <RiskGauge score={caseData.risk_score} />
+                  ) : (
+                    <p className="text-xs text-ink-400">No score recorded.</p>
+                  )}
+                  {caseData.flags && caseData.flags.length > 0 && (
+                    <div className="mt-4 flex w-full flex-wrap justify-center gap-1.5 border-t border-ink-100 pt-3">
+                      {caseData.flags.map((f) => <FlagPill key={f} flag={f} />)}
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+                <div className="space-y-3 text-xs leading-relaxed text-ink-600">
+                  {caseData.nearest_exchange ? (
+                    <p>
+                      <span className="font-semibold text-ink-800">Nearest exchange: </span>
+                      {caseData.nearest_exchange.name}, {caseData.nearest_exchange.hops} hop
+                      {caseData.nearest_exchange.hops === 1 ? '' : 's'} from the reported wallet.
+                      {' '}Attribution basis: {caseData.nearest_exchange.source || 'seed label set; source not recorded'}.
+                      Deposit-address attribution identifies the exchange, not the person — that
+                      requires a legal request.
+                    </p>
+                  ) : (
+                    <p>No exchange was identified within the hop limit.</p>
+                  )}
+                  {caseData.recommended_action && (
+                    <p>
+                      <span className="font-semibold text-ink-800">System recommendation: </span>
+                      {caseData.recommended_action}
+                    </p>
+                  )}
+                </div>
               </div>
-            ) : (
-              <p className="text-xs text-ink-400">Scoring pending...</p>
-            )}
+            </Collapsible>
+
+            <Collapsible title="Detailed findings" hint="Every pattern the detectors found, with transactions">
+              <FindingsPanel patterns={caseData.patterns} chain={caseData.chain} />
+            </Collapsible>
+
+            <Collapsible
+              id="linked-complaints"
+              title="Linked complaints"
+              hint="Other cases that share wallets with this one"
+              open={linksOpen}
+              onOpenChange={setLinksOpen}
+            >
+              <CaseLinksPanel caseId={caseData.id} chain={caseData.chain} />
+            </Collapsible>
+
+            <Collapsible title="Wallet clusters" hint="Addresses that share an owner">
+              <ClusterPanel clusters={caseData.clusters ?? []} />
+            </Collapsible>
+
+            <Collapsible title="Chain of custody" hint="Tamper-evident record of every action">
+              <AuditChainPanel caseId={caseData.id} version={version + suspectsVersion} />
+            </Collapsible>
           </div>
         </div>
+      )}
 
-        {/* Findings carry the transaction hashes behind every claim, so they
-            sit with the graph rather than below the secondary panels. */}
-        <FindingsPanel patterns={caseData.patterns} chain={caseData.chain} />
-
-        {/* Cross-case links sit directly under the findings: for an
-            investigator this is the highest-value section on the page, and
-            it is the one that names a wallet they can act on. It replaces
-            the old related-cases list, which reported a count without ever
-            saying which address produced it. */}
-        <CaseLinksPanel caseId={caseData.id} chain={caseData.chain} />
-
-        {/* Supporting detail. Both are reference rather than findings, so
-            they close by default and stop competing with the sections
-            above for a first read. */}
-        <div className="space-y-6">
-          <Collapsible title="Wallet clusters" hint="Addresses that share an owner">
-            <ClusterPanel clusters={caseData.clusters ?? []} />
-          </Collapsible>
+      {caseData.status !== 'complete' && (
+        <div className="mt-8">
           <Collapsible title="Chain of custody" hint="Tamper-evident record of every action">
             <AuditChainPanel caseId={caseData.id} />
           </Collapsible>
         </div>
-      </div>
+      )}
 
       {/* Modals */}
       <LegalNoticeModal

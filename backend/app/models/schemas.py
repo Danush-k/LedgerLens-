@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 from app.chain_clients.base import Chain
 
@@ -59,7 +59,22 @@ class AuditEventOut(BaseModel):
         from_attributes = True
 
 
-class CaseOut(BaseModel):
+class _UTCTimestamps(BaseModel):
+    """Serialise every timestamp with its timezone.
+
+    Everything is written in UTC, but SQLite returns it without the offset,
+    and a browser reads an offset-less timestamp as local time - on an IST
+    machine "checked 10 seconds ago" became "checked 5 hours ago".
+    """
+
+    @field_serializer("*", mode="wrap", when_used="json")
+    def _utc(self, value, handler):
+        if isinstance(value, datetime) and value.tzinfo is None:
+            value = value.replace(tzinfo=timezone.utc)
+        return handler(value)
+
+
+class CaseOut(_UTCTimestamps):
     id: str
     complaint_ref: str | None
     narrative: str | None
@@ -89,12 +104,19 @@ class CaseOut(BaseModel):
     graph: dict | None
     created_at: datetime
     completed_at: datetime | None
+    # Live monitoring. What the page needs to say whether what it is showing
+    # is current: whether this case is being watched in the background, when
+    # its wallets were last re-read, and how much has moved since the trace.
+    live_watch: bool = False
+    live_checked_at: datetime | None = None
+    live_event_count: int = 0
+    live_last_event_at: datetime | None = None
 
     class Config:
         from_attributes = True
 
 
-class CaseSummary(BaseModel):
+class CaseSummary(_UTCTimestamps):
     id: str
     reported_address: str
     chain: str
@@ -108,6 +130,12 @@ class CaseSummary(BaseModel):
     nearest_exchange: dict | None
     fraud_typology: str | None
     created_at: datetime
+    # Carried in the summary so the case list can mark a case whose wallets
+    # have moved since it was traced, which is the one thing that would send
+    # an investigator back to a case they had finished with.
+    live_watch: bool = False
+    live_event_count: int = 0
+    live_last_event_at: datetime | None = None
 
     class Config:
         from_attributes = True

@@ -1,24 +1,18 @@
-import { Loader2, Send } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { AlertTriangle, ExternalLink, Loader2, Send } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
-import { submitTrace } from '../api/client'
+import { findExistingTraces, submitTrace, type ExistingTrace } from '../api/client'
 import { SmartComplaintParser } from '../components/SmartComplaintParser'
 import { ChainMark, chainMeta } from '../components/ChainMark'
+import { RiskBadge, StatusPill } from '../components/ui/Primitives'
 import type { Chain } from '../types'
 
-// Base58 omits 0, O, I and l - the glyphs easiest to confuse by eye. This
-// was previously written inline as "[1-9A-HJ-NP-Za-k-z]", where "a-k-z"
-// parses as a-k, a literal hyphen and z, silently rejecting every letter
-// from m to y and with it most real legacy Bitcoin addresses.
-const B58 = '[1-9A-HJ-NP-Za-km-z]'
-
 const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
-  { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
-  { value: 'tron', label: 'Tron', placeholder: 'T… (USDT-TRC20)' },
   { value: 'ethereum', label: 'Ethereum', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'bsc', label: 'BSC', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'polygon', label: 'Polygon', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
+  { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
 ]
 
 function validateAddressFormat(addr: string, ch: Chain): string | null {
@@ -41,18 +35,16 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
     if (trimmed.length < 26 || trimmed.length > 62) {
       return `Invalid Bitcoin address length (${trimmed.length} chars). Must be between 26 and 62 characters.`
     }
-    if (!new RegExp(`^(1${B58}{25,34}|3${B58}{25,34}|bc1[0-9a-z]{38,59})$`).test(trimmed)) {
+    // Base58 excludes four glyphs easy to confuse by eye: 0, O, I and l.
+    // Written as [1-9A-HJ-NP-Za-km-z] - NOT "...Za-k-z", which parses as
+    // the range a-k, a literal hyphen, then z, silently rejecting every
+    // real address containing a letter from m to y. That typo lived in
+    // this file (and, until recently, in the backend's own copy of this
+    // pattern) and rejected the majority of real Bitcoin addresses before
+    // the request ever left the browser - most base58 addresses contain at
+    // least one letter in that dropped range.
+    if (!/^(1[1-9A-HJ-NP-Za-km-z]{25,34}|3[1-9A-HJ-NP-Za-km-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) {
       return `Invalid Bitcoin address format.`
-    }
-  } else if (ch === 'tron') {
-    if (!trimmed.startsWith('T')) {
-      return `Invalid Tron address prefix. Must start with 'T'.`
-    }
-    if (trimmed.length !== 34) {
-      return `Invalid Tron address length (${trimmed.length} chars). Must be exactly 34 characters.`
-    }
-    if (!new RegExp(`^T${B58}{33}$`).test(trimmed)) {
-      return `Invalid Tron address format.`
     }
   }
   return null
@@ -61,17 +53,46 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
 export function NewCase() {
   const navigate = useNavigate()
   const [address, setAddress] = useState('')
-  const [chain, setChain] = useState<Chain>('bitcoin')
+  const [chain, setChain] = useState<Chain>('ethereum')
   const [complaintRef, setComplaintRef] = useState('')
   const [narrative, setNarrative] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [existing, setExisting] = useState<ExistingTrace[]>([])
+  const [checkingExisting, setCheckingExisting] = useState(false)
 
   const activeChain = CHAINS.find((c) => c.value === chain)!
 
   const validationError = useMemo(() => {
     return validateAddressFormat(address, chain)
   }, [address, chain])
+
+  // Before anyone submits a trace, check whether this exact wallet has
+  // already been traced. Submitting the same wallet twice isn't wrong in
+  // itself - a second, independent complaint naming it is exactly the
+  // prior-report signal this system exists to catch - but doing it by
+  // accident produces a confusing duplicate: a near-empty new case sitting
+  // next to a rich, already-completed one for the same address. Better to
+  // show what's already on file before a trace starts than to explain the
+  // mismatch afterwards.
+  useEffect(() => {
+    if (validationError || !address.trim()) {
+      setExisting([])
+      return
+    }
+    let active = true
+    setCheckingExisting(true)
+    const timer = window.setTimeout(() => {
+      findExistingTraces(chain, address.trim())
+        .then((rows) => active && setExisting(rows))
+        .catch(() => active && setExisting([]))
+        .finally(() => active && setCheckingExisting(false))
+    }, 500)
+    return () => {
+      active = false
+      window.clearTimeout(timer)
+    }
+  }, [address, chain, validationError])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -137,11 +158,10 @@ export function NewCase() {
                     key={c.value}
                     onClick={() => setChain(c.value)}
                     aria-pressed={active}
-                    className={`flex cursor-pointer items-center gap-2 rounded border px-2.5 py-2 text-[13px] font-medium transition-colors ${
-                      active
+                    className={`flex cursor-pointer items-center gap-2 rounded border px-2.5 py-2 text-[13px] font-medium transition-colors ${active
                         ? 'bg-surface text-ink-900'
                         : 'border-ink-200 text-ink-600 hover:border-ink-300 hover:text-ink-900'
-                    }`}
+                      }`}
                     style={active ? { borderColor: color } : undefined}
                   >
                     <ChainMark chain={c.value} size={17} />
@@ -165,14 +185,53 @@ export function NewCase() {
                 setError(null)
               }}
               placeholder={activeChain.placeholder}
-              className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${
-                validationError
+              className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${validationError
                   ? 'border-critical focus:border-critical'
                   : 'border-ink-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
-              }`}
+                }`}
             />
             {validationError && (
               <p className="mt-1.5 text-xs text-critical font-medium">{validationError}</p>
+            )}
+            {!validationError && checkingExisting && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-ink-400">
+                <Loader2 size={11} className="animate-spin" /> Checking whether this wallet has been traced before…
+              </p>
+            )}
+            {existing.length > 0 && (
+              <div className="mt-2 rounded-lg border border-warning/40 bg-warning-soft p-3">
+                <p className="flex items-center gap-1.5 text-xs font-semibold text-ink-800">
+                  <AlertTriangle size={13} className="shrink-0 text-warning" />
+                  This wallet has already been traced
+                  {existing.length > 1 ? ` — ${existing.length} existing cases` : ''}
+                </p>
+                <p className="mt-1 text-[11px] leading-relaxed text-ink-600">
+                  Submitting again starts a brand-new, independent trace — useful if this is a
+                  genuinely separate complaint, but if you're looking for the earlier result, open
+                  it directly below rather than re-tracing.
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {existing.slice(0, 3).map((c) => (
+                    <li key={c.case_id}>
+                      <Link
+                        to={`/cases/${c.case_id}`}
+                        className="flex flex-wrap items-center gap-2 rounded-md border border-ink-200 bg-surface px-2.5 py-1.5 text-[11px] transition-colors hover:border-brand-500"
+                      >
+                        <StatusPill status={c.status} />
+                        {c.risk_score !== null && <RiskBadge score={c.risk_score} />}
+                        <span className="text-ink-600">{c.complaint_ref || 'no reference'}</span>
+                        <span className="text-ink-400">
+                          {new Date(c.created_at).toLocaleDateString()}
+                        </span>
+                        {c.nearest_exchange && (
+                          <span className="text-good">→ {c.nearest_exchange.name}</span>
+                        )}
+                        <ExternalLink size={11} className="ml-auto shrink-0 text-ink-400" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
@@ -211,10 +270,14 @@ export function NewCase() {
           <button
             type="submit"
             disabled={submitting || !!validationError}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 px-4 py-2.5 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold shadow-xs transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              existing.length > 0
+                ? 'border border-ink-200 bg-surface text-ink-700 hover:border-ink-400'
+                : 'bg-brand-600 text-white hover:bg-brand-700'
+            }`}
           >
             {submitting ? <Loader2 size={15} className="animate-spin" /> : <Send size={15} />}
-            {submitting ? 'Initiating Trace…' : 'Start Multi-Hop Trace'}
+            {submitting ? 'Initiating Trace…' : existing.length > 0 ? 'Trace Again Anyway' : 'Start Multi-Hop Trace'}
           </button>
         </form>
       </div>

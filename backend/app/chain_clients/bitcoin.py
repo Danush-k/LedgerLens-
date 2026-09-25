@@ -26,10 +26,54 @@ MAX_COSPEND_INPUTS = 50
 # rest of this client already speaks.
 
 
+# Esplora's first page is the most recent 25 transactions only - for an
+# address anyone can send dust to (and people do, for years, to famous
+# addresses), the transaction that actually moved real money can sit well
+# outside that page. Without paging past it, "no outgoing transfers found"
+# stops meaning "this wallet is clean" and starts meaning "this wallet
+# hasn't been touched *recently*" - a materially different, and wrong,
+# claim. Capped rather than unbounded: an address with an unusually long
+# history should cost a few extra requests, not become an unpaged fetch
+# that never returns.
+_ESPLORA_MAX_PAGES = 12
+
+
 def _read_esplora(session: requests.Session, base_url: str, address: str) -> list[dict]:
-    """Blockstream and other Esplora hosts, which need no translation."""
-    response = get_with_retry(session, f"{base_url}/address/{address}/txs", attempts=4)
-    return response.json()
+    """Blockstream and other Esplora hosts, which need no translation.
+
+    Paging costs more requests than a single fetch, and every extra request
+    is one more chance for a free, shared API to refuse. A later page
+    failing after its own retries is not license to discard the pages that
+    already succeeded - this address's most recent, most relevant history
+    is real data, and losing it because page 6 of 12 timed out would trade
+    the pagination bug for a reliability one. Only the *first* page failing
+    is a genuine "could not reach this address at all", and is left to
+    propagate as one.
+    """
+    all_txs: list[dict] = []
+    last_txid: str | None = None
+    for page_num in range(_ESPLORA_MAX_PAGES):
+        url = (f"{base_url}/address/{address}/txs" if last_txid is None
+              else f"{base_url}/address/{address}/txs/chain/{last_txid}")
+        try:
+            page = get_with_retry(session, url, attempts=4).json()
+        except Exception:
+            if page_num == 0:
+                raise
+            break  # keep what earlier pages already found
+        if not page:
+            break
+        all_txs.extend(page)
+        last_txid = page[-1].get("txid")
+        # A page shorter than Esplora's own page size (25) is the last one -
+        # asking again would just re-request the same tail.
+        if len(page) < 25 or not last_txid:
+            break
+    return all_txs
+
+
+_BLOCKCHAIN_INFO_PAGE = 50
+_BLOCKCHAIN_INFO_MAX_PAGES = 6  # same reasoning as Esplora's page cap, above
 
 
 def _read_blockchain_info(session: requests.Session, base_url: str,
@@ -37,15 +81,29 @@ def _read_blockchain_info(session: requests.Session, base_url: str,
     """blockchain.info's rawaddr, mapped onto the Esplora shape.
 
     Values are already in satoshis in both, so only the field names and the
-    nesting differ.
+    nesting differ. Paged the same way and for the same reason as Esplora:
+    the first page is only the most recent transactions.
     """
-    response = get_with_retry(
-        session, f"{base_url}/rawaddr/{address}",
-        params={"limit": 50}, attempts=4)
-    payload = response.json()
+    raw_txs: list[dict] = []
+    for page in range(_BLOCKCHAIN_INFO_MAX_PAGES):
+        try:
+            response = get_with_retry(
+                session, f"{base_url}/rawaddr/{address}",
+                params={"limit": _BLOCKCHAIN_INFO_PAGE, "offset": page * _BLOCKCHAIN_INFO_PAGE},
+                attempts=4)
+            batch = response.json().get("txs", [])
+        except Exception:
+            if page == 0:
+                raise
+            break  # a later page failing must not discard the ones already fetched
+        if not batch:
+            break
+        raw_txs.extend(batch)
+        if len(batch) < _BLOCKCHAIN_INFO_PAGE:
+            break
 
     normalised: list[dict] = []
-    for tx in payload.get("txs", []):
+    for tx in raw_txs:
         normalised.append({
             "txid": tx.get("hash", ""),
             "status": {"block_time": int(tx.get("time", 0))},

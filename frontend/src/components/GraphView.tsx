@@ -7,6 +7,9 @@ import {
   Minimize2,
   MousePointer,
   RefreshCw,
+  Search,
+  Sparkles,
+  X,
   ZoomIn,
   ZoomOut,
 } from 'lucide-react'
@@ -17,6 +20,7 @@ import type { GraphEdge, GraphNode, WalletCluster } from '../types'
 import { formatAmount } from '../utils/format'
 import { NodeInspector } from './NodeInspector'
 import { EdgeInspector } from './EdgeInspector'
+import { ClusterInspector } from './ClusterInspector'
 
 const NODE_COLORS: Record<string, string> = {
   reported: '#3b82f6',
@@ -35,12 +39,21 @@ interface Props {
   highlightPath?: string[] // node ids on the path to the nearest exchange
   onNodeClick?: (node: GraphNode) => void
   clusters?: WalletCluster[]
+  activeTypeFilter?: string | null
   selectedNode?: GraphNode | null
   onCloseNode?: () => void
   selectedEdge?: GraphEdge | null
   onEdgeClick?: (edge: GraphEdge) => void
   onCloseEdge?: () => void
+  /** Edge keys (tx|source|target) and node ids that arrived while the page was open. */
+  liveArrivals?: Set<string>
+  /** Node ids an officer has confirmed as suspects. */
+  suspectNodeIds?: Set<string>
+  /** Centre the canvas on a node; the nonce lets the same node be requested twice. */
+  focusRequest?: { id: string; nonce: number } | null
 }
+
+const EMPTY_SET: Set<string> = new Set()
 
 type LayoutType = 'hops' | 'breadthfirst' | 'concentric' | 'circle' | 'grid' | 'cose'
 
@@ -50,11 +63,15 @@ export function GraphView({
   highlightPath = [],
   onNodeClick,
   clusters = [],
+  activeTypeFilter = null,
   selectedNode = null,
   onCloseNode,
   selectedEdge = null,
   onEdgeClick,
   onCloseEdge,
+  liveArrivals = EMPTY_SET,
+  suspectNodeIds = EMPTY_SET,
+  focusRequest = null,
 }: Props) {
   const cyRef = useRef<Core | null>(null)
 
@@ -65,50 +82,54 @@ export function GraphView({
   const [pathOnly, setPathOnly] = useState(false)
   const [showValues, setShowValues] = useState(true)
   const [wheelZoomEnabled, setWheelZoomEnabled] = useState(false)
+  const [selectedCluster, setSelectedCluster] = useState<WalletCluster | null>(null)
+  const [isClusterHighlighted, setIsClusterHighlighted] = useState(false)
+  const [verifiedNodeAddress, setVerifiedNodeAddress] = useState<string | null>(null)
+  const [declutterDust, setDeclutterDust] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
 
-  // Dynamically toggle prominent highlight classes on the selected node/edge
+  // Autocomplete matching nodes for quick address finder
+  const searchMatches = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    if (!q) return []
+    return nodes
+      .filter(
+        (n) =>
+          n.address.toLowerCase().includes(q) ||
+          (n.label_name && n.label_name.toLowerCase().includes(q))
+      )
+      .slice(0, 8)
+  }, [nodes, searchQuery])
+
+  // Keyboard shortcut '/' or 'Cmd+K' to quick-focus the search bar
   useEffect(() => {
-    if (!cyRef.current) return
-    const cy = cyRef.current
-    cy.batch(() => {
-      cy.nodes().removeClass('selected-node')
-      cy.edges().removeClass('connected-to-selected selected-edge')
-      if (selectedNode) {
-        const ele = cy.getElementById(selectedNode.id)
-        if (ele.length > 0) {
-          ele.addClass('selected-node')
-          ele.connectedEdges().addClass('connected-to-selected')
-        }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.key === '/' || (e.key === 'k' && (e.metaKey || e.ctrlKey))) &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        document.activeElement?.tagName !== 'TEXTAREA'
+      ) {
+        e.preventDefault()
+        setIsSearchOpen(true)
+        setTimeout(() => searchInputRef.current?.focus(), 40)
       }
-      if (selectedEdge) {
-        const matching = cy.edges().filter((ele: any) => {
-          const d = ele.data()
-          return (
-            d.tx_hash === selectedEdge.tx_hash &&
-            d.source === selectedEdge.source &&
-            d.target === selectedEdge.target
-          )
-        })
-        matching.addClass('selected-edge')
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false)
       }
-    })
-  }, [selectedNode, selectedEdge])
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
 
   /**
    * Addresses proven to share a key holder are drawn inside one box.
-   *
-   * Only common-input-ownership is grouped. Shared-funder is a much weaker
-   * signal - an exchange paying out to a thousand customers "shares a
-   * funder" with all of them - and drawing a box around that would assert
-   * on the canvas exactly the thing the backend refuses to merge.
-   *
-   * Cytoscape allows a node one parent, so an address appearing in several
-   * clusters is placed in the first, and the panel below the graph remains
-   * the complete account.
    */
   const clusterParents = useMemo(() => {
     const parentOf = new Map<string, string>()
     const parents: { id: string; label: string }[] = []
+    const clusterById = new Map<string, WalletCluster>()
 
     clusters
       .filter((c) => c.type === 'common_input' && c.addresses.length > 1)
@@ -125,6 +146,7 @@ export function GraphView({
         // A box around a single visible wallet says nothing.
         if (claimed > 1) {
           parents.push({ id: parentId, label: `Same owner · ${claimed} wallets` })
+          clusterById.set(parentId, cluster)
         } else {
           cluster.addresses.forEach((address) => {
             const node = nodes.find((n) => n.address === address)
@@ -133,8 +155,121 @@ export function GraphView({
         }
       })
 
-    return { parentOf, parents }
+    return { parentOf, parents, clusterById }
   }, [clusters, nodes])
+
+  // Dynamically toggle prominent highlight classes on the selected node/edge/cluster/filter/verified
+  useEffect(() => {
+    if (!cyRef.current) return
+    const cy = cyRef.current
+    cy.batch(() => {
+      // 1. Reset dynamic classes
+      cy.nodes().removeClass(
+        'selected-node type-highlighted type-dimmed target-verified declutter-dimmed cluster-highlighted cluster-dimmed selected-cluster'
+      )
+      cy.edges().removeClass(
+        'connected-to-selected selected-edge type-dimmed cluster-highlighted cluster-dimmed'
+      )
+
+      // 2. Selected Node
+      if (selectedNode) {
+        const ele = cy.getElementById(selectedNode.id)
+        if (ele.length > 0) {
+          ele.addClass('selected-node')
+          ele.connectedEdges().addClass('connected-to-selected')
+        }
+      }
+
+      // 3. Selected Edge
+      if (selectedEdge) {
+        const matching = cy.edges().filter((ele: any) => {
+          const d = ele.data()
+          return (
+            d.tx_hash === selectedEdge.tx_hash &&
+            d.source === selectedEdge.source &&
+            d.target === selectedEdge.target
+          )
+        })
+        matching.addClass('selected-edge')
+      }
+
+      // 4. Cluster Selection & Highlights
+      if (selectedCluster) {
+        const parentId = Array.from(clusterParents.clusterById.entries()).find(
+          ([_, c]) => c === selectedCluster
+        )?.[0]
+        if (parentId) {
+          cy.getElementById(parentId).addClass('selected-cluster')
+        }
+
+        if (isClusterHighlighted) {
+          const addrs = new Set(selectedCluster.addresses)
+          cy.nodes().forEach((n: any) => {
+            if (n.hasClass('cluster-parent')) return
+            const fullAddr = n.data('fullAddress')
+            if (addrs.has(fullAddr)) {
+              n.addClass('cluster-highlighted')
+            } else {
+              n.addClass('cluster-dimmed')
+            }
+          })
+
+          cy.edges().forEach((e: any) => {
+            const rawSrc = e.data('source') ?? ''
+            const rawTgt = e.data('target') ?? ''
+            const cleanSrc = rawSrc.includes(':') ? rawSrc.split(':', 2)[1] : rawSrc
+            const cleanTgt = rawTgt.includes(':') ? rawTgt.split(':', 2)[1] : rawTgt
+            if (addrs.has(cleanSrc) || addrs.has(cleanTgt)) {
+              e.addClass('cluster-highlighted')
+            } else {
+              e.addClass('cluster-dimmed')
+            }
+          })
+        }
+      }
+
+      // 5. Verified Node from Cluster Inspector (Target Pulse)
+      if (verifiedNodeAddress) {
+        const verifiedEle = cy.nodes().filter((n: any) => n.data('fullAddress') === verifiedNodeAddress)
+        verifiedEle.addClass('target-verified')
+      }
+
+      // 6. Interactive Legend Type Filter
+      if (activeTypeFilter) {
+        cy.nodes().forEach((n: any) => {
+          if (n.hasClass('cluster-parent')) return
+          if (n.data('type') === activeTypeFilter) {
+            n.addClass('type-highlighted')
+          } else {
+            n.addClass('type-dimmed')
+          }
+        })
+        cy.edges().addClass('type-dimmed')
+      }
+
+      // 7. Declutter Dust Mode
+      if (declutterDust) {
+        cy.nodes().forEach((n: any) => {
+          if (n.hasClass('cluster-parent')) return
+          const outDegree = n.outgoers('edge').length
+          const taintVal = n.data('taint') ?? 0
+          if (outDegree === 0 && taintVal < 0.0005 && n.data('type') === 'unresolved') {
+            n.addClass('declutter-dimmed')
+          }
+        })
+      }
+    })
+  }, [
+    selectedNode,
+    selectedEdge,
+    selectedCluster,
+    isClusterHighlighted,
+    clusterParents,
+    verifiedNodeAddress,
+    activeTypeFilter,
+    declutterDust,
+  ])
+
 
   const elements = useMemo(() => {
     const pathSet = new Set(highlightPath)
@@ -153,6 +288,9 @@ export function GraphView({
         classes: [
           onPath ? 'on-path' : '',
           pathOnly && !onPath ? 'dimmed' : '',
+          n.detected_live ? 'live-detected' : '',
+          liveArrivals.has(n.id) ? 'live-new' : '',
+          suspectNodeIds.has(n.id) ? 'suspect-confirmed' : '',
           selectedNode?.id === n.id ? 'selected-node' : '',
         ].filter(Boolean).join(' '),
       }
@@ -180,6 +318,8 @@ export function GraphView({
         classes: [
           onPath ? 'on-path' : '',
           pathOnly && !onPath ? 'dimmed' : '',
+          e.detected_live ? 'live-detected' : '',
+          liveArrivals.has(`${e.tx_hash}|${e.source}|${e.target}`) ? 'live-new' : '',
           isSelected ? 'selected-edge' : '',
         ].filter(Boolean).join(' '),
       }
@@ -192,7 +332,37 @@ export function GraphView({
 
     // Parents must precede their children or Cytoscape drops the parent.
     return [...parentEls, ...nodeEls, ...edgeEls]
-  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents, selectedNode, selectedEdge])
+  }, [nodes, edges, highlightPath, pathOnly, showValues, clusterParents, selectedNode, selectedEdge,
+      liveArrivals, suspectNodeIds])
+
+  // New arrivals pulse so the eye finds them on a busy canvas; everything
+  // else found after the trace keeps a steady amber mark.
+  useEffect(() => {
+    const cy = cyRef.current
+    if (!cy || liveArrivals.size === 0) return
+    let on = false
+    const timer = window.setInterval(() => {
+      on = !on
+      cy.elements('.live-new').toggleClass('live-pulse', on)
+    }, 700)
+    return () => {
+      window.clearInterval(timer)
+      cy.elements('.live-pulse').removeClass('live-pulse')
+    }
+  }, [liveArrivals, elements])
+
+  useEffect(() => {
+    const cy = cyRef.current
+    if (!cy || !focusRequest) return
+    const target = cy.getElementById(focusRequest.id)
+    if (target.length === 0) return
+    cy.animate({
+      center: { eles: target },
+      zoom: Math.max(cy.zoom(), 1.6),
+      duration: 450,
+      easing: 'ease-in-out',
+    })
+  }, [focusRequest])
 
   // Edge thickness is proportional to amount, so the main flow is visually
   // obvious and dust transactions recede instead of competing with it.
@@ -260,6 +430,139 @@ export function GraphView({
         padding: 14,
         'corner-radius': 6,
         shape: 'round-rectangle',
+      },
+    },
+    {
+      selector: 'node.cluster-parent.selected-cluster',
+      style: {
+        'border-width': 2.5,
+        'border-color': '#f59e0b',
+        'border-opacity': 0.9,
+        'background-color': '#f59e0b',
+        'background-opacity': 0.12,
+      },
+    },
+    {
+      selector: 'node.cluster-highlighted',
+      style: {
+        'border-width': 4.5,
+        'border-color': '#f59e0b',
+        'border-opacity': 1,
+        width: 38,
+        height: 38,
+        'underlay-color': '#fbbf24',
+        'underlay-padding': 10,
+        'underlay-opacity': 0.5,
+        'underlay-shape': 'ellipse',
+        'font-weight': 'bold',
+        'font-size': 11,
+        'z-index': 999,
+      },
+    },
+    {
+      selector: 'edge.cluster-highlighted',
+      style: {
+        width: 4,
+        'line-color': '#f59e0b',
+        'target-arrow-color': '#f59e0b',
+        'target-arrow-shape': 'triangle',
+        'arrow-scale': 1.35,
+        opacity: 1,
+        'z-index': 999,
+        color: '#d97706',
+        'font-weight': 'bold',
+        'font-size': 9.5,
+      },
+    },
+    {
+      selector: 'node.cluster-dimmed',
+      style: {
+        opacity: 0.2,
+      },
+    },
+    {
+      selector: 'edge.cluster-dimmed',
+      style: {
+        opacity: 0.1,
+      },
+    },
+    {
+      selector: 'node.target-verified',
+      style: {
+        'border-width': 5,
+        'border-color': '#06b6d4',
+        'border-opacity': 1,
+        width: 44,
+        height: 44,
+        'underlay-color': '#22d3ee',
+        'underlay-padding': 16,
+        'underlay-opacity': 0.65,
+        'underlay-shape': 'ellipse',
+        'font-weight': 'bold',
+        'font-size': 12,
+        'z-index': 1000,
+      },
+    },
+    {
+      selector: 'node.type-highlighted',
+      style: {
+        'border-width': 4.5,
+        'border-color': '#0284c7',
+        'underlay-color': '#38bdf8',
+        'underlay-padding': 8,
+        'underlay-opacity': 0.45,
+        'font-weight': 'bold',
+        'z-index': 999,
+      },
+    },
+    {
+      selector: 'node.type-dimmed',
+      style: {
+        opacity: 0.18,
+      },
+    },
+    {
+      selector: 'edge.type-dimmed',
+      style: {
+        opacity: 0.08,
+      },
+    },
+    {
+      selector: 'node.declutter-dimmed',
+      style: {
+        opacity: 0.12,
+      },
+    },
+    {
+      selector: 'node.suspect-confirmed',
+      style: {
+        'border-width': 4,
+        'border-color': '#b3261e',
+        'border-style': 'double',
+        'font-weight': 'bold',
+      },
+    },
+    {
+      selector: 'node.live-detected',
+      style: {
+        'underlay-color': '#f59e0b',
+        'underlay-padding': 6,
+        'underlay-opacity': 0.35,
+        'underlay-shape': 'ellipse',
+      },
+    },
+    {
+      selector: 'node.live-new',
+      style: {
+        'underlay-padding': 12,
+        'underlay-opacity': 0.55,
+      },
+    },
+    {
+      selector: 'node.live-new.live-pulse',
+      style: {
+        'underlay-padding': 18,
+        'underlay-opacity': 0.2,
       },
     },
     {
@@ -355,6 +658,32 @@ export function GraphView({
         opacity: 0.15,
       },
     },
+    {
+      selector: 'edge.live-detected',
+      style: {
+        'line-color': '#f59e0b',
+        'target-arrow-color': '#f59e0b',
+        'line-style': 'dashed',
+        'line-dash-pattern': [7, 4],
+        color: '#b45309',
+        'z-index': 20,
+      },
+    },
+    {
+      selector: 'edge.live-new',
+      style: {
+        width: 4,
+        'line-style': 'solid',
+        'font-weight': 'bold',
+      },
+    },
+    {
+      selector: 'edge.live-new.live-pulse',
+      style: {
+        'line-color': '#fbbf24',
+        'target-arrow-color': '#fbbf24',
+      },
+    },
   ]
 
   // Graph control handlers
@@ -385,31 +714,50 @@ export function GraphView({
   }
 
   /**
-   * Cytoscape has no hop-column layout, so 'hops' is resolved here into a
-   * preset with computed positions: x by hop distance, y stacked within the
-   * hop. Money then always reads left to right, which no force-directed
-   * layout guarantees - and on a 70-node graph that difference is the
-   * difference between a diagram and a hairball.
+   * Adaptive Hop Matrix Layout:
+   * Dynamically groups nodes within a hop into 2-4 staggered sub-columns
+   * when density exceeds 8 nodes. This avoids extreme 3000px vertical pillars,
+   * balances widescreen aspect ratios, and prevents overlapping diagonal edge blobs.
    */
   const resolveLayout = (name: LayoutType) => {
     if (name !== 'hops') {
       return { name, directed: true, padding: 36, spacingFactor: 1.4 }
     }
-    const COLUMN = 190
-    const ROW = 74
+    const ROW_HEIGHT = 68
+    const SUB_COL_WIDTH = 125
+    const MIN_HOP_GAP = 220
+
     const byHop = new Map<number, GraphNode[]>()
     for (const n of nodes) {
       const hop = n.hop ?? 0
       byHop.set(hop, [...(byHop.get(hop) ?? []), n])
     }
+
+    const sortedHops = Array.from(byHop.keys()).sort((a, b) => a - b)
+    const hopStartPositions: Record<number, number> = {}
+    let currentX = 0
+
+    for (const hop of sortedHops) {
+      const group = byHop.get(hop) ?? []
+      const numSubCols = Math.min(4, Math.max(1, Math.ceil(group.length / 8)))
+      const hopWidth = (numSubCols - 1) * SUB_COL_WIDTH
+      hopStartPositions[hop] = currentX
+      currentX += hopWidth + MIN_HOP_GAP
+    }
+
     const positions: Record<string, { x: number; y: number }> = {}
-    for (const [hop, group] of byHop) {
+    for (const hop of sortedHops) {
+      const group = byHop.get(hop) ?? []
+      const numSubCols = Math.min(4, Math.max(1, Math.ceil(group.length / 8)))
+      const numRows = Math.ceil(group.length / numSubCols)
+      const startX = hopStartPositions[hop] ?? (hop * MIN_HOP_GAP)
+
       group.forEach((n, i) => {
+        const subCol = i % numSubCols
+        const subRow = Math.floor(i / numSubCols)
         positions[n.id] = {
-          x: hop * COLUMN,
-          // Centre each column vertically so the trunk of the flow stays
-          // near the middle instead of hanging off the top edge.
-          y: (i - (group.length - 1) / 2) * ROW,
+          x: startX + subCol * SUB_COL_WIDTH,
+          y: (subRow - (numRows - 1) / 2) * ROW_HEIGHT + (subCol % 2 === 1 ? 18 : 0),
         }
       })
     }
@@ -433,6 +781,75 @@ export function GraphView({
     }
   }
 
+  const handleFocusCluster = () => {
+    if (!cyRef.current || !selectedCluster) return
+    const cy = cyRef.current
+    const addrs = new Set(selectedCluster.addresses)
+    const clusterNodes = cy.nodes().filter((ele: any) => {
+      return !ele.hasClass('cluster-parent') && addrs.has(ele.data('fullAddress'))
+    })
+    if (clusterNodes.length > 0) {
+      cy.animate({
+        fit: {
+          eles: clusterNodes,
+          padding: 70,
+        },
+        duration: 500,
+        easing: 'ease-in-out',
+      })
+    }
+  }
+
+  const handleSelectNodeFromCluster = (node: GraphNode) => {
+    setSelectedCluster(null)
+    setIsClusterHighlighted(false)
+    setVerifiedNodeAddress(null)
+    if (onNodeClick) onNodeClick(node)
+  }
+
+  const handleLocateNode = (address: string) => {
+    setVerifiedNodeAddress(address)
+    if (!cyRef.current) return
+    const cy = cyRef.current
+    const targetNode = cy.nodes().filter((n: any) => n.data('fullAddress') === address)
+    if (targetNode.length > 0) {
+      cy.animate({
+        center: { eles: targetNode },
+        zoom: Math.max(cy.zoom(), 1.9),
+        duration: 500,
+        easing: 'ease-in-out',
+      })
+      toast.info(`Located ${address.slice(0, 8)}… on canvas`)
+    } else {
+      toast.warning('Address node is beyond current visible graph frontier')
+    }
+  }
+
+  const handleSelectSearchedNode = (node: GraphNode) => {
+    setSearchQuery('')
+    setIsSearchOpen(false)
+    setVerifiedNodeAddress(node.address)
+    if (cyRef.current) {
+      const cy = cyRef.current
+      const targetEle = cy.nodes().filter((n: any) => n.data('fullAddress') === node.address)
+      if (targetEle.length > 0) {
+        cy.animate({
+          center: { eles: targetEle },
+          zoom: Math.max(cy.zoom(), 2.1),
+          duration: 500,
+          easing: 'ease-in-out',
+        })
+      }
+    }
+    if (onNodeClick) onNodeClick(node)
+    if (onCloseEdge) onCloseEdge()
+    setSelectedCluster(null)
+    setIsClusterHighlighted(false)
+    toast.success('Located wallet on canvas', {
+      description: `${node.address.slice(0, 12)}… (Hop ${node.hop ?? 0})`,
+    })
+  }
+
   const handleExportPNG = () => {
     if (cyRef.current) {
       const png64 = cyRef.current.png({ full: true, scale: 2, bg: surface })
@@ -452,6 +869,80 @@ export function GraphView({
         isFullscreen ? 'fixed inset-4 z-50 shadow-md ring-1 ring-ink-200' : 'h-full w-full'
       }`}
     >
+      {/* Floating Node Search / Address Finder (Top-Left) */}
+      <div className="absolute top-3 left-3 z-20 w-64 sm:w-84">
+        <div className="relative flex items-center">
+          <Search size={14} className="absolute left-2.5 text-ink-400 pointer-events-none" />
+          <input
+            ref={searchInputRef}
+            type="text"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value)
+              setIsSearchOpen(true)
+            }}
+            onFocus={() => setIsSearchOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchMatches.length > 0) {
+                handleSelectSearchedNode(searchMatches[0])
+              }
+            }}
+            placeholder="Find address or scammer node... (/)"
+            className="w-full rounded-lg border border-ink-200/90 bg-surface/95 pl-8 pr-7 py-1.5 text-xs font-mono text-ink-800 placeholder:font-sans placeholder:text-ink-400 shadow-md backdrop-blur-md focus:border-brand-500 focus:outline-hidden focus:ring-1 focus:ring-brand-500"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchQuery('')
+                setIsSearchOpen(false)
+              }}
+              className="absolute right-2 text-ink-400 hover:text-ink-700 p-0.5"
+              title="Clear search"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
+        {/* Live Search Results Dropdown */}
+        {isSearchOpen && searchQuery.trim().length > 0 && (
+          <div className="absolute top-full left-0 right-0 mt-1 max-h-64 overflow-y-auto rounded-lg border border-ink-200 bg-surface shadow-xl z-30 p-1 divide-y divide-ink-100">
+            {searchMatches.length > 0 ? (
+              searchMatches.map((n) => (
+                <button
+                  key={n.id}
+                  type="button"
+                  onClick={() => handleSelectSearchedNode(n)}
+                  className="w-full text-left px-2.5 py-2 hover:bg-brand-50/70 rounded-md flex flex-col gap-0.5 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-mono text-xs font-semibold text-ink-900 truncate">
+                      {n.address}
+                    </span>
+                    <span className="shrink-0 text-[10px] px-1.5 py-0.2 rounded bg-ink-100 font-bold uppercase text-ink-600">
+                      Hop {n.hop ?? 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px] text-ink-500">
+                    <span className="capitalize font-medium text-brand-700">
+                      {n.label_name || n.node_type}
+                    </span>
+                    {n.tainted_value !== undefined && (
+                      <span>· Taint: {formatAmount(n.tainted_value)}</span>
+                    )}
+                  </div>
+                </button>
+              ))
+            ) : (
+              <div className="px-3 py-3 text-center text-xs text-ink-400 italic">
+                No node matching "{searchQuery}" found on canvas
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Floating Graph Controls Toolbar */}
       <div className="absolute top-3 right-3 z-10 flex flex-wrap items-center gap-1.5 rounded-lg border border-ink-200/80 bg-surface/95 p-1.5 shadow-md">
         {/* Zoom Controls */}
@@ -505,6 +996,25 @@ export function GraphView({
         </button>
 
         <div className="h-4 w-px bg-ink-200" />
+
+        {/* Declutter Dust Button for large graphs */}
+        <button
+          type="button"
+          onClick={() => {
+            const next = !declutterDust
+            setDeclutterDust(next)
+            toast.info(next ? 'Declutter on: Dimming dust leaves' : 'Declutter off: Showing all transfers')
+          }}
+          title={declutterDust ? 'Show all transfers including dust' : 'Declutter: Dim dust & focus main money paths'}
+          className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors ${
+            declutterDust
+              ? 'bg-brand-50 text-brand-600 font-semibold border border-brand-200 shadow-2xs'
+              : 'text-ink-600 hover:bg-ink-100 hover:text-ink-900'
+          }`}
+        >
+          <Sparkles className="h-3.5 w-3.5" />
+          <span>{declutterDust ? 'Declutter: On' : 'Declutter: Off'}</span>
+        </button>
 
         {/* Layout Switcher */}
         <select
@@ -603,15 +1113,27 @@ export function GraphView({
               }
             }
           })
-          if (onNodeClick) {
-            cy.on('tap', 'node', (evt) => {
-              const id = evt.target.id() as string
-              const node = nodes.find((n) => n.id === id)
-              if (node) onNodeClick(node)
-            })
-          }
+          cy.on('tap', 'node', (evt) => {
+            const id = evt.target.id() as string
+            if (id.startsWith('cluster-') || evt.target.hasClass('cluster-parent')) {
+              const cluster = clusterParents.clusterById.get(id)
+              if (cluster) {
+                setSelectedCluster(cluster)
+                setIsClusterHighlighted(true) // auto-highlight transactions on selection
+                if (onCloseNode) onCloseNode()
+                if (onCloseEdge) onCloseEdge()
+              }
+              return
+            }
+            setSelectedCluster(null)
+            setIsClusterHighlighted(false)
+            const node = nodes.find((n) => n.id === id)
+            if (node && onNodeClick) onNodeClick(node)
+          })
           if (onEdgeClick) {
             cy.on('tap', 'edge', (evt) => {
+              setSelectedCluster(null)
+              setIsClusterHighlighted(false)
               const data = evt.target.data()
               const edge = edges.find(
                 (e) =>
@@ -632,6 +1154,8 @@ export function GraphView({
           }
           cy.on('tap', (evt) => {
             if (evt.target === cy) {
+              setSelectedCluster(null)
+              setIsClusterHighlighted(false)
               if (onCloseNode) onCloseNode()
               if (onCloseEdge) onCloseEdge()
             }
@@ -650,6 +1174,27 @@ export function GraphView({
           edge={selectedEdge}
           chain={nodes[0]?.chain || 'bitcoin'}
           onClose={onCloseEdge ?? (() => {})}
+        />
+      )}
+
+      {/* Floating Right-Side Cluster Inspector */}
+      {selectedCluster && (
+        <ClusterInspector
+          cluster={selectedCluster}
+          nodes={nodes}
+          edges={edges}
+          chain={nodes[0]?.chain || 'bitcoin'}
+          isHighlighted={isClusterHighlighted}
+          verifiedAddress={verifiedNodeAddress}
+          onToggleHighlight={() => setIsClusterHighlighted((prev) => !prev)}
+          onFocusCluster={handleFocusCluster}
+          onSelectNode={handleSelectNodeFromCluster}
+          onLocateNode={handleLocateNode}
+          onClose={() => {
+            setSelectedCluster(null)
+            setIsClusterHighlighted(false)
+            setVerifiedNodeAddress(null)
+          }}
         />
       )}
     </div>

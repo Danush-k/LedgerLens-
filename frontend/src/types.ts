@@ -33,6 +33,9 @@ export interface GraphNode {
   tainted_value?: number
   /** Share of value arriving here that is the victim's, 0-1. */
   taint_ratio?: number
+  /** Reached by live monitoring after the original trace completed. */
+  detected_live?: boolean
+  first_seen_at?: string
 }
 
 export interface GraphEdge {
@@ -43,6 +46,9 @@ export interface GraphEdge {
   timestamp: number
   hop: number
   tainted_value?: number
+  /** Observed by live monitoring after the original trace completed. */
+  detected_live?: boolean
+  first_seen_at?: string
 }
 
 /** Evidence-backed finding from the pattern detectors. */
@@ -82,6 +88,9 @@ export interface CaseSummary {
   nearest_exchange: NearestExchange | null
   fraud_typology: string | null
   created_at: string
+  live_watch?: boolean
+  live_event_count?: number
+  live_last_event_at?: string | null
 }
 
 export interface CaseDetail extends CaseSummary {
@@ -104,6 +113,7 @@ export interface CaseDetail extends CaseSummary {
   recommended_action: string | null
   graph: { nodes: GraphNode[]; edges: GraphEdge[] } | null
   completed_at: string | null
+  live_checked_at?: string | null
 }
 
 export interface AuditEvent {
@@ -300,4 +310,136 @@ export interface CaseLink {
   created_at: string
   relationship: 'same_wallet' | 'shared_wallet'
   shared_addresses: string[]
+}
+
+
+// ── Suspects ──────────────────────────────────────────────────────────────
+
+export type SuspectPriority = 'high' | 'medium' | 'low'
+export type SuspectStatus = 'pending' | 'confirmed' | 'dismissed'
+export type SuspectRole =
+  | 'reported'
+  | 'cashout'
+  | 'holding'
+  | 'collector'
+  | 'distributor'
+  | 'relay'
+  | 'mixer_user'
+  | 'untraced'
+  | 'recipient'
+
+export interface EvidenceTx {
+  tx_hash: string
+  value: number
+  timestamp: number | null
+  tainted_value?: number | null
+}
+
+/** One named reason a wallet is on the list, with the transactions it rests on. */
+export interface SuspectReason {
+  code: string
+  weight: number
+  text: string
+  /** `caveat` reasons weaken the case and subtract from the score. */
+  kind: 'signal' | 'caveat'
+  transactions: EvidenceTx[]
+}
+
+export interface SuspectDecision {
+  status: SuspectStatus
+  note: string | null
+  decided_by: string | null
+  decided_at: string | null
+}
+
+export interface Suspect {
+  id: string
+  rank: number
+  address: string
+  chain: string
+  hop: number
+  node_type: string | null
+  label_name: string | null
+  score: number
+  priority: SuspectPriority
+  role: SuspectRole
+  role_title: string
+  role_description: string
+  victim_funds: number
+  victim_share: number
+  received: number
+  sent: number
+  unit: string
+  exchange_name: string | null
+  linked_cases: { case_id: string; complaint_ref: string | null; reported_address: string }[]
+  same_owner_as: string[]
+  detected_live: boolean
+  reasons: SuspectReason[]
+  recommended_action: string
+  first_activity: number | null
+  last_activity: number | null
+  decision: SuspectDecision
+}
+
+export type NextStepAction =
+  | 'legal_notice'
+  | 'filter_holding'
+  | 'review_suspects'
+  | 'suspect_report'
+  | 'linked_cases'
+  | null
+
+export interface NextStep {
+  key: string
+  priority: SuspectPriority
+  action: NextStepAction
+  title: string
+  detail: string
+}
+
+export interface CaseBriefingSummary {
+  headline: string
+  unit: string
+  chain: string
+  victim_total: number
+  to_exchanges: number
+  exchange_names: string[]
+  still_held: number
+  holding_wallets: number
+  beyond_depth: number
+  to_mixers: number
+  to_bridges: number
+  counts: Record<'total' | 'high' | 'medium' | 'low' | 'confirmed' | 'dismissed' | 'pending', number>
+  linked_case_count: number
+  next_steps: NextStep[]
+}
+
+export interface SuspectsResult {
+  ready: boolean
+  reason: string | null
+  summary: CaseBriefingSummary | null
+  suspects: Suspect[]
+}
+
+
+// ── Live monitoring ───────────────────────────────────────────────────────
+
+export interface LiveTransfer {
+  tx_hash: string
+  chain: string
+  from_address: string
+  to_address: string
+  value: number
+  timestamp: number
+  hop: number
+  to_node_type: string | null
+  to_label_name: string | null
+  detected_at: string
+}
+
+export interface LiveCheck {
+  checked_at: string
+  addresses_checked: number
+  errors: { address: string; error: string }[]
+  new_count: number
 }

@@ -27,7 +27,7 @@ export function Syndicates() {
 
   useEffect(() => {
     getSyndicates()
-      .then((data) => {
+      .then((data: any) => {
         setSyndicates(data.syndicates || [])
       })
 

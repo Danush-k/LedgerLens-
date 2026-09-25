@@ -99,6 +99,56 @@ def _fetch_level(client, level: list[tuple[str, int]]) -> dict[str, tuple[list, 
     return results
 
 
+def fetch_outgoing_concurrently(client, addresses: list[str]) -> dict[str, tuple[list, str | None]]:
+    """Public entry point to the concurrent fetch the walk uses.
+
+    The live watcher re-checks a handful of already-traced wallets on an
+    interval, which is the same "fetch these addresses at once, and tell me
+    which ones failed" problem the walk solves per hop. Sharing the
+    implementation keeps one retry/concurrency policy rather than two that
+    drift apart.
+    """
+    return _fetch_level(client, [(address, 0) for address in addresses])
+
+
+def apply_taint_to_new_edges(nodes: dict[str, dict], edges: list[dict],
+                              new_edges: list[dict]) -> None:
+    """Carry victim attribution onto transfers found after the trace ended.
+
+    The walk computes taint as it goes, using each wallet's total outflow at
+    the moment it was read. A transfer that appears hours later cannot rerun
+    that: recomputing every ratio from the enlarged graph would silently
+    restate figures already published in a report and cited in a notice.
+
+    So the finalized ratio - "of the value that reached this wallet along
+    traced paths, this share is the victim's" - is applied forward to the new
+    transfer, and only the receiving wallet is restated. Attribution can grow
+    as more of a wallet's money is shown to be the victim's; it never shrinks
+    retroactively, and no figure already reported changes meaning.
+
+    `edges` must already include `new_edges` - inflow is measured over the
+    whole graph, not just the new arrivals.
+    """
+    inflow: dict[str, float] = {}
+    for edge in edges:
+        inflow[edge["target"]] = inflow.get(edge["target"], 0.0) + edge["value"]
+
+    for edge in new_edges:
+        source = nodes.get(edge["source"]) or {}
+        edge["tainted_value"] = round(edge["value"] * source.get("taint_ratio", 0.0), 12)
+
+    for edge in new_edges:
+        target = nodes.get(edge["target"])
+        if target is None:
+            continue
+        target["tainted_value"] = round(
+            target.get("tainted_value", 0.0) + edge["tainted_value"], 8)
+        received = inflow.get(edge["target"], 0.0)
+        target["taint_ratio"] = (
+            round(min(1.0, target["tainted_value"] / received), 6) if received > 0 else 0.0
+        )
+
+
 def trace_wallet(chain: Chain, reported_address: str, hop_limit: int = 5,
                   on_hop: Callable[[int, int, int], None] | None = None) -> TraceResult:
     """Breadth-first walk of outgoing transfers from a reported wallet.

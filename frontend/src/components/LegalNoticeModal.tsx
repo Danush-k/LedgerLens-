@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Archive, CheckCircle2, Download, FileText, Loader2, ShieldCheck, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { describeDownloadError, downloadLegalNotice } from '../api/client'
+import { describeDownloadError, downloadEvidencePackage, downloadLegalNotice } from '../api/client'
 import type { CaseDetail, LegalNoticeParams } from '../types'
 
 interface Props {
