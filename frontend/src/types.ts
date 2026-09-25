@@ -79,6 +79,7 @@ export interface WalletCluster {
 
 export interface CaseSummary {
   id: string
+  complaint_ref?: string | null
   reported_address: string
   chain: Chain
   status: CaseStatus

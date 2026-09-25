@@ -212,29 +212,8 @@ def seed_if_empty() -> bool:
 
 
 def main() -> None:
-    db = SessionLocal()
-    try:
-        print("Wiping existing case data...")
-        wipe(db)
-
-        print(f"Loading real, previously-traced cases from {FIXTURE_PATH.name}...")
-        now = datetime.now(timezone.utc)
-        cases = [_insert_case(db, entry, now) for entry in _load_fixture()]
-
-        print("Deriving cross-case signals over the real data...")
-        for case in cases:
-            _finalise(db, case)
-
-        print("\nSeeded cases (all from real, live-traced blockchain data):")
-        for case in cases:
-            db.refresh(case)
-            print(f"  {case.complaint_ref:28} {case.reported_address:36} "
-                 f"risk={case.risk_score:>5.1f}  exch={'Y' if case.nearest_exchange else '-'}  "
-                 f"nodes={len(case.graph['nodes'])}")
-        print("\nDone. Every number above came from a real trace of a real,")
-        print("publicly documented wallet - nothing here is synthesised.")
-    finally:
-        db.close()
+    from scripts.seed_rich_demo import seed_rich_caseload
+    seed_rich_caseload()
 
 
 if __name__ == "__main__":

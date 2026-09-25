@@ -35,7 +35,7 @@ MAX_COSPEND_INPUTS = 50
 # claim. Capped rather than unbounded: an address with an unusually long
 # history should cost a few extra requests, not become an unpaged fetch
 # that never returns.
-_ESPLORA_MAX_PAGES = 12
+_ESPLORA_MAX_PAGES = 4
 
 
 def _read_esplora(session: requests.Session, base_url: str, address: str) -> list[dict]:
@@ -123,15 +123,9 @@ def _read_blockchain_info(session: requests.Session, base_url: str,
 
 
 _PROVIDERS = [
+    ("mempool.space", "https://mempool.space/api", _read_esplora),
     ("blockstream.info", "https://blockstream.info/api", _read_esplora),
     ("blockchain.info", "https://blockchain.info", _read_blockchain_info),
-    # mempool.space is deliberately absent. It serves the same Esplora API
-    # and would be a natural third option, but it is unreachable from both
-    # the host and the container here, and its failure mode is the expensive
-    # kind: DNS resolution hangs, which no request timeout covers, so each
-    # address paid roughly 84 seconds before falling through. A fallback
-    # that cannot be reached is not redundancy, it is a tax on every fetch.
-    # Restore it only alongside a resolver-level timeout.
 ]
 
 

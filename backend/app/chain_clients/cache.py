@@ -87,7 +87,7 @@ class CachedChainClient(ChainClient):
         self._ttl = ttl
         self.chain = inner.chain
 
-    def get_outgoing_transfers(self, address: str) -> list[Transfer]:
+    def get_outgoing_transfers(self, address: str, limit: int = 50, *args, **kwargs) -> list[Transfer]:
         conn = _client()
         key = _key(self.chain.value, address)
 
@@ -95,18 +95,22 @@ class CachedChainClient(ChainClient):
             try:
                 cached = conn.get(key)
                 if cached is not None:
-                    return _decode(cached)
+                    return _decode(cached)[:limit]
             except Exception as exc:  # noqa: BLE001
                 logger.debug(f"Chain cache read failed for {address}: {exc}")
 
-        transfers = self._inner.get_outgoing_transfers(address)
+        # Some inner clients don't take limit
+        try:
+            transfers = self._inner.get_outgoing_transfers(address, limit=limit, *args, **kwargs)
+        except TypeError:
+            transfers = self._inner.get_outgoing_transfers(address)
 
         if conn is not None:
             try:
                 conn.setex(key, self._ttl, _encode(transfers))
             except Exception as exc:  # noqa: BLE001 - never fail a trace to write a cache
                 logger.debug(f"Chain cache write failed for {address}: {exc}")
-        return transfers
+        return transfers[:limit]
 
     def get_co_spent_addresses(self, address: str) -> set[str]:
         return self._inner.get_co_spent_addresses(address)

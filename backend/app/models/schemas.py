@@ -118,6 +118,7 @@ class CaseOut(_UTCTimestamps):
 
 class CaseSummary(_UTCTimestamps):
     id: str
+    complaint_ref: str | None = None
     reported_address: str
     chain: str
     status: str

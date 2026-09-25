@@ -322,6 +322,41 @@ def get_legal_notice(
     )
 
 
+@router.get("/{case_id}/evidence-package")
+def get_case_evidence_package(
+    case_id: str,
+    officer_name: str = "Investigating Officer",
+    officer_designation: str = "Inspector of Police",
+    police_station: str = "Cyber Crime Police Station",
+    fir_number: str | None = None,
+    fir_date: str | None = None,
+    act_section: str = "bnss_94",
+    db: Session = Depends(get_db),
+):
+    case = db.get(Case, case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    if case.status != "complete":
+        raise HTTPException(409, "Case has not finished tracing yet")
+
+    from app.reports.evidence_package import generate_evidence_zip
+    zip_bytes = generate_evidence_zip(
+        case=case,
+        officer_name=officer_name,
+        officer_designation=officer_designation,
+        police_station=police_station,
+        fir_number=fir_number,
+        fir_date=fir_date,
+        act_section=act_section,
+    )
+    filename = f"evidence-package-{case_id[:8]}.zip"
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
+
+
 @router.get("/{case_id}/report")
 def get_case_report(case_id: str, db: Session = Depends(get_db),
                     user: CurrentUser = Depends(get_current_user)):

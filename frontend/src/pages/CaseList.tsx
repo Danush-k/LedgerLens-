@@ -238,8 +238,15 @@ export function CaseList() {
             <tbody className="divide-y divide-ink-100">
               {sortedCases.map((c) => (
                 <tr key={c.id} className="transition-colors hover:bg-ink-50/60">
-                  <td className="px-5 py-3.5 font-mono text-xs text-ink-800">
-                    {c.reported_address.slice(0, 10)}…{c.reported_address.slice(-8)}
+                  <td className="px-5 py-3.5">
+                    {c.complaint_ref && (
+                      <span className="block text-[11px] font-semibold text-brand-600 mb-0.5">
+                        {c.complaint_ref}
+                      </span>
+                    )}
+                    <span className="font-mono text-xs text-ink-800">
+                      {c.reported_address.slice(0, 10)}…{c.reported_address.slice(-8)}
+                    </span>
                   </td>
                   <td className="px-5 py-3.5">
                     <ChainBadge chain={c.chain} />

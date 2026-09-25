@@ -10,9 +10,10 @@ import type { Chain } from '../types'
 
 const CHAINS: { value: Chain; label: string; placeholder: string }[] = [
   { value: 'ethereum', label: 'Ethereum', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
-  { value: 'bsc', label: 'BSC', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
   { value: 'polygon', label: 'Polygon', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
+  { value: 'tron', label: 'Tron (USDT)', placeholder: 'T… (34-char Base58)' },
   { value: 'bitcoin', label: 'Bitcoin', placeholder: 'bc1… / 1… / 3…' },
+  { value: 'bsc', label: 'BSC', placeholder: '0xeb2d2f1b8c558a40207669291fda468e50c8a0bb' },
 ]
 
 function validateAddressFormat(addr: string, ch: Chain): string | null {
@@ -27,6 +28,16 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
     }
     if (!/^0x[a-fA-F0-9]{40}$/.test(trimmed)) {
       return `Invalid ${ch.toUpperCase()} address: Contains non-hexadecimal characters.`
+    }
+  } else if (ch === 'tron') {
+    if (!trimmed.startsWith('T')) {
+      return `Invalid TRON address: Must start with prefix 'T'.`
+    }
+    if (trimmed.length !== 34) {
+      return `Invalid TRON address length (${trimmed.length} chars). Must be exactly 34 characters.`
+    }
+    if (!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(trimmed)) {
+      return `Invalid TRON address format (Base58check).`
     }
   } else if (ch === 'bitcoin') {
     if (!/^(1|3|bc1)/i.test(trimmed)) {
@@ -148,7 +159,7 @@ export function NewCase() {
             {/* The selected chain's own brand colour carries the border, so
                 the control identifies the network at a glance rather than
                 relying on the label alone. */}
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
               {CHAINS.map((c) => {
                 const active = chain === c.value
                 const { color } = chainMeta(c.value)

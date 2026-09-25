@@ -9,18 +9,21 @@ from app.config import get_settings
 # (module=account&action=txlist). One client, three chains.
 _EXPLORER_CONFIG = {
     Chain.ETHEREUM: {
-        "base_url": "https://api.etherscan.io/api",
+        "base_url": "https://api.etherscan.io/v2/api",
+        "chain_id": "1",
         "api_key_attr": "etherscan_api_key",
         "native_unit_decimals": 18,
     },
     Chain.BSC: {
-        "base_url": "https://api.bscscan.com/api",
+        "base_url": "https://api.etherscan.io/v2/api",
+        "chain_id": "56",
         "api_key_attr": "bscscan_api_key",
         "native_unit_decimals": 18,
     },
     Chain.POLYGON: {
-        "base_url": "https://api.polygonscan.com/api",
-        "api_key_attr": "polygonscan_api_key",
+        "base_url": "https://api.etherscan.io/v2/api",
+        "chain_id": "137",
+        "api_key_attr": "etherscan_api_key",
         "native_unit_decimals": 18,
     },
 }
@@ -64,6 +67,7 @@ class EVMClient(ChainClient):
         # 1. Native currency transfers (ETH / BNB / MATIC)
         try:
             params_native = {
+                "chainid": self._config["chain_id"],
                 "module": "account",
                 "action": "txlist",
                 "address": address,
@@ -123,6 +127,7 @@ class EVMClient(ChainClient):
         if len(transfers) < limit:
             try:
                 params_token = {
+                    "chainid": self._config["chain_id"],
                     "module": "account",
                     "action": "tokentx",
                     "address": address,
