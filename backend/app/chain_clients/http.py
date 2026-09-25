@@ -17,13 +17,39 @@ things keep a trace alive against them, in order of how much they matter:
 3. Having somewhere else to ask. Several providers serve the identical
    Esplora API, so a host that is throttling us can be stepped over.
 """
+import concurrent.futures
 import random
+import socket
 import threading
 import time
 
 import requests
+import urllib3.util.connection as _urllib3_connection
 
 RETRYABLE_STATUS = {429, 500, 502, 503, 504}
+
+# DNS for a public API host often returns several candidate IPs (IPv4 and
+# IPv6 both), and `socket.create_connection` - what every request here goes
+# through - tries them one at a time, each paying the *full* connect
+# timeout before falling to the next. A host with broken IPv6 routing (not
+# rare, and true of this environment against at least one of these
+# explorers) turns a "10s timeout" into 10s times however many dead
+# candidates come first. Since none of these APIs need IPv6, forcing IPv4
+# removes the dead candidates outright rather than hoping the timeout
+# absorbs them.
+_urllib3_connection.allowed_gai_family = lambda: socket.AF_INET
+
+# A second, independent backstop for the same problem: even IPv4-only, a
+# host can still hand back several unreachable IPs before a working one (or
+# none at all), and each is its own full-timeout wait *inside a single
+# requests.get() call* - `timeout=` bounds one connection attempt, not the
+# call. Measured directly against a currently address-multiplied host, a
+# `timeout=10` call took 140s to raise. Running the call on a watchdog
+# thread and bounding *that* with a hard wall-clock deadline is the only
+# reliable way to cap it - confirmed to actually cut the same call off at
+# the deadline regardless of how many candidates were hanging underneath.
+_watchdog_pool = concurrent.futures.ThreadPoolExecutor(
+    max_workers=64, thread_name_prefix="chain-http-watchdog")
 
 
 class RateLimiter:
@@ -89,10 +115,23 @@ def get_with_retry(session: requests.Session, url: str, params: dict | None = No
     limiter = limiter_for(_host_of(url), rate)
     last_exc: Exception | None = None
 
+    # requests' own timeout only bounds a single connection attempt, not
+    # this call - a wall-clock deadline a few seconds above it is the actual
+    # ceiling on how long one attempt can run, no matter how many candidate
+    # addresses are hanging underneath it.
+    deadline = timeout + 3
+
     for attempt in range(attempts):
         limiter.acquire()
         try:
-            response = session.get(url, params=params, timeout=timeout)
+            future = _watchdog_pool.submit(session.get, url, params=params, timeout=timeout)
+            try:
+                response = future.result(timeout=deadline)
+            except concurrent.futures.TimeoutError:
+                raise requests.exceptions.ConnectTimeout(
+                    f"{url} did not respond within {deadline}s wall-clock "
+                    f"(requests' own timeout does not bound multiple candidate "
+                    f"addresses; this does)")
             if response.status_code in RETRYABLE_STATUS:
                 if attempt < attempts - 1:
                     time.sleep(_backoff(attempt))

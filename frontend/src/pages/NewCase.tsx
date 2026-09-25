@@ -90,6 +90,12 @@ export function NewCase() {
   const [error, setError] = useState<string | null>(null)
   const [existing, setExisting] = useState<ExistingTrace[]>([])
   const [checkingExisting, setCheckingExisting] = useState(false)
+  // Unset by default (the server's own configured depth). A live wallet's
+  // graph naturally fans out with depth regardless of how quiet its root
+  // address looks - a 6-transaction wallet reached 400+ nodes by hop 5 in
+  // testing - so the quick-test examples set this to keep the demo fast,
+  // while a real investigation is free to go as deep as the case needs.
+  const [hopLimit, setHopLimit] = useState<number | undefined>(undefined)
 
   const activeChain = CHAINS.find((c) => c.value === chain)!
 
@@ -153,6 +159,7 @@ export function NewCase() {
         chain,
         complaint_ref: complaintRef.trim() || undefined,
         narrative: narrative.trim() || undefined,
+        hop_limit: hopLimit,
       })
       toast.success('Trace started', { description: 'Tracing runs in the background — this page updates live.' })
       navigate(`/cases/${case_id}`)
@@ -224,6 +231,7 @@ export function NewCase() {
               onChange={(e) => {
                 setAddress(e.target.value)
                 setError(null)
+                setHopLimit(undefined)
               }}
               placeholder={activeChain.placeholder}
               className={`w-full rounded-lg border bg-surface px-3.5 py-2 font-mono text-xs text-ink-900 outline-hidden transition-colors ${validationError
@@ -236,7 +244,10 @@ export function NewCase() {
                 <span>⚠️ <strong>Note:</strong> This address is the QuickSwap Router on <strong>Polygon</strong>. On Ethereum it has 0 transfers.</span>
                 <button
                   type="button"
-                  onClick={() => setChain('polygon')}
+                  onClick={() => {
+                    setChain('polygon')
+                    setHopLimit(2)
+                  }}
                   className="ml-2 underline font-semibold text-brand-700 hover:text-brand-900 cursor-pointer"
                 >
                   Switch to Polygon
@@ -250,34 +261,39 @@ export function NewCase() {
                 onClick={() => {
                   setChain('polygon')
                   setAddress('0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff')
+                  setHopLimit(2)
                   setError(null)
                 }}
                 className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
+                title="Capped at 2 hops so this finishes quickly - a live wallet's graph fans out fast with depth, regardless of chain."
               >
-                Polygon QuickSwap (120+ nodes)
+                Polygon QuickSwap (2 hops)
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setChain('ethereum')
                   setAddress('0xa84c1fa017fe678bcd1380715ba8398cbc517821')
+                  setHopLimit(2)
                   setError(null)
                 }}
                 className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
+                title="Capped at 2 hops so this finishes quickly - a live wallet's graph fans out fast with depth, regardless of chain."
               >
-                Ethereum Binance (22+ nodes)
+                Ethereum Binance (2 hops)
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setChain('bitcoin')
                   setAddress('1CZH527GEeR5WDyGac5WHrD6tnW5qJkFGR')
+                  setHopLimit(2)
                   setError(null)
                 }}
                 className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
-                title="A real wallet a few hops downstream in the WannaCry trace - 6 total transactions, so a fresh trace finishes in seconds instead of minutes."
+                title="A real wallet a few hops downstream in the WannaCry trace, capped at 2 hops - a fresh trace finishes in seconds, not minutes."
               >
-                Bitcoin (small, fast - 6 txs)
+                Bitcoin (small, fast - 2 hops)
               </button>
             </div>
             {validationError && (

@@ -53,6 +53,7 @@ export interface TraceRequestBody {
   chain: Chain
   complaint_ref?: string
   narrative?: string
+  hop_limit?: number
 }
 
 export async function submitTrace(body: TraceRequestBody) {

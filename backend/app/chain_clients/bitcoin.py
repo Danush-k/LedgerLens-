@@ -56,7 +56,14 @@ def _read_esplora(session: requests.Session, base_url: str, address: str) -> lis
         url = (f"{base_url}/address/{address}/txs" if last_txid is None
               else f"{base_url}/address/{address}/txs/chain/{last_txid}")
         try:
-            page = get_with_retry(session, url, attempts=4).json()
+            # 1, not the old 4: each attempt is now wall-clock bounded
+            # (http.py), but a host that is genuinely down - not just
+            # blipping - gains nothing from retrying it specifically, since
+            # two better-positioned fallback providers already exist for
+            # exactly that case. Every retry against a dead host is paid by
+            # whichever address in the hop discovers it, before benching
+            # steps the rest of the hop around it - one try, then fail over.
+            page = get_with_retry(session, url, attempts=1).json()
         except Exception:
             if page_num == 0:
                 raise
@@ -90,7 +97,7 @@ def _read_blockchain_info(session: requests.Session, base_url: str,
             response = get_with_retry(
                 session, f"{base_url}/rawaddr/{address}",
                 params={"limit": _BLOCKCHAIN_INFO_PAGE, "offset": page * _BLOCKCHAIN_INFO_PAGE},
-                attempts=4)
+                attempts=1)  # see the matching comment in _read_esplora above
             batch = response.json().get("txs", [])
         except Exception:
             if page == 0:
