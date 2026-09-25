@@ -54,11 +54,30 @@ settings = get_settings()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com|http://localhost:.*",
+    allow_origin_regex=r"^https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
+
+
+@app.get("/", tags=["system"])
+def root():
+    return {
+        "status": "online",
+        "service": "LedgerLens Forensics API",
+        "version": "0.1.0",
+        "documentation": "/docs",
+        "health": "/health",
+        "message": "API backend is fully operational.",
+    }
+
+
+@app.get("/health", tags=["system"])
+def health_check():
+    return {"status": "ok", "service": "LedgerLens"}
+
 
 authenticated = [Depends(get_current_user)]
 

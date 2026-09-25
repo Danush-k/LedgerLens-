@@ -22,11 +22,11 @@ import type {
   SuspectsResult,
 } from '../types'
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? (import.meta.env.DEV ? 'http://localhost:8000' : '')
+const rawBaseURL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || (import.meta.env.DEV ? 'http://localhost:8000' : '')
+const baseURL = rawBaseURL.replace(/\/+$/, '')
 
-// Bound every request so an unreachable/hung API fails predictably instead of
-// spinning for however long the OS takes to give up on the TCP connection.
-export const api = axios.create({ baseURL, timeout: 15_000 })
+// Bound every request with a generous 60s timeout to allow Render free tier cold starts to wake up cleanly
+export const api = axios.create({ baseURL, timeout: 60_000 })
 
 api.interceptors.request.use((config) => {
   const token = getStoredToken()
