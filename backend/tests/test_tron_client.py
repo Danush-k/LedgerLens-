@@ -1,7 +1,7 @@
 from unittest.mock import patch, MagicMock
 from app.chain_clients.base import Chain, is_valid_address
 from app.chain_clients.factory import get_chain_client
-from app.chain_clients.tron import TronClient
+from app.chain_clients.tron import TronClient, USDT_CONTRACT
 
 
 def test_tron_address_validation():
@@ -16,29 +16,27 @@ def test_tron_address_validation():
 
 def test_get_chain_client_returns_tron():
     client = get_chain_client(Chain.TRON)
-    assert isinstance(client, TronClient)
-    assert client.chain == Chain.TRON
+    inner = getattr(client, '_inner', client)
+    assert isinstance(inner, TronClient)
+    assert inner.chain == Chain.TRON
 
 
-@patch("app.chain_clients.tron.get")
+@patch("app.chain_clients.tron.get_with_retry")
 def test_tron_client_get_outgoing_transfers(mock_get):
-    mock_get.side_effect = [
-        # TRC-20 response
-        {
-            "data": [
-                {
-                    "transaction_id": "tx_tron_101",
-                    "from": "T111111111111111111111111111111111",
-                    "to": "T222222222222222222222222222222222",
-                    "value": "50000000",
-                    "token_info": {"decimals": 6},
-                    "block_timestamp": 1700000000000,
-                }
-            ]
-        },
-        # Native TRX response
-        {"data": []},
-    ]
+    mock_resp1 = MagicMock()
+    mock_resp1.json.return_value = {
+        "data": [
+            {
+                "transaction_id": "tx_tron_101",
+                "from": "T111111111111111111111111111111111",
+                "to": "T222222222222222222222222222222222",
+                "value": "50000000",
+                "token_info": {"decimals": 6, "address": USDT_CONTRACT},
+                "block_timestamp": 1700000000000,
+            }
+        ]
+    }
+    mock_get.return_value = mock_resp1
 
     client = TronClient()
     transfers = client.get_outgoing_transfers("T111111111111111111111111111111111")
