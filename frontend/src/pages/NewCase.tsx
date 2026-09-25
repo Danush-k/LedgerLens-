@@ -201,6 +201,54 @@ export function NewCase() {
                   : 'border-ink-200 focus:border-brand-500 focus:ring-1 focus:ring-brand-500'
                 }`}
             />
+            {address.toLowerCase() === '0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff' && chain === 'ethereum' && (
+              <div className="mt-2 rounded-md border border-brand-300 bg-brand-50/70 p-2.5 text-xs text-brand-900 flex items-center justify-between">
+                <span>⚠️ <strong>Note:</strong> This address is the QuickSwap Router on <strong>Polygon</strong>. On Ethereum it has 0 transfers.</span>
+                <button
+                  type="button"
+                  onClick={() => setChain('polygon')}
+                  className="ml-2 underline font-semibold text-brand-700 hover:text-brand-900 cursor-pointer"
+                >
+                  Switch to Polygon
+                </button>
+              </div>
+            )}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5 text-xs text-ink-500">
+              <span className="text-[11px] font-medium text-ink-400">Quick Test Examples:</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setChain('polygon')
+                  setAddress('0xa5e0829caced8ffdd4de3c43696c57f7d7a678ff')
+                  setError(null)
+                }}
+                className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
+              >
+                Polygon QuickSwap (120+ nodes)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setChain('ethereum')
+                  setAddress('0xa84c1fa017fe678bcd1380715ba8398cbc517821')
+                  setError(null)
+                }}
+                className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
+              >
+                Ethereum Binance (22+ nodes)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setChain('bitcoin')
+                  setAddress('1Kr6QSydW9bFQG1mXiPNNu6WpJGmUa9i1g')
+                  setError(null)
+                }}
+                className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
+              >
+                Bitcoin Mempool (Active UTXO)
+              </button>
+            </div>
             {validationError && (
               <p className="mt-1.5 text-xs text-critical font-medium">{validationError}</p>
             )}
