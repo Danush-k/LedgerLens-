@@ -135,9 +135,9 @@ def on_shutdown() -> None:
     live_monitor.stop()
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@app.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return JSONResponse(status_code=204, content=None)
 
 
 # ── Static Frontend Serving (Unified Deployment) ──────────────────────────────
