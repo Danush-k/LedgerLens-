@@ -271,12 +271,13 @@ export function NewCase() {
                 type="button"
                 onClick={() => {
                   setChain('bitcoin')
-                  setAddress('1Kr6QSydW9bFQG1mXiPNNu6WpJGmUa9i1g')
+                  setAddress('1CZH527GEeR5WDyGac5WHrD6tnW5qJkFGR')
                   setError(null)
                 }}
                 className="cursor-pointer rounded border border-ink-200 bg-surface px-2 py-0.5 text-[11px] font-mono hover:border-brand-500 hover:text-ink-900 transition-colors"
+                title="A real wallet a few hops downstream in the WannaCry trace - 6 total transactions, so a fresh trace finishes in seconds instead of minutes."
               >
-                Bitcoin Mempool (Active UTXO)
+                Bitcoin (small, fast - 6 txs)
               </button>
             </div>
             {validationError && (
