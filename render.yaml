@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: ledgerlens-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./fraudmap.db
+      - key: HOP_LIMIT
+        value: "5"
+      - key: BITCOIN_API_BASE_URL
+        value: https://mempool.space/api
+      - key: ETHERSCAN_API_KEY
+        value: MQG349TPVEGAPHY3XTI2QKXRRBDDI83MIG
+      - key: BSCSCAN_API_KEY
+        value: P9F1X5FCBZVY681ZH2A7TTXXJ3H77MM12Y
+      - key: POLYGONSCAN_API_KEY
+        value: TQMXVDKCAYWT66DJR1BCP1SQCTVE6PCUR7
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DEFAULT_INVESTIGATOR_USERNAME
+        value: investigator
+      - key: DEFAULT_INVESTIGATOR_PASSWORD
+        value: changeme123
+      - key: DEFAULT_ADMIN_USERNAME
+        value: admin
+      - key: DEFAULT_ADMIN_PASSWORD
+        value: changeme123

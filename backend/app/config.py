@@ -40,8 +40,8 @@ class Settings(BaseSettings):
     live_viewer_ttl_seconds: int = 90  # how long an open page keeps a case watched
     live_max_cases_per_tick: int = 4  # ceiling on concurrent explorer pressure
 
-    # Datastores
-    database_url: str = "postgresql+psycopg2://fraudmap:fraudmap@localhost:5432/fraudmap"
+    # Datastores (defaults to bundled SQLite; override with DATABASE_URL for Postgres)
+    database_url: str = "sqlite:///./fraudmap.db"
     neo4j_uri: str = "bolt://localhost:7687"
     neo4j_user: str = "neo4j"
     neo4j_password: str = "fraudmap123"
