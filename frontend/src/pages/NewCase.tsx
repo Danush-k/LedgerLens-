@@ -61,6 +61,25 @@ function validateAddressFormat(addr: string, ch: Chain): string | null {
   return null
 }
 
+// EVM chains share one address format (0x + 40 hex), so a bare address
+// can't tell Ethereum, Polygon and BSC apart - only the family. Bitcoin and
+// Tron each have a distinct, unambiguous format, so those can be detected
+// outright. This is what "auto-selects the chain" means in practice below:
+// jump to the specific chain when the format is unambiguous, and jump to
+// the EVM family's default (Ethereum) only when the currently selected
+// chain isn't already an EVM chain - so picking Polygon or BSC by hand is
+// never silently overridden while typing a matching address.
+const EVM_CHAINS: Chain[] = ['ethereum', 'bsc', 'polygon']
+
+function detectChainFamily(addr: string): Chain | 'evm' | null {
+  const trimmed = addr.trim()
+  if (!trimmed) return null
+  if (/^0x[a-fA-F0-9]{40}$/.test(trimmed)) return 'evm'
+  if (/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(trimmed)) return 'tron'
+  if (/^(1[1-9A-HJ-NP-Za-km-z]{25,34}|3[1-9A-HJ-NP-Za-km-z]{25,34}|bc1[0-9a-zA-Z]{38,59})$/.test(trimmed)) return 'bitcoin'
+  return null
+}
+
 export function NewCase() {
   const navigate = useNavigate()
   const [address, setAddress] = useState('')
@@ -73,6 +92,17 @@ export function NewCase() {
   const [checkingExisting, setCheckingExisting] = useState(false)
 
   const activeChain = CHAINS.find((c) => c.value === chain)!
+
+  // Auto-detect the chain from the address as it's typed, so pasting a
+  // Bitcoin address while Ethereum is still selected (the default) doesn't
+  // produce a false "invalid address" - the exact failure this was added
+  // to fix.
+  useEffect(() => {
+    const family = detectChainFamily(address)
+    if (family === 'bitcoin' && chain !== 'bitcoin') setChain('bitcoin')
+    else if (family === 'tron' && chain !== 'tron') setChain('tron')
+    else if (family === 'evm' && !EVM_CHAINS.includes(chain)) setChain('ethereum')
+  }, [address])
 
   const validationError = useMemo(() => {
     return validateAddressFormat(address, chain)
