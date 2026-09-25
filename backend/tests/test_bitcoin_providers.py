@@ -252,9 +252,10 @@ def test_a_refusing_provider_falls_through_to_the_next():
     assert calls == ["first", "second"]
 
 
-def test_the_working_provider_is_preferred_afterwards():
-    """A provider throttling us keeps throttling us. Starting every fetch
-    back at the failing one pays its timeout on every single address."""
+def test_a_failing_provider_is_benched_and_skipped_by_later_addresses():
+    """A provider throttling us keeps throttling us. Once it's failed once
+    (and been benched), the sort-by-benched ordering steps over it for
+    every later address in the same hop, without needing to be tried."""
     attempts = {"a": 0, "b": 0}
 
     def failing(session, base, address):
@@ -272,8 +273,35 @@ def test_the_working_provider_is_preferred_afterwards():
     client._get_txs("bc1qtwo")
     client._get_txs("bc1qthree")
 
-    assert attempts["a"] == 1        # tried once, then stepped over
+    assert attempts["a"] == 1        # tried once, then benched and stepped over
     assert attempts["b"] == 3
+
+
+def test_healthy_providers_are_round_robined_across_addresses():
+    """Two equally healthy providers must split a hop's addresses between
+    them, not funnel every address through whichever one answered first.
+
+    Each provider is paced by its own independent rate limiter, so pinning
+    an entire wide hop to a single provider caps the whole hop at that one
+    provider's throughput even while a second, equally healthy provider
+    sits idle - this is what turned a 276-address hop into a multi-minute
+    stall with only one of three real providers actually down.
+    """
+    calls = {"a": 0, "b": 0}
+
+    def make(label):
+        def read(session, base, address):
+            calls[label] += 1
+            return [ESPLORA_TX]
+        return read
+
+    client = BitcoinClient()
+    client._providers = [("a", "https://a", make("a")), ("b", "https://b", make("b"))]
+
+    for i in range(4):
+        client._get_txs(f"bc1qaddr{i}")
+
+    assert calls == {"a": 2, "b": 2}
 
 
 def test_every_provider_failing_names_them_all():
@@ -350,9 +378,12 @@ def test_a_refusing_provider_is_benched_for_later_addresses():
     assert attempts["good"] == 4
 
 
-def test_all_providers_benched_still_attempts_one():
-    """If everything is benched we still have to ask somebody - benching
-    reorders, it does not remove."""
+def test_all_providers_benched_fails_fast_without_calling_any():
+    """When every provider already failed for some other address in this
+    same trace within the bench window, retrying all of them again here
+    would just pay the same timeouts a second time for no new information.
+    This must fail immediately, with zero network calls, rather than
+    grinding through the same dead ends address by address."""
     import app.chain_clients.bitcoin as btc
     btc._bench("a")
     btc._bench("b")
@@ -366,8 +397,9 @@ def test_all_providers_benched_still_attempts_one():
     client = BitcoinClient()
     client._providers = [("a", "https://a", works), ("b", "https://b", works)]
 
-    assert len(client._get_txs("bc1qsource")) == 1
-    assert len(calls) == 1
+    with pytest.raises(RuntimeError, match="rate-limited or unreachable"):
+        client._get_txs("bc1qsource")
+    assert calls == []
 
 
 def test_bench_expires():

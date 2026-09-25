@@ -199,20 +199,40 @@ class BitcoinClient(ChainClient):
             return self._tx_cache[address]
 
         providers = self._providers
-        order = providers[self._preferred:] + providers[:self._preferred]
+        # Round-robin the starting provider on every address, rather than
+        # sticking to whichever one last answered. Each provider is paced
+        # by its own independent per-host limiter (http.py), so pinning
+        # every address in a wide hop to a single provider caps the whole
+        # hop at *that one provider's* rate limit even while a second,
+        # equally healthy provider sits idle - which is exactly what turned
+        # a 276-address hop into a multi-minute stall with only one of
+        # three providers (blockchain.info) actually down. Spreading
+        # addresses across every currently-healthy provider uses all of
+        # their budgets at once instead of just one.
+        start = self._preferred
+        self._preferred = (self._preferred + 1) % len(providers)
+        order = providers[start:] + providers[:start]
         # Providers known to be refusing go last rather than being dropped:
         # if every one is benched we still have to ask somebody.
         order.sort(key=lambda p: _is_benched(p[0]))
-        errors: list[str] = []
 
-        for offset, (label, base_url, read) in enumerate(order):
+        if all(_is_benched(label) for label, _, _ in order):
+            # Every provider already failed within the bench window for
+            # some other address in this same trace. Retrying all of them
+            # again here pays the same timeouts a second time for no new
+            # information - failing immediately lets the hop finish (as
+            # "could not look", honestly) instead of grinding through the
+            # same dead ends address by address until the trace's own
+            # timeout cuts it off.
+            raise RuntimeError(
+                "every Bitcoin data provider is currently rate-limited or "
+                "unreachable (" + ", ".join(label for label, _, _ in order) + ")")
+
+        errors: list[str] = []
+        for label, base_url, read in order:
             try:
                 txs = read(self._session, base_url, address)
                 self._tx_cache[address] = txs
-                # Stay on whichever answered: a provider throttling us tends
-                # to keep throttling us, and starting each fetch back at the
-                # failing one pays its timeout every single time.
-                self._preferred = (self._preferred + offset) % len(providers)
                 return txs
             except Exception as exc:  # noqa: BLE001 - try the next provider
                 _bench(label)
