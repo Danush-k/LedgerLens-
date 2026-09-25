@@ -8,7 +8,6 @@
 import { ArrowRight, Building2, Network, ShieldAlert } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { toast } from 'sonner'
 import { getAnalyticsOverview, getConvergence } from '../api/client'
 import { ChainBadge, ChainMark } from '../components/ChainMark'
 import { HorizontalBars } from '../components/HorizontalBars'
@@ -23,31 +22,78 @@ export function Overview() {
   const [data, setData] = useState<AnalyticsOverview | null>(null)
   const [convergence, setConvergence] = useState<ConvergenceResult | null>(null)
   const [loading, setLoading] = useState(true)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  const loadData = () => {
+    setLoading(true)
+    setErrorMsg(null)
+    Promise.allSettled([getAnalyticsOverview(), getConvergence(2)])
+      .then(([overviewRes, convRes]) => {
+        if (overviewRes.status === 'fulfilled' && overviewRes.value && typeof overviewRes.value === 'object' && overviewRes.value.by_status) {
+          setData(overviewRes.value)
+        } else {
+          setErrorMsg('Unable to retrieve analytics from backend. The server may be waking up from sleep.')
+        }
+        if (convRes.status === 'fulfilled' && convRes.value) {
+          setConvergence(convRes.value)
+        }
+      })
+      .catch((err) => {
+        setErrorMsg('Connection error: ' + (err?.message || 'Failed to reach API server'))
+      })
+      .finally(() => setLoading(false))
+  }
 
   useEffect(() => {
-    let cancelled = false
-    Promise.all([getAnalyticsOverview(), getConvergence(2)])
-      .then(([overview, conv]) => {
-        if (cancelled) return
-        setData(overview)
-        setConvergence(conv)
-      })
-      .catch(() => !cancelled && toast.error('Could not load the command centre.'))
-      .finally(() => !cancelled && setLoading(false))
-    return () => { cancelled = true }
+    loadData()
   }, [])
 
   if (loading) {
     return (
-      <div className="flex h-full items-center justify-center py-24">
+      <div className="flex h-full flex-col items-center justify-center py-24 gap-3">
         <LoadingRing size={40} label="Loading case load…" />
+        <p className="text-xs text-ink-400">Connecting to forensics backend…</p>
       </div>
     )
   }
 
-  if (!data) return null
+  if (!data || typeof data !== 'object' || !data.by_status) {
+    return (
+      <div className="mx-auto max-w-xl px-6 py-16 text-center">
+        <div className="rounded-xl border border-ink-200 bg-surface p-8 shadow-xs">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-brand-600 mb-4">
+            <Network size={24} />
+          </div>
+          <h2 className="text-base font-semibold text-ink-900">Forensics Backend Reconnecting</h2>
+          <p className="mt-2 text-xs leading-relaxed text-ink-500">
+            {errorMsg || 'The backend service is currently initializing. On free hosting plans (like Render), inactive instances take ~30–50 seconds to spin up.'}
+          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <button
+              onClick={loadData}
+              className="cursor-pointer rounded-lg bg-brand-600 px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-brand-500 transition-colors"
+            >
+              Retry Connection
+            </button>
+            <Link
+              to="/cases"
+              className="rounded-lg border border-ink-200 bg-surface px-4 py-2 text-xs font-semibold text-ink-700 hover:bg-ink-50 transition-colors"
+            >
+              View Cases List
+            </Link>
+            <Link
+              to="/new"
+              className="rounded-lg border border-ink-200 bg-surface px-4 py-2 text-xs font-semibold text-ink-700 hover:bg-ink-50 transition-colors"
+            >
+              Start New Trace
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-  const inProgress = (data.by_status.queued ?? 0) + (data.by_status.tracing ?? 0)
+  const inProgress = ((data.by_status?.queued ?? 0) + (data.by_status?.tracing ?? 0))
   const convergencePoints = convergence?.convergence_points ?? []
   const topConvergence = convergencePoints.slice(0, 4)
 

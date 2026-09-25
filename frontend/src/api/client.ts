@@ -22,7 +22,9 @@ import type {
   SuspectsResult,
 } from '../types'
 
-const rawBaseURL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || (import.meta.env.DEV ? 'http://localhost:8000' : '')
+const rawBaseURL =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() ||
+  (import.meta.env.DEV ? 'http://localhost:8000' : 'https://ledgerlens-ivr5.onrender.com')
 const baseURL = rawBaseURL.replace(/\/+$/, '')
 
 // Bound every request with a generous 60s timeout to allow Render free tier cold starts to wake up cleanly
